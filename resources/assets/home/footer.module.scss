@@ -1,0 +1,89 @@
+.footer{
+    height: auto;
+    background-color: var(--textColor);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    gap: 2rem;
+    >div{
+        height: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        h2{
+            font-size: 16px;
+            text-align: center;
+        }
+    }
+    .footer_data{
+        width: 100%;
+        display: flex;
+        justify-content: space-evenly;
+        flex-direction: row;
+        .links{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            >div{
+                display: flex;
+                flex-direction: column;
+                >a{
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    margin-top: 10px;
+                    color: white;
+                    text-decoration: none;
+                    font-size: 14px;
+                    >svg{
+                        margin-right: 10px;
+                        font-size: 20px;
+                    }
+                }
+            }
+        }
+        @media screen and (max-width: 600px) {
+            flex-direction: column;
+            .links{
+                span{
+                    text-align: center;
+                }
+            }
+            .social{
+                width: 100%;
+                ul{
+                    width: 100% !important;
+                    text-align: center;
+                }
+            }
+        }
+        .social{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            >div{
+                >a{
+                    margin-top: 10px;
+                    flex: 0 0 100px;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: left;
+                    align-items: center;
+                    text-decoration: none;
+                    color: white;
+                    gap: .5rem;
+                    font-size: 14px;
+
+                    svg{
+                        font-size: 20px;
+                    }
+                }
+            }
+
+        }
+    }
+}

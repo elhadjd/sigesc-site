@@ -1,0 +1,110 @@
+.principal{
+    width: 100%;
+    height: auto !important;
+    background-image: url('../../../public/Company/img/companyBg.png');
+    background-position: center;
+    background-size: cover;
+    .company{
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 30px;
+        >form{
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            width: 500px;
+            gap: 1rem;
+            background-color: white;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.034), 0 6px 20px 0 rgba(0, 0, 0, 0.007);
+            border-radius: 10px;
+            @include form-control;
+            
+            .box{
+                padding: 0px 10px 3px 0px;
+                display: flex;
+                flex-direction: row ;
+                align-items: flex-end;
+                position: relative;
+                label{
+                    width: 30%;
+                }
+                input,button{
+                    width: 70%;
+                }
+                .listCountry{
+                    position: absolute;
+                    overflow-y: auto;
+                    width: 100%;
+                    height: 150px;
+                    top: 44px;
+                    left: 0;
+                    background-color: white;
+                    z-index: 999;
+                    border-radius: 3px;
+                    box-shadow: rgb(100 ,100 ,111, 0.2) 10px 9px 35px 0px;
+                    @include scroll;
+                    >div{
+                        display: flex;
+                        justify-content: start;
+                        padding: 2px 10px 2px 10px;
+                        color: var(--textColor);
+                        font-size: 15px;
+                        cursor: pointer;
+                        &:hover{
+                            background-color: rgb(248, 248, 248);
+                        }
+                    }
+                }
+                
+            }
+            >button{
+                color: rgb(255, 255, 255);
+                font-size: 16px;
+                line-height: 28px;
+                padding: 6px 10px;
+                width: 100%;
+                height: 100%;
+                background-color: var(--buttonsColor);
+                border: 2px solid var(--buttonsColor);
+                border-radius: 5px;
+                cursor: pointer;
+                &:focus{
+                    outline-color: var(--buttonsColor);
+                }
+                &:hover{
+                    opacity: 0.9;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .company{
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        form{
+            width: 100% !important;
+        }
+    }
+}
+
+@media screen and (max-width: 450px){
+    .principal{
+        height: auto !important;
+        form{
+            .box{
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                label{
+                    width: 100% !important;
+                }
+                input,button{
+                    width: 100% !important;
+                }
+            }
+        }
+    }
+    
+}

@@ -1,0 +1,5 @@
+[06-Mar-2024 01:05:28 America/Fortaleza] PHP Warning:  require(/home4/sisges27/public_html/../vendor/autoload.php): Failed to open stream: No such file or directory in /home4/sisges27/public_html/index.php on line 34
+[06-Mar-2024 01:05:28 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required '/home4/sisges27/public_html/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home4/sisges27/public_html/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home4/sisges27/public_html/index.php on line 34

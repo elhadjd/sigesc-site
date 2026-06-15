@@ -1,0 +1,108 @@
+@mixin scroll {
+    &::-webkit-scrollbar-thumb{
+        overflow-y: auto;
+        border-radius: 5px;
+        background-color: #9bb1b66c;
+    }
+    &::-webkit-scrollbar{
+        width: 12px;
+    }
+}
+@mixin form-input{
+    padding: 8px 12px;
+    font-size: 15px;
+    font-weight: 400;
+    border: 1.5px solid #ddd;
+    border-radius: 5px;
+    color: var(--textColor);
+    line-height: 28px;
+    &:focus{
+        transition: 0.5s;
+        outline-color: #00a5cf;
+    }
+}
+@mixin form-control{
+    .box{
+        padding: 20px 10px 3px 20px;
+        border-radius: 10px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: .5rem;
+        .search{
+            position: relative;
+            margin-top: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            input{
+                width: 98% !important;
+            }
+            svg{
+                position: absolute;
+                right: 5px;
+                font-size: 35px;
+                fill: rgba(0, 0, 0, 0.11);
+            }
+        }
+        label{
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--textColor);
+        }
+        button{
+            @include form-input;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--textColor);
+            background-color: white;
+            span{
+                width: 100%;
+                text-align: start;
+            }
+        }
+        input[type=text],
+        input[type=password],
+        input[type=email]{
+            @include form-input;
+        }
+    }
+}
+
+@mixin primaryButton{
+    color: rgb(255, 255, 255);
+    font-size: 16px;
+    line-height: 28px;
+    padding: 6px 10px;
+    width: 100%;
+    height: 100%;
+    background-color: var(--buttonsColor);
+    border: 2px solid var(--buttonsColor);
+    border-radius: 5px;
+    cursor: pointer;
+    &:focus{
+        outline-color: var(--buttonsColor);
+    }
+    &:hover{
+        opacity: 0.9;
+    }
+}
+
+@mixin secondaryButton{
+    color: rgb(255, 255, 255);
+    font-size: 16px;
+    line-height: 28px;
+    padding: 6px 10px;
+    width: 100%;
+    height: 100%;
+    background-color: var(--secondaryColor);
+    border: 2px solid var(--secondaryColor);
+    border-radius: 5px;
+    cursor: pointer;
+    &:focus{
+        outline-color: var(--secondaryColor);
+    }
+    &:hover{
+        opacity: 0.9;
+    }
+}

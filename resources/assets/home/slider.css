@@ -1,0 +1,28 @@
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+.swiper-slide img {
+  width: 96%;
+  height: 100%;
+  object-fit: cover;
+  object-fit: fill;
+  -webkit-user-select: none;
+  border-radius: 10px;
+}
+
+@media screen and (max-width: 900px)  {
+  .swiper-slide img {
+    object-fit: contain;
+  }
+}

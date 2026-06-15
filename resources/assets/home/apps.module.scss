@@ -1,0 +1,95 @@
+.principal{
+    width: 100%;
+    height: auto;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    gap: 1.5rem;
+    padding: 10px;
+    color: var(--textColor);
+    border-radius: 10px;
+    .title{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        gap: 1rem;
+        p{
+            font-size: 15px;
+            font-weight: 400;
+            color: gray;
+        }
+        @media screen and (max-width: 600px) {
+            font-size: 15px;
+        }
+    }
+    .module{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        .box{
+            flex: 0 0 150px;
+            height: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0px 10px 0px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.034), 0 6px 20px 0 rgba(0, 0, 0, 0.007);
+
+            >span:nth-child(1){
+                height: 70%;
+            }
+            >span{
+                img{
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 5px;
+                    border-bottom: 1px solid #ddd;
+                }
+                h2{
+                    height: 20%;
+                    font: 12pt arial;
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+    >div:nth-child(2){
+
+        .hardware{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 20px;
+            color: var(--textColor);
+            >div{
+                flex: 0 0 200px;
+                display: flex;
+                flex-direction: column;
+                padding: 5px 20px 20px 20px;
+                gap: 1rem;
+                align-items: center;
+                span{
+                    font-size: 17px;
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .module{
+
+        >div{
+            flex: 0 0 130px !important;
+        }
+    }
+}
