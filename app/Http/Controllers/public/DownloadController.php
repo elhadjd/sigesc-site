@@ -36,7 +36,7 @@ class DownloadController extends Controller
                 ], 400);
             }
 
-            $filePath = "sigesc-apps/{$appType}/sigesc-{$appVersion}.exe";
+            $filePath = "sigesc-apps/{$appType}/sigesc-3.0.0.exe";
             if (!Storage::disk('public')->exists($filePath)) {
                 return response()->json([
                     'status' => 'error',
@@ -47,16 +47,16 @@ class DownloadController extends Controller
             SetupDownload::create([
                 'ip_client' => request()->ip(),
                 'app_type' => $appType,
-                'version' => $appVersion,
+                'version' => "3.0.0",
                 'user_id' => Auth::check() ? Auth::id() : null,
             ]);
 
             $fullPath = storage_path("app/public/{$filePath}");
             $checksum = hash_file('sha256', $fullPath);
 
-            return response()->download($fullPath, "sigesc-{$appVersion}.exe", [
+            return response()->download($fullPath, "sigesc-3.0.0.exe", [
                 'Content-Type' => \Illuminate\Support\Facades\File::mimeType($fullPath),
-                'Content-Disposition' => 'attachment; filename="sigesc-' . $appVersion . '.exe"',
+                'Content-Disposition' => 'attachment; filename="sigesc-' . "3.0.0" . '.exe"',
                 'Content-Length' => filesize($fullPath),
                 'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
                 'Pragma' => 'no-cache',
