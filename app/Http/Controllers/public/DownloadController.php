@@ -26,7 +26,7 @@ class DownloadController extends Controller
      * @param string $appVersion
      * @return \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\JsonResponse
      */
-    public function download(string $appType, string $appVersion)
+    public function Download(string $appType, string $appVersion)
     {
         try {
             if (!in_array($appType, ['online', 'offline'])) {
