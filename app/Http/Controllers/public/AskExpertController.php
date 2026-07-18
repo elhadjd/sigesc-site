@@ -6,20 +6,43 @@ use App\Http\Controllers\Controller;
 use App\Jobs\AiContent\AnswerExpertQuestion;
 use App\Models\AiContent\ExpertQuestion;
 use App\Services\AiContentEngine\AskExpert\AskExpertService;
+use App\Services\Seo\SeoBuilder;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class AskExpertController extends Controller
 {
-    public function index()
+    public function __construct(
+        protected SeoBuilder $seo
+    ) {}
+
+    public function index(Request $request)
     {
-        return Inertia::render('ask-expert/index', [
-            'seo' => [
-                'title' => 'Pergunte ao Especialista | SIGESC',
-                'description' => 'Faça uma pergunta sobre AGT, IVA, gestão comercial ou empreendedorismo em Angola. A IA do SIGESC pesquisa e responde com base em fontes.',
-                'canonical' => url('/pergunte-ao-especialista'),
-                'og_type' => 'website',
+        $seo = $this->seo->forAskExpert();
+        $prerender = [
+            'kicker' => 'Assistência inteligente',
+            'headline' => 'Pergunte ao Especialista SIGESC',
+            'lead' => 'Faça uma pergunta sobre AGT, IVA, gestão comercial ou empreendedorismo em Angola. A IA pesquisa fontes e responde com prudência.',
+            'sections' => [
+                [
+                    'heading' => 'Temas frequentes',
+                    'items' => [
+                        'Faturação eletrónica e obrigações AGT',
+                        'IVA, IRT e Imposto Industrial',
+                        'Gestão de stock, PDV e fluxo de caixa',
+                        'Abertura de empresa e licenciamento',
+                    ],
+                ],
             ],
+            'links' => [
+                ['href' => url('/calculadoras'), 'label' => 'Calculadoras fiscais'],
+                ['href' => url('/blog/posts'), 'label' => 'Artigos do blog'],
+                ['href' => url('/contact'), 'label' => 'Contacto humano'],
+            ],
+        ];
+
+        return $this->renderPublicPage($request, 'ask-expert/index', [
+            'seo' => $seo,
+            'prerender' => $prerender,
         ]);
     }
 
@@ -53,20 +76,34 @@ class AskExpertController extends Controller
             ->with('success', 'Resposta gerada com sucesso.');
     }
 
-    public function show(string $uuid)
+    public function show(Request $request, string $uuid)
     {
         $question = ExpertQuestion::with('article:id,title,slug,status')
             ->where('uuid', $uuid)
             ->firstOrFail();
 
-        return Inertia::render('ask-expert/show', [
-            'question' => $question,
-            'seo' => [
-                'title' => 'Resposta do Especialista | SIGESC',
-                'description' => str($question->question)->limit(150)->toString(),
-                'canonical' => url('/pergunte-ao-especialista/'.$question->uuid),
-                'og_type' => 'article',
+        $seo = $this->seo->forPage([
+            'title' => 'Resposta do Especialista | SIGESC',
+            'description' => str($question->question)->limit(150)->toString(),
+            'path' => '/pergunte-ao-especialista/'.$question->uuid,
+            'og_type' => 'article',
+        ]);
+
+        $prerender = [
+            'kicker' => 'Pergunte ao Especialista',
+            'headline' => $question->question,
+            'lead' => 'Resposta gerada com base em pesquisa. Confirme sempre na legislação e na AGT.',
+            'html' => $question->answer_html ?: '<p>Resposta em processamento.</p>',
+            'links' => [
+                ['href' => url('/pergunte-ao-especialista'), 'label' => 'Nova pergunta'],
+                ['href' => url('/blog/posts'), 'label' => 'Blog SIGESC'],
             ],
+        ];
+
+        return $this->renderPublicPage($request, 'ask-expert/show', [
+            'question' => $question,
+            'seo' => $seo,
+            'prerender' => $prerender,
         ]);
     }
 }

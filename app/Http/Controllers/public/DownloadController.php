@@ -4,19 +4,51 @@ namespace App\Http\Controllers\public;
 
 use App\Http\Controllers\Controller;
 use App\Models\SetupDownload;
+use App\Services\Seo\SeoBuilder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
 
 class DownloadController extends Controller
 {
-    function Page()
+    public function __construct(
+        protected SeoBuilder $seo
+    ) {}
+
+    public function Page(Request $request)
     {
         $checkDownload = SetupDownload::where('ip_client', request()->ip())->where('viewed', false)->exists();
-        if ($checkDownload) return redirect()->route('download.thanks');
-        return Inertia::render('downloads/sigesc-admin');
+        if ($checkDownload) {
+            return redirect()->route('download.thanks');
+        }
+
+        $seo = $this->seo->forDownloads();
+        $prerender = [
+            'kicker' => 'Downloads',
+            'headline' => 'Descarregue o SIGESC',
+            'lead' => 'Instale o SIGESC Admin e comece a gerir vendas, stock e faturação na sua empresa.',
+            'sections' => [
+                [
+                    'heading' => 'Antes de instalar',
+                    'items' => [
+                        'Escolha a versão adequada (online ou offline)',
+                        'Confirme os requisitos do sistema',
+                        'Contacte o suporte se precisar de ajuda na instalação',
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => url('/prices'), 'label' => 'Ver planos'],
+                ['href' => url('/contact'), 'label' => 'Suporte'],
+                ['href' => url('/solutions'), 'label' => 'Soluções'],
+            ],
+        ];
+
+        return $this->renderPublicPage($request, 'downloads/sigesc-admin', [
+            'seo' => $seo,
+            'prerender' => $prerender,
+        ]);
     }
 
     /**
@@ -121,15 +153,31 @@ class DownloadController extends Controller
     //     }
     // }
 
-    public function Thanks()
+    public function Thanks(Request $request)
     {
         $checkDownload = SetupDownload::where('ip_client', request()->ip())->where('viewed', false)->exists();
         if ($checkDownload) {
             SetupDownload::where('ip_client', request()->ip())->update([
                 'viewed' => true,
             ]);
-            return Inertia::render('downloads/thanks', [
-                'local' => request()->getLocale()
+
+            $seo = $this->seo->forPage([
+                'title' => 'Obrigado pelo download | SIGESC',
+                'description' => 'Obrigado por descarregar o SIGESC. Siga as instruções de instalação para começar.',
+                'path' => '/downloads/thanks',
+            ]);
+
+            return $this->renderPublicPage($request, 'downloads/thanks', [
+                'local' => $request->getLocale(),
+                'seo' => $seo,
+                'prerender' => [
+                    'headline' => 'Obrigado pelo download',
+                    'lead' => 'O ficheiro do SIGESC está pronto. Siga as instruções de instalação.',
+                    'links' => [
+                        ['href' => url('/contact'), 'label' => 'Precisa de ajuda?'],
+                        ['href' => url('/blog/posts'), 'label' => 'Ler o blog'],
+                    ],
+                ],
             ]);
         }
 

@@ -79,4 +79,49 @@
             <li>Contribuição cambial 2,5% / 10%</li>
         </ul>
     </section>
+@elseif (!empty($props['prerender']) && is_array($props['prerender']))
+    @php $pr = $props['prerender']; @endphp
+    <section class="seo-prerender" style="max-width:760px;margin:0 auto;padding:2rem 1rem;font-family:Georgia,serif;color:#14213d;">
+        @if (!empty($pr['kicker']))
+            <p style="text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;color:#64748b;">{{ $pr['kicker'] }}</p>
+        @endif
+        <h1>{{ $pr['headline'] ?? ($props['seo']['title'] ?? 'SIGESC') }}</h1>
+        @if (!empty($pr['lead']))
+            <p style="font-size:1.15rem;">{{ $pr['lead'] }}</p>
+        @endif
+        @if (!empty($pr['html']))
+            <div>{!! $pr['html'] !!}</div>
+        @endif
+        @foreach ($pr['sections'] ?? [] as $section)
+            <section style="margin-top:1.5rem;">
+                @if (!empty($section['heading']))
+                    <h2 style="font-size:1.35rem;">{{ $section['heading'] }}</h2>
+                @endif
+                @if (!empty($section['body']))
+                    <p>{{ $section['body'] }}</p>
+                @endif
+                @if (!empty($section['items']))
+                    <ul>
+                        @foreach ($section['items'] as $item)
+                            <li>{{ $item }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            </section>
+        @endforeach
+        @if (!empty($pr['links']))
+            <ul style="list-style:none;padding:0;margin-top:2rem;">
+                @foreach ($pr['links'] as $link)
+                    <li style="padding:.75rem 0;border-bottom:1px solid #e5e0d6;">
+                        <a href="{{ $link['href'] ?? '#' }}" style="color:#0b3d91;text-decoration:none;font-weight:600;">
+                            {{ $link['label'] ?? $link['href'] }}
+                        </a>
+                        @if (!empty($link['description']))
+                            <p style="margin:.25rem 0 0;color:#475569;">{{ $link['description'] }}</p>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </section>
 @endif

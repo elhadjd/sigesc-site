@@ -23,6 +23,13 @@ class SitemapController extends Controller
             ['loc' => $base.'/solutions', 'changefreq' => 'monthly', 'priority' => '0.8'],
             ['loc' => $base.'/prices', 'changefreq' => 'monthly', 'priority' => '0.8'],
             ['loc' => $base.'/contact', 'changefreq' => 'yearly', 'priority' => '0.5'],
+            ['loc' => $base.'/downloads', 'changefreq' => 'monthly', 'priority' => '0.7'],
+            ['loc' => $base.'/shop', 'changefreq' => 'weekly', 'priority' => '0.6'],
+            ['loc' => $base.'/clients/depoiments', 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['loc' => $base.'/resources/help', 'changefreq' => 'yearly', 'priority' => '0.4'],
+            ['loc' => $base.'/resources/faq', 'changefreq' => 'yearly', 'priority' => '0.4'],
+            ['loc' => $base.'/modules/ponto-de-venda', 'changefreq' => 'monthly', 'priority' => '0.7'],
+            ['loc' => $base.'/modules/gestao-de-stock', 'changefreq' => 'monthly', 'priority' => '0.7'],
         ];
 
         $posts = Cache::remember('sitemap_blog_posts', 900, function () {

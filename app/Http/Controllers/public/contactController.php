@@ -9,6 +9,7 @@ use App\Mail\autoPassword;
 use App\Mail\EmailVerify;
 use App\Models\costumerContact;
 use App\Models\User;
+use App\Services\Seo\SeoBuilder;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,19 +17,46 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
 
 class contactController extends Controller
 {
-    function index()
+    public function __construct(
+        protected SeoBuilder $seo
+    ) {}
+
+    public function index(Request $request)
     {
-        return Inertia::render('contact/index');
+        $seo = $this->seo->forContact();
+        $prerender = [
+            'kicker' => 'Contacto',
+            'headline' => 'Fale com a equipa SIGESC',
+            'lead' => 'Suporte comercial e técnico para empresas em Angola. Estamos disponíveis para ajudar na implementação do SIGESC.',
+            'sections' => [
+                [
+                    'heading' => 'Contactos',
+                    'items' => [
+                        'Telefone: +244 929147445',
+                        'Email: comercial.sigesc@gmail.com',
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => url('/pergunte-ao-especialista'), 'label' => 'Pergunte ao Especialista'],
+                ['href' => url('/prices'), 'label' => 'Ver preços'],
+                ['href' => url('/downloads'), 'label' => 'Downloads'],
+            ],
+        ];
+
+        return $this->renderPublicPage($request, 'contact/index', [
+            'seo' => $seo,
+            'prerender' => $prerender,
+        ]);
     }
 
-    function senMessage(Request $request, costumerContact $costumerContact)
+    public function senMessage(Request $request, costumerContact $costumerContact)
     {
         $request->validate([
-            'name' => "required|string",
+            'name' => 'required|string',
             'surname' => 'required|string',
             'email' => 'required|email',
             'phone' => 'required|string',
@@ -66,13 +94,13 @@ class contactController extends Controller
         }
     }
 
-    function newUser($data)
+    public function newUser($data)
     {
-        if (!User::where('email', $data->email)->first()) {
+        if (! User::where('email', $data->email)->first()) {
             DB::transaction(function () use ($data) {
                 $password = Str::random(10);
                 $user = User::create([
-                    'socialType' => "sisgesc.net",
+                    'socialType' => 'sisgesc.net',
                     'name' => $data->name,
                     'accountType' => 'client',
                     'email' => $data->email,
@@ -87,19 +115,19 @@ class contactController extends Controller
                 $autoPasswordData = [
                     'name' => $user->name,
                     'email' => $user->email,
-                    'password' => $password
+                    'password' => $password,
                 ];
 
                 Mail::to($user->email)->send(new autoPassword($autoPasswordData));
 
                 event(new Registered($user));
 
-                $data = [
+                $mailData = [
                     'userName' => $user->name,
                     'id' => $user->id,
                 ];
 
-                Mail::to($user->email)->send(new EmailVerify($data));
+                Mail::to($user->email)->send(new EmailVerify($mailData));
 
                 Auth::login($user->fresh());
             });

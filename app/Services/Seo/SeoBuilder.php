@@ -180,6 +180,154 @@ class SeoBuilder
         ]);
     }
 
+    /**
+     * Generic marketing / content page SEO.
+     *
+     * @param  array{title: string, description: string, path?: string, keywords?: string, og_type?: string}  $page
+     * @return array<string, mixed>
+     */
+    public function forPage(array $page): array
+    {
+        $base = rtrim(config('app.url') ?: 'https://www.sisgesc.net', '/');
+        $path = $page['path'] ?? '/';
+        $canonical = str_starts_with($path, 'http') ? $path : $base.'/'.ltrim($path, '/');
+
+        return $this->defaults([
+            'title' => $page['title'],
+            'description' => $page['description'],
+            'keywords' => $page['keywords'] ?? null,
+            'canonical' => rtrim($canonical, '/') ?: $base,
+            'og_type' => $page['og_type'] ?? 'website',
+            'json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'WebPage',
+                    'name' => $page['title'],
+                    'description' => $page['description'],
+                    'url' => rtrim($canonical, '/') ?: $base,
+                    'isPartOf' => [
+                        '@type' => 'WebSite',
+                        'name' => 'SIGESC',
+                        'url' => $base,
+                    ],
+                    'inLanguage' => 'pt-AO',
+                ],
+            ],
+        ]);
+    }
+
+    public function forHome(): array
+    {
+        return $this->forPage([
+            'title' => 'SIGESC - Software de Gestão Integrado para Empresas em Angola',
+            'description' => 'Software de gestão comercial completo para PME em Angola: PDV, estoque, finanças, faturação eletrónica AGT e mais — numa só plataforma.',
+            'path' => '/',
+            'keywords' => 'SIGESC, software gestão Angola, ERP, PDV, faturação eletrónica AGT, PME',
+        ]);
+    }
+
+    public function forSolutions(): array
+    {
+        return $this->forPage([
+            'title' => 'Soluções SIGESC | Módulos de Gestão Comercial',
+            'description' => 'Conheça as soluções SIGESC: ponto de venda, estoque, RH, finanças, logística e módulos feitos para empresas angolanas.',
+            'path' => '/solutions',
+            'keywords' => 'soluções SIGESC, módulos ERP, PDV Angola, gestão de estoque',
+        ]);
+    }
+
+    public function forModule(string $moduleName): array
+    {
+        $slug = Str::slug($moduleName);
+
+        return $this->forPage([
+            'title' => "Módulo {$moduleName} | SIGESC",
+            'description' => "Saiba como o módulo {$moduleName} do SIGESC ajuda a gerir o seu negócio em Angola com eficiência e conformidade.",
+            'path' => '/modules/'.$slug,
+            'keywords' => "SIGESC {$moduleName}, módulo gestão, software Angola",
+        ]);
+    }
+
+    public function forPrices(): array
+    {
+        return $this->forPage([
+            'title' => 'Preços SIGESC | Planos para PME em Angola',
+            'description' => 'Planos e preços do software de gestão SIGESC. Escolha o plano ideal para a sua empresa em Angola.',
+            'path' => '/prices',
+            'keywords' => 'preços SIGESC, planos ERP Angola, software gestão preço',
+        ]);
+    }
+
+    public function forContact(): array
+    {
+        return $this->forPage([
+            'title' => 'Contacto | SIGESC Angola',
+            'description' => 'Fale com a equipa SIGESC. Suporte comercial e técnico para empresas em Angola.',
+            'path' => '/contact',
+            'keywords' => 'contacto SIGESC, suporte, Angola',
+        ]);
+    }
+
+    public function forAskExpert(): array
+    {
+        return $this->forPage([
+            'title' => 'Pergunte ao Especialista | SIGESC',
+            'description' => 'Faça uma pergunta sobre AGT, IVA, gestão comercial ou empreendedorismo em Angola. A IA do SIGESC pesquisa e responde com base em fontes.',
+            'path' => '/pergunte-ao-especialista',
+            'keywords' => 'pergunte ao especialista, AGT, IVA Angola, SIGESC',
+        ]);
+    }
+
+    public function forDownloads(): array
+    {
+        return $this->forPage([
+            'title' => 'Downloads SIGESC | Instalar o software',
+            'description' => 'Descarregue o SIGESC Admin e comece a gerir a sua empresa com PDV, stock e faturação.',
+            'path' => '/downloads',
+            'keywords' => 'download SIGESC, instalar ERP, software gestão Angola',
+        ]);
+    }
+
+    public function forShop(?string $page = null): array
+    {
+        $path = $page ? '/shop/'.$page : '/shop';
+
+        return $this->forPage([
+            'title' => ($page ? Str::headline($page).' | ' : '').'Loja SIGESC',
+            'description' => 'Loja SIGESC: livros, recursos e produtos para empresários e gestores em Angola.',
+            'path' => $path,
+            'keywords' => 'loja SIGESC, livros gestão, recursos empresariais Angola',
+        ]);
+    }
+
+    public function forClients(string $page): array
+    {
+        return $this->forPage([
+            'title' => 'Clientes SIGESC | '.Str::headline($page),
+            'description' => 'Conheça empresas que usam o SIGESC e depoimentos de clientes em Angola.',
+            'path' => '/clients/'.$page,
+            'keywords' => 'clientes SIGESC, depoimentos, casos de sucesso',
+        ]);
+    }
+
+    public function forResource(string $resource): array
+    {
+        $labels = [
+            'help' => 'Ajuda',
+            'faq' => 'Perguntas frequentes',
+            'privacy' => 'Política de privacidade',
+            'terms' => 'Termos de uso',
+        ];
+        $label = $labels[$resource] ?? Str::headline($resource);
+
+        return $this->forPage([
+            'title' => "{$label} | SIGESC",
+            'description' => "{$label} do SIGESC — informação útil para utilizadores e empresas em Angola.",
+            'path' => '/resources/'.$resource,
+            'keywords' => "SIGESC {$label}, recursos, suporte",
+        ]);
+    }
+
     protected function absoluteUrl(?string $url): string
     {
         if (! $url) {

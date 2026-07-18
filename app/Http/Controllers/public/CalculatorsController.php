@@ -8,7 +8,6 @@ use App\Services\Tax\AngolaTaxCalculator;
 use App\Support\CrawlerDetector;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 
 class CalculatorsController extends Controller
 {
@@ -27,16 +26,35 @@ class CalculatorsController extends Controller
             'og_type' => 'website',
         ]);
 
+        $meta = $this->tax->meta();
+
         if (CrawlerDetector::isSearchCrawler($request)) {
             return response()->view('seo.calculators-index', [
                 'seo' => $seo,
-                'meta' => $this->tax->meta(),
+                'meta' => $meta,
             ]);
         }
 
-        return Inertia::render('calculators/index', [
-            'meta' => $this->tax->meta(),
+        return $this->renderPublicPage($request, 'calculators/index', [
+            'meta' => $meta,
             'seo' => $seo,
+            'prerender' => [
+                'headline' => 'Calculadoras fiscais Angola',
+                'lead' => 'IRT 2026, IVA, Imposto Industrial, retenção na fonte e contribuição cambial — cálculos no servidor com base na lei configurada.',
+                'sections' => [
+                    [
+                        'heading' => 'Simuladores disponíveis',
+                        'items' => [
+                            'IRT Grupo A (salários)',
+                            'IRT Grupo C (simplificado / sector primário)',
+                            'IVA (14%, 7%, 5%, 1%)',
+                            'Imposto Industrial (25%, 10%, 35%)',
+                            'Retenção na fonte 6,5%',
+                            'Contribuição cambial 2,5% / 10%',
+                        ],
+                    ],
+                ],
+            ],
         ]);
     }
 
