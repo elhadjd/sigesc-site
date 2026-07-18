@@ -2,6 +2,7 @@
 
 namespace App\Services\AiContentEngine\AskExpert;
 
+use App\Events\ExpertAnswerReady;
 use App\Jobs\AiContent\ProcessArticlePipeline;
 use App\Models\AiContent\AiJob;
 use App\Models\AiContent\Article;
@@ -113,7 +114,9 @@ PROMPT
                 ProcessArticlePipeline::dispatch($article->id);
             }
 
-            $this->mailer->notifyAnswer($question->fresh(['article']));
+            $fresh = $question->fresh(['article']);
+            $this->mailer->notifyAnswer($fresh);
+            event(new ExpertAnswerReady($fresh));
 
             $job->update([
                 'status' => 'completed',
@@ -138,6 +141,13 @@ PROMPT
                 'finished_at' => now(),
             ]);
             $this->logger->error($e->getMessage(), $job, null, 'AskExpert');
+
+            try {
+                event(new ExpertAnswerReady($question->fresh(['article'])));
+            } catch (\Throwable) {
+                // Broadcasting must not hide the original failure.
+            }
+
             throw $e;
         }
 
