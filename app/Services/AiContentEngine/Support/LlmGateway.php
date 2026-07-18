@@ -9,8 +9,7 @@ use RuntimeException;
 /**
  * Structured JSON generation for AI Content Engine agents.
  *
- * Preferred provider: Tavily Research (TAVILY_API_KEY).
- * Optional fallback: OpenAI-compatible chat completions (OPENAI_API_KEY).
+ * Providers: DeepSeek (OpenAI-compatible), Tavily Research, OpenAI.
  */
 class LlmGateway
 {
@@ -28,11 +27,15 @@ class LlmGateway
         return $this->resolveProvider();
     }
 
+    public function isProviderReady(string $provider): bool
+    {
+        return $this->resolveProvider(strtolower($provider)) !== null;
+    }
+
     public function missingConfigMessage(): string
     {
-        return 'Configure TAVILY_API_KEY (recomendado) para o AI Content Engine. '
-            .'A Tavily é usada na pesquisa e na geração estruturada de conteúdo. '
-            .'OPENAI_API_KEY é apenas fallback opcional — não é obrigatória.';
+        return 'Configure DEEPSEEK_API_KEY (recomendado para Pergunte ao Especialista), '
+            .'ou TAVILY_API_KEY / OPENAI_API_KEY para o AI Content Engine.';
     }
 
     /**
@@ -43,17 +46,41 @@ class LlmGateway
         array $messages,
         ?string $model = null,
         float $temperature = 0.5,
-        ?string $outputLength = null
+        ?string $outputLength = null,
+        ?string $providerOverride = null
     ): array {
-        $provider = $this->resolveProvider();
+        $provider = $providerOverride
+            ? $this->resolveProvider($providerOverride)
+            : $this->resolveProvider();
 
         if ($provider === null) {
-            throw new RuntimeException($this->missingConfigMessage());
+            throw new RuntimeException(
+                $providerOverride
+                    ? 'LLM provider "'.$providerOverride.'" is not configured.'
+                    : $this->missingConfigMessage()
+            );
         }
 
         return match ($provider) {
+            'deepseek' => $this->chatJsonViaOpenAiCompatible(
+                $messages,
+                $model ?: (string) config('ai_content_engine.deepseek.model', 'deepseek-chat'),
+                $temperature,
+                (string) config('ai_content_engine.deepseek.base_url'),
+                (string) config('ai_content_engine.deepseek.api_key'),
+                (int) config('ai_content_engine.deepseek.timeout', 180),
+                'DeepSeek'
+            ),
             'tavily' => $this->chatJsonViaTavily($messages, $model, $outputLength),
-            'openai' => $this->chatJsonViaOpenAi($messages, $model, $temperature),
+            'openai' => $this->chatJsonViaOpenAiCompatible(
+                $messages,
+                $model ?: (string) config('ai_content_engine.openai.model'),
+                $temperature,
+                (string) config('ai_content_engine.openai.base_url'),
+                (string) config('ai_content_engine.openai.api_key'),
+                (int) config('ai_content_engine.openai.timeout', 180),
+                'OpenAI'
+            ),
             default => throw new RuntimeException('Unsupported LLM provider: '.$provider),
         };
     }
@@ -139,46 +166,63 @@ PROMPT);
     }
 
     /**
+     * OpenAI-compatible chat completions (OpenAI, DeepSeek, etc.).
+     *
      * @param  array<int, array{role: string, content: string}>  $messages
      * @return array<string, mixed>
      */
-    protected function chatJsonViaOpenAi(array $messages, ?string $model = null, float $temperature = 0.5): array
-    {
-        $apiKey = config('ai_content_engine.openai.api_key');
-
+    protected function chatJsonViaOpenAiCompatible(
+        array $messages,
+        string $model,
+        float $temperature,
+        string $baseUrl,
+        string $apiKey,
+        int $timeout,
+        string $label
+    ): array {
         if (blank($apiKey)) {
-            throw new RuntimeException('OPENAI_API_KEY is required when AI_CONTENT_LLM_PROVIDER=openai.');
+            throw new RuntimeException($label.' API key is required for this LLM provider.');
         }
 
-        $response = Http::baseUrl(config('ai_content_engine.openai.base_url'))
+        $baseUrl = rtrim($baseUrl, '/');
+        // DeepSeek accepts both https://api.deepseek.com and .../v1
+        if (! str_ends_with($baseUrl, '/v1')) {
+            $baseUrl .= '/v1';
+        }
+
+        $response = Http::baseUrl($baseUrl)
             ->withToken($apiKey)
             ->acceptJson()
-            ->timeout((int) config('ai_content_engine.openai.timeout', 180))
+            ->timeout($timeout)
             ->retry(2, 1200)
             ->post('/chat/completions', [
-                'model' => $model ?: config('ai_content_engine.openai.model'),
+                'model' => $model,
                 'messages' => $messages,
                 'temperature' => $temperature,
                 'response_format' => ['type' => 'json_object'],
             ]);
 
         if (! $response->successful()) {
-            throw new RuntimeException('LLM chat failed: '.$response->status().' '.$response->body());
+            throw new RuntimeException($label.' chat failed: '.$response->status().' '.$response->body());
         }
 
         $content = data_get($response->json(), 'choices.0.message.content');
         $decoded = json_decode((string) $content, true);
 
         if (! is_array($decoded)) {
-            throw new RuntimeException('LLM returned invalid JSON.');
+            throw new RuntimeException($label.' returned invalid JSON.');
         }
 
         return $decoded;
     }
 
-    protected function resolveProvider(): ?string
+    protected function resolveProvider(?string $preferred = null): ?string
     {
-        $preferred = strtolower((string) config('ai_content_engine.llm.provider', 'auto'));
+        $preferred = strtolower((string) ($preferred ?? config('ai_content_engine.llm.provider', 'auto')));
+
+        if ($preferred === 'deepseek') {
+            return filled(config('ai_content_engine.deepseek.api_key')) ? 'deepseek' : null;
+        }
 
         if ($preferred === 'tavily') {
             return $this->tavily->configured() ? 'tavily' : null;
@@ -188,7 +232,11 @@ PROMPT);
             return filled(config('ai_content_engine.openai.api_key')) ? 'openai' : null;
         }
 
-        // auto: Tavily first (pesquisa + geração), OpenAI só se Tavily não estiver configurada
+        // auto: DeepSeek → Tavily → OpenAI
+        if (filled(config('ai_content_engine.deepseek.api_key'))) {
+            return 'deepseek';
+        }
+
         if ($this->tavily->configured()) {
             return 'tavily';
         }
@@ -250,7 +298,6 @@ PROMPT);
                 if ($this->looksLikeAgentPayload($content[$key])) {
                     return $content[$key];
                 }
-                // Nested wrapper once more.
                 if (isset($content[$key]['json']) || isset($content[$key]['content_html']) || isset($content[$key]['answer_html'])) {
                     return $this->normalizeStructuredContent($content[$key]);
                 }
@@ -276,7 +323,6 @@ PROMPT);
             return $this->normalizeStructuredContent($content['content']);
         }
 
-        // Content itself may already be the agent payload (topics, content_html, …).
         if ($this->looksLikeAgentPayload($content)) {
             return $content;
         }
