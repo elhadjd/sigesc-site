@@ -68,8 +68,8 @@ export default function ResearchSettingsPage({
     return (
         <AiContentLayout title="Research Engine Settings">
             <p className="mb-6 max-w-2xl text-sm text-slate-400">
-                Configura o Hybrid Research Engine usado pelo AIResearchAgent. Fontes oficiais
-                têm prioridade máxima; Tavily e notícias são apenas complemento.
+                Configura o Hybrid Research Engine. A pesquisa web usa Tavily AI; fontes oficiais
+                angolanas mantêm prioridade máxima no ranking de confiança.
             </p>
 
             <form
@@ -89,7 +89,7 @@ export default function ResearchSettingsPage({
                             onChange={(e) => form.setData('tavily_enabled', e.target.checked)}
                             className="h-4 w-4 rounded border-white/20 bg-transparent"
                         />
-                        Ativar Tavily (complementar)
+                        Ativar Tavily AI (pesquisa web principal)
                     </label>
 
                     <label className="flex items-center gap-3 text-sm text-slate-200">

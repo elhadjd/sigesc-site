@@ -2,24 +2,50 @@
 
 namespace App\Services\AiContentEngine\Support;
 
+use App\Services\AiContentEngine\Research\TavilyClient;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ResearchGateway
 {
+    public function __construct(
+        protected TavilyClient $tavily
+    ) {}
+
     /**
-     * Deep research via Tavily when available, with DuckDuckGo fallback.
+     * Deep research via Tavily AI when available, with DuckDuckGo fallback.
      *
      * @return array{provider: string, results: array<int, array<string, mixed>>}
      */
     public function search(string $query, int $maxResults = 8): array
     {
-        if (filled(config('ai_content_engine.tavily.api_key'))) {
+        if ($this->tavily->configured()) {
             try {
+                $data = $this->tavily->searchForContent($query, $maxResults, 'general');
+                $results = [];
+
+                foreach ($data['results'] as $item) {
+                    $results[] = [
+                        'title' => $item['title'] ?? '',
+                        'url' => $item['url'] ?? '',
+                        'snippet' => $item['content'] ?? '',
+                        'score' => $item['score'] ?? null,
+                    ];
+                }
+
+                if (! empty($data['answer'])) {
+                    array_unshift($results, [
+                        'title' => 'Tavily Answer',
+                        'url' => '',
+                        'snippet' => $data['answer'],
+                        'score' => 1,
+                    ]);
+                }
+
                 return [
                     'provider' => 'tavily',
-                    'results' => $this->tavily($query, $maxResults),
+                    'results' => array_slice($results, 0, $maxResults),
                 ];
             } catch (\Throwable $e) {
                 Log::warning('Tavily search failed, falling back', ['error' => $e->getMessage()]);
@@ -30,63 +56,6 @@ class ResearchGateway
             'provider' => 'duckduckgo',
             'results' => $this->duckDuckGo($query, $maxResults),
         ];
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    protected function tavily(string $query, int $maxResults): array
-    {
-        $response = Http::timeout(45)
-            ->acceptJson()
-            ->post(config('ai_content_engine.tavily.base_url').'/search', [
-                'api_key' => config('ai_content_engine.tavily.api_key'),
-                'query' => $query,
-                'search_depth' => 'advanced',
-                'include_answer' => true,
-                'max_results' => $maxResults,
-                'include_domains' => config('ai_content_engine.trusted_domains', []),
-            ]);
-
-        if (! $response->successful()) {
-            // Retry without domain filter — Tavily may reject unknown domains.
-            $response = Http::timeout(45)
-                ->acceptJson()
-                ->post(config('ai_content_engine.tavily.base_url').'/search', [
-                    'api_key' => config('ai_content_engine.tavily.api_key'),
-                    'query' => $query,
-                    'search_depth' => 'advanced',
-                    'include_answer' => true,
-                    'max_results' => $maxResults,
-                ]);
-        }
-
-        if (! $response->successful()) {
-            throw new \RuntimeException('Tavily error: '.$response->body());
-        }
-
-        $data = $response->json();
-        $results = [];
-
-        foreach ($data['results'] ?? [] as $item) {
-            $results[] = [
-                'title' => $item['title'] ?? '',
-                'url' => $item['url'] ?? '',
-                'snippet' => $item['content'] ?? '',
-                'score' => $item['score'] ?? null,
-            ];
-        }
-
-        if (! empty($data['answer'])) {
-            array_unshift($results, [
-                'title' => 'Tavily Answer',
-                'url' => '',
-                'snippet' => $data['answer'],
-                'score' => 1,
-            ]);
-        }
-
-        return $results;
     }
 
     /**

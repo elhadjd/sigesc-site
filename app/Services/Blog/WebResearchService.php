@@ -2,25 +2,32 @@
 
 namespace App\Services\Blog;
 
+use App\Services\AiContentEngine\Research\TavilyClient;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class WebResearchService
 {
+    public function __construct(
+        protected TavilyClient $tavily
+    ) {}
+
     /**
      * Research a topic across multiple queries and return normalized findings.
+     * Prefers Tavily AI; falls back to DuckDuckGo when the key is missing.
      *
      * @param  array<int, string>  $queries
-     * @return array{queries: array<int, string>, results: array<int, array<string, mixed>>, sources: array<int, string>}
+     * @return array{queries: array<int, string>, results: array<int, array<string, mixed>>, sources: array<int, string>, provider?: string}
      */
     public function research(array $queries): array
     {
         $results = [];
         $seenUrls = [];
+        $provider = $this->tavily->configured() ? 'tavily' : 'duckduckgo';
 
         foreach ($queries as $query) {
-            foreach ($this->searchDuckDuckGo($query) as $hit) {
+            foreach ($this->searchQuery($query) as $hit) {
                 $url = $hit['url'] ?? null;
 
                 if (! $url || isset($seenUrls[$url])) {
@@ -55,7 +62,47 @@ class WebResearchService
             'queries' => $queries,
             'results' => $enriched,
             'sources' => collect($enriched)->pluck('url')->filter()->values()->all(),
+            'provider' => $provider,
         ];
+    }
+
+    /**
+     * @return array<int, array{title: string, url: string, snippet: string}>
+     */
+    protected function searchQuery(string $query): array
+    {
+        $limit = (int) config('ai_blog.research.results_per_query', 6);
+
+        if ($this->tavily->configured()) {
+            try {
+                $data = $this->tavily->searchForContent($query, $limit, 'general');
+                $hits = [];
+
+                foreach ($data['results'] as $item) {
+                    $url = $item['url'] ?? null;
+                    if (! $url) {
+                        continue;
+                    }
+
+                    $hits[] = [
+                        'title' => $item['title'] ?? $query,
+                        'url' => $url,
+                        'snippet' => $item['content'] ?? '',
+                    ];
+                }
+
+                if ($hits !== []) {
+                    return $hits;
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Tavily blog research failed, falling back', [
+                    'query' => $query,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $this->searchDuckDuckGo($query);
     }
 
     /**

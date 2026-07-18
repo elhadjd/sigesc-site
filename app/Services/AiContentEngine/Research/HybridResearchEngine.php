@@ -74,25 +74,26 @@ class HybridResearchEngine
         $findings = [];
         $providersUsed = [];
 
-        // 1) Official sources — highest priority, never replaced by Tavily.
+        // 1) Official sources — highest trust priority (never demoted by Tavily).
         $findings = array_merge($findings, $this->safeProviderSearch($this->official, $topic, min(6, $maxSources), $article?->id));
         $providersUsed[] = 'official';
 
-        // 2) Internal knowledge
-        $findings = array_merge($findings, $this->safeProviderSearch($this->internal, $topic, min(4, $maxSources), $article?->id));
-        $providersUsed[] = 'internal';
-
-        // 3) Tavily complementary (never substitutes official)
+        // 2) Tavily AI — primary web research for recent / complementary content.
         if (! empty($settings['tavily_enabled'])) {
-            $findings = array_merge($findings, $this->safeProviderSearch($this->tavily, $topic, min(6, $maxSources), $article?->id));
+            $tavilyLimit = min(max(6, (int) config('ai_content_engine.tavily.max_results', 8)), $maxSources);
+            $findings = array_merge($findings, $this->safeProviderSearch($this->tavily, $topic, $tavilyLimit, $article?->id));
             $providersUsed[] = 'tavily';
         }
 
-        // 4) News
+        // 3) News via Tavily (topic=news) when enabled.
         if (! empty($settings['news_enabled'])) {
-            $findings = array_merge($findings, $this->safeProviderSearch($this->news, $topic, min(4, $maxSources), $article?->id));
+            $findings = array_merge($findings, $this->safeProviderSearch($this->news, $topic, min(5, $maxSources), $article?->id));
             $providersUsed[] = 'news';
         }
+
+        // 4) Internal knowledge (published blog / prior research).
+        $findings = array_merge($findings, $this->safeProviderSearch($this->internal, $topic, min(4, $maxSources), $article?->id));
+        $providersUsed[] = 'internal';
 
         $normalized = $this->normalizeAndRank($findings, $minTrust, $maxSources);
         $avgTrust = $this->averageTrust($normalized);

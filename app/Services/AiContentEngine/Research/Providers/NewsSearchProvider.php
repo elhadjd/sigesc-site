@@ -3,14 +3,17 @@
 namespace App\Services\AiContentEngine\Research\Providers;
 
 use App\Models\AiContent\ResearchSetting;
-use App\Models\AiContent\ResearchSource;
 use App\Services\AiContentEngine\Research\Contracts\ResearchProviderInterface;
 use App\Services\AiContentEngine\Research\TrustScorer;
 use App\Services\AiContentEngine\Support\ResearchGateway;
 
+/**
+ * News research — prefers Tavily (topic=news), falls back to ResearchGateway.
+ */
 class NewsSearchProvider implements ResearchProviderInterface
 {
     public function __construct(
+        protected TavilyResearchProvider $tavily,
         protected ResearchGateway $gateway,
         protected TrustScorer $scorer
     ) {}
@@ -31,44 +34,35 @@ class NewsSearchProvider implements ResearchProviderInterface
             return [];
         }
 
-        $query = $topic.' Angola notícias OR legislação OR AGT';
-        $raw = $this->gateway->search($query, $limit);
+        if ($this->tavily->enabled()) {
+            $fromTavily = $this->tavily->searchNews($topic, $limit);
 
-        $newsDomains = ResearchSource::query()
-            ->where('is_active', true)
-            ->where(function ($q) {
-                $q->where('category', 'news')->orWhere('type', 'news');
-            })
-            ->pluck('domain')
-            ->filter()
-            ->all();
+            return array_map(function (array $item) {
+                $item['provider'] = $this->name();
+                $item['metadata'] = array_merge($item['metadata'] ?? [], [
+                    'upstream' => 'tavily',
+                ]);
 
+                return $item;
+            }, $fromTavily);
+        }
+
+        // Fallback when Tavily is off / missing key.
+        $raw = $this->gateway->search($topic.' Angola notícias OR legislação OR AGT', $limit);
         $results = [];
 
         foreach ($raw['results'] as $item) {
             $url = $item['url'] ?? '';
-            $host = parse_url($url, PHP_URL_HOST) ?: '';
-            $host = strtolower(preg_replace('/^www\./', '', $host) ?? $host);
-
-            $isNews = in_array($host, $newsDomains, true)
-                || str_contains($host, 'jornal')
-                || str_contains($host, 'noticia')
-                || str_contains($host, 'news');
-
-            // Keep general recent web hits as light news complement.
-            $score = $this->scorer->score($url, null, $isNews ? 'news' : 'web');
-
             $results[] = [
                 'title' => $item['title'] ?? '',
                 'url' => $url,
                 'snippet' => $item['snippet'] ?? '',
                 'content' => $item['snippet'] ?? '',
                 'provider' => $this->name(),
-                'trust_score' => $score,
+                'trust_score' => $this->scorer->score($url, null, 'news'),
                 'published_date' => null,
                 'metadata' => [
                     'upstream' => $raw['provider'],
-                    'is_news_domain' => $isNews,
                 ],
             ];
         }
