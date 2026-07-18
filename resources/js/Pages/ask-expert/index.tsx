@@ -52,8 +52,8 @@ export default function AskExpertIndex({
                         </h1>
                         <p className="mt-4 text-lg text-slate-600">
                             Pergunte sobre vendas online, anúncios, sistemas de gestão, AGT, IVA, faturação ou
-                            empreendedorismo em Angola. A pesquisa corre em segundo plano (fila) para não
-                            sobrecarregar o site — e pode virar artigo no blog.
+                            empreendedorismo em Angola. A resposta é preparada com pesquisa e pode virar artigo no
+                            blog.
                         </p>
 
                         {flash?.success && (
@@ -96,16 +96,16 @@ export default function AskExpertIndex({
                                 </label>
                             </div>
                             <p className="rounded-xl bg-[#e8eef8] px-4 py-3 text-sm leading-relaxed text-slate-700">
-                                Se indicar o email, o resultado será enviado para si assim que a resposta estiver
-                                pronta — incluindo o link do artigo no blog quando a pergunta gerar um post SIGESC.
-                                Sem email, acompanhe a página de resposta (o processamento corre em fila).
+                                Se indicar o email, enviamos a resposta quando estiver pronta — e o link do artigo no
+                                blog, se a pergunta der origem a um post. Sem email, pode acompanhar a resposta nesta
+                                página.
                             </p>
                             <button
                                 type="submit"
                                 disabled={loading}
                                 className="rounded-xl bg-[#0b3d91] px-6 py-3 text-sm font-semibold text-white hover:bg-[#0a347c] disabled:opacity-60"
                             >
-                                {loading ? 'A enviar para a fila…' : 'Obter resposta'}
+                                {loading ? 'A enviar a pergunta…' : 'Obter resposta'}
                             </button>
                         </form>
                     </section>

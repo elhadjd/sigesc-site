@@ -6,7 +6,7 @@ import { FaDownload, FaUsers } from 'react-icons/fa';
 import { Link } from '@inertiajs/react';
 import { useLoggedUser } from '@/contexts/loggedUser';
 import ChatComponent from '@/ui/chat';
-import { SIGESC_ADMIN_URL, SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
+import { SIGESC_ADMIN_LOGIN_URL, SIGESC_ADMIN_URL, SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
 
 export default function FooterComponent() {
     const { local } = useLoggedUser();
@@ -119,10 +119,15 @@ export default function FooterComponent() {
                         <h4 className="text-lg font-semibold mb-5 text-gray-900">Sua Conta</h4>
                         <ul className="space-y-3">
                             <li>
-                                <Link href={`/auth`} className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                <a
+                                    href={SIGESC_ADMIN_LOGIN_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group"
+                                >
                                     <BiLogIn className="text-blue-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm">Entrar</span>
-                                </Link>
+                                </a>
                             </li>
                             <li>
                                 <a href={SIGESC_ADMIN_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">

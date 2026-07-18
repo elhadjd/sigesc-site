@@ -4,7 +4,7 @@ import { Link, usePage } from '@inertiajs/react';
 const nav = [
     { href: '/admin/ai-content', label: 'Dashboard', routeName: 'admin.ai-content.dashboard' },
     { href: '/admin/ai-content/articles', label: 'Artigos', routeName: 'admin.ai-content.articles' },
-    { href: '/admin/ai-content/jobs', label: 'Filas IA', routeName: 'admin.ai-content.jobs' },
+    { href: '/admin/ai-content/jobs', label: 'Processamentos', routeName: 'admin.ai-content.jobs' },
     { href: '/admin/ai-content/logs', label: 'Logs', routeName: 'admin.ai-content.logs' },
     { href: '/admin/ai-content/research-settings', label: 'Research Engine', routeName: 'admin.ai-content.research-settings' },
     { href: '/admin/ai-content/expert', label: 'Especialista', routeName: 'admin.ai-content.expert' },
