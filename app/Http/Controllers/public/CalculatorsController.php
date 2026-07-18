@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\public;
 
 use App\Http\Controllers\Controller;
+use App\Services\Seo\PublicPageContent;
 use App\Services\Seo\SeoBuilder;
 use App\Services\Tax\AngolaTaxCalculator;
 use App\Support\CrawlerDetector;
@@ -13,48 +14,35 @@ class CalculatorsController extends Controller
 {
     public function __construct(
         protected AngolaTaxCalculator $tax,
-        protected SeoBuilder $seo
+        protected SeoBuilder $seo,
+        protected PublicPageContent $content
     ) {}
 
     public function index(Request $request)
     {
         $seo = $this->seo->defaults([
-            'title' => 'Calculadoras Fiscais Angola (IVA, IRT, Imposto Industrial) | SIGESC',
-            'description' => 'Simuladores oficiais de apoio: IRT 2026, IVA, Imposto Industrial, retenção na fonte e contribuição cambial — com base na legislação angolana configurada.',
+            'title' => 'Calculadoras Fiscais Angola (IVA, IRT 2026, Imposto Industrial) | SIGESC',
+            'description' => 'Simule IRT 2026 (Lei n.º 14/25), IVA, Imposto Industrial, retenção na fonte 6,5% e contribuição cambial. Cálculos no servidor com base na legislação angolana configurada — para PME e gestores.',
             'canonical' => route('calculators.index', absolute: true),
-            'keywords' => 'calculadora IRT Angola, calculadora IVA Angola, Imposto Industrial, retenção na fonte, AGT',
+            'keywords' => 'calculadora IRT Angola 2026, calculadora IVA Angola, Imposto Industrial, retenção na fonte 6.5%, contribuição cambial, AGT, OGE 2026',
             'og_type' => 'website',
         ]);
 
         $meta = $this->tax->meta();
+        $prerender = $this->content->calculators($meta);
 
         if (CrawlerDetector::isSearchCrawler($request)) {
             return response()->view('seo.calculators-index', [
                 'seo' => $seo,
                 'meta' => $meta,
+                'page' => $prerender,
             ]);
         }
 
         return $this->renderPublicPage($request, 'calculators/index', [
             'meta' => $meta,
             'seo' => $seo,
-            'prerender' => [
-                'headline' => 'Calculadoras fiscais Angola',
-                'lead' => 'IRT 2026, IVA, Imposto Industrial, retenção na fonte e contribuição cambial — cálculos no servidor com base na lei configurada.',
-                'sections' => [
-                    [
-                        'heading' => 'Simuladores disponíveis',
-                        'items' => [
-                            'IRT Grupo A (salários)',
-                            'IRT Grupo C (simplificado / sector primário)',
-                            'IVA (14%, 7%, 5%, 1%)',
-                            'Imposto Industrial (25%, 10%, 35%)',
-                            'Retenção na fonte 6,5%',
-                            'Contribuição cambial 2,5% / 10%',
-                        ],
-                    ],
-                ],
-            ],
+            'prerender' => $prerender,
         ]);
     }
 

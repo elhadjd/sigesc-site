@@ -6,43 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Jobs\AiContent\AnswerExpertQuestion;
 use App\Models\AiContent\ExpertQuestion;
 use App\Services\AiContentEngine\AskExpert\AskExpertService;
+use App\Services\Seo\PublicPageContent;
 use App\Services\Seo\SeoBuilder;
 use Illuminate\Http\Request;
 
 class AskExpertController extends Controller
 {
     public function __construct(
-        protected SeoBuilder $seo
+        protected SeoBuilder $seo,
+        protected PublicPageContent $content
     ) {}
 
     public function index(Request $request)
     {
-        $seo = $this->seo->forAskExpert();
-        $prerender = [
-            'kicker' => 'Assistência inteligente',
-            'headline' => 'Pergunte ao Especialista SIGESC',
-            'lead' => 'Faça uma pergunta sobre AGT, IVA, gestão comercial ou empreendedorismo em Angola. A IA pesquisa fontes e responde com prudência.',
-            'sections' => [
-                [
-                    'heading' => 'Temas frequentes',
-                    'items' => [
-                        'Faturação eletrónica e obrigações AGT',
-                        'IVA, IRT e Imposto Industrial',
-                        'Gestão de stock, PDV e fluxo de caixa',
-                        'Abertura de empresa e licenciamento',
-                    ],
-                ],
-            ],
-            'links' => [
-                ['href' => url('/calculadoras'), 'label' => 'Calculadoras fiscais'],
-                ['href' => url('/blog/posts'), 'label' => 'Artigos do blog'],
-                ['href' => url('/contact'), 'label' => 'Contacto humano'],
-            ],
-        ];
-
         return $this->renderPublicPage($request, 'ask-expert/index', [
-            'seo' => $seo,
-            'prerender' => $prerender,
+            'seo' => $this->seo->forAskExpert(),
+            'prerender' => $this->content->askExpert(),
         ]);
     }
 

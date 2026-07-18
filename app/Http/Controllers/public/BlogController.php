@@ -4,6 +4,7 @@ namespace App\Http\Controllers\public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Services\Seo\PublicPageContent;
 use App\Services\Seo\SeoBuilder;
 use App\Support\CrawlerDetector;
 use Illuminate\Http\Request;
@@ -14,7 +15,8 @@ use Inertia\Inertia;
 class BlogController extends Controller
 {
     public function __construct(
-        protected SeoBuilder $seo
+        protected SeoBuilder $seo,
+        protected PublicPageContent $content
     ) {}
 
     /**
@@ -96,13 +98,18 @@ class BlogController extends Controller
             return response()->json($data);
         }
 
+        $seo = $this->seo->forBlogIndex();
+        $prerender = $this->content->blogIndex($posts->items(), $categories);
+
         // Full HTML document for search engines / social crawlers.
         if (CrawlerDetector::isSearchCrawler($request)) {
             return response()
                 ->view('seo.blog-index', [
                     'posts' => $posts->items(),
                     'pagination' => $pagination,
-                    'seo' => $this->seo->forBlogIndex(),
+                    'seo' => $seo,
+                    'page' => $prerender,
+                    'categories' => $categories,
                 ])
                 ->header('X-Robots-Tag', 'index, follow');
         }
@@ -119,7 +126,8 @@ class BlogController extends Controller
                 'search' => $request->search ?? '',
                 'sort' => $request->sort ?? 'newest',
             ],
-            'seo' => $this->seo->forBlogIndex(),
+            'seo' => $seo,
+            'prerender' => $prerender,
         ]);
     }
 

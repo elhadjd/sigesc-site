@@ -28,9 +28,15 @@ class SitemapController extends Controller
             ['loc' => $base.'/clients/depoiments', 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => $base.'/resources/help', 'changefreq' => 'yearly', 'priority' => '0.4'],
             ['loc' => $base.'/resources/faq', 'changefreq' => 'yearly', 'priority' => '0.4'],
-            ['loc' => $base.'/modules/ponto-de-venda', 'changefreq' => 'monthly', 'priority' => '0.7'],
-            ['loc' => $base.'/modules/gestao-de-stock', 'changefreq' => 'monthly', 'priority' => '0.7'],
         ];
+
+        foreach (config('sigesc_modules', []) as $module) {
+            $staticUrls[] = [
+                'loc' => $base.'/modules/'.$module['slug'],
+                'changefreq' => 'monthly',
+                'priority' => '0.7',
+            ];
+        }
 
         $posts = Cache::remember('sitemap_blog_posts', 900, function () {
             return Post::published()

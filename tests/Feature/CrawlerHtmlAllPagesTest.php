@@ -69,9 +69,33 @@ class CrawlerHtmlAllPagesTest extends TestCase
             ->component('dashboard')
             ->has('seo')
             ->has('prerender')
+            ->has('modules')
         );
 
-        $this->assertStringContainsString('SIGESC', $response->getContent());
-        $this->assertStringContainsString('seo-prerender', $response->getContent());
+        $html = $response->getContent();
+        $this->assertStringContainsString('SIGESC', $html);
+        $this->assertStringContainsString('seo-prerender', $html);
+        $this->assertStringContainsString('Ponto de Venda', $html);
+        $this->assertStringContainsString('/modules/ponto-de-venda', $html);
+    }
+
+    public function test_home_and_solutions_expose_module_submenu_before_js(): void
+    {
+        foreach (['/', '/solutions'] as $path) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $this->assertStringContainsString('Ponto de Venda', $html);
+            $this->assertStringContainsString('Gestão de Estoque', $html);
+            $this->assertStringContainsString('Faturamento', $html);
+            $this->assertStringContainsString('/modules/gestao-de-stock', $html);
+        }
+    }
+
+    public function test_calculators_prerender_has_legal_detail(): void
+    {
+        $html = $this->get('/calculadoras')->assertOk()->getContent();
+        $this->assertStringContainsString('Lei n.º 14/25', $html);
+        $this->assertStringContainsString('150.000', $html);
+        $this->assertStringContainsString('Taxa geral (14%)', $html);
+        $this->assertStringContainsString('Contribuição especial', $html);
     }
 }

@@ -1,19 +1,50 @@
 @extends('seo.layout')
 
 @section('content')
-    <p class="kicker">Ferramentas SIGESC</p>
-    <h1>Calculadoras fiscais para empresários em Angola</h1>
-    <p class="excerpt">
-        Simuladores com base na legislação configurada (OGE 2026 / Códigos do IVA e Imposto Industrial):
-        IRT, IVA, Imposto Industrial, retenção na fonte e contribuição cambial.
-    </p>
-    <ul class="card-list">
-        <li><h2>IRT Grupo A (salários) — Lei n.º 14/25</h2><p>Tabela progressiva 2026 com isenção até 150.000 Kz.</p></li>
-        <li><h2>IRT Grupo C</h2><p>Regime simplificado 6,5% e sector primário 10%.</p></li>
-        <li><h2>IVA</h2><p>Taxas 14%, 7%, 5% e 1% (Cabinda), com modos acrescentar/extrair.</p></li>
-        <li><h2>Imposto Industrial</h2><p>25%, 10% (agrícola) e 35% (banca/seguros/telecom/petróleo).</p></li>
-        <li><h2>Retenção na fonte 6,5%</h2><p>Cálculo sobre facturas de serviços.</p></li>
-        <li><h2>Contribuição cambial</h2><p>2,5% (singular) e 10% (colectiva) — OGE 2026.</p></li>
-    </ul>
+    @php
+        $page = $page ?? [];
+        $headline = $page['headline'] ?? 'Calculadoras fiscais Angola — IRT 2026, IVA, Imposto Industrial';
+        $lead = $page['lead'] ?? 'Simuladores com base na legislação angolana configurada.';
+        $sections = $page['sections'] ?? [];
+        $links = $page['links'] ?? [];
+    @endphp
+
+    <p class="kicker">{{ $page['kicker'] ?? 'Ferramentas fiscais Angola' }}</p>
+    <h1>{{ $headline }}</h1>
+    <p class="excerpt">{{ $lead }}</p>
+
+    @foreach ($sections as $section)
+        <section style="margin-top:2rem;">
+            @if (!empty($section['heading']))
+                <h2>{{ $section['heading'] }}</h2>
+            @endif
+            @if (!empty($section['body']))
+                <p>{{ $section['body'] }}</p>
+            @endif
+            @if (!empty($section['items']))
+                <ul>
+                    @foreach ($section['items'] as $item)
+                        <li>{{ $item }}</li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
+    @endforeach
+
+    @if (!empty($links))
+        <ul class="card-list" style="margin-top:2rem;">
+            @foreach ($links as $link)
+                <li>
+                    <a href="{{ $link['href'] ?? '#' }}">
+                        <h2>{{ $link['label'] ?? $link['href'] }}</h2>
+                        @if (!empty($link['description']))
+                            <p>{{ $link['description'] }}</p>
+                        @endif
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    @endif
+
     <p class="meta" style="margin-top:2rem;">{{ $meta['disclaimer'] ?? '' }}</p>
 @endsection

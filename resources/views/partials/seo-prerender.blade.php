@@ -66,19 +66,6 @@
             @endforeach
         </ul>
     </section>
-@elseif ($component === 'calculators/index')
-    <section class="seo-prerender" style="max-width:760px;margin:0 auto;padding:2rem 1rem;font-family:Georgia,serif;color:#14213d;">
-        <h1>Calculadoras fiscais Angola</h1>
-        <p>IRT 2026, IVA, Imposto Industrial, retenção na fonte e contribuição cambial — cálculos no servidor com base na lei configurada.</p>
-        <ul>
-            <li>IRT Grupo A (salários)</li>
-            <li>IRT Grupo C (simplificado / sector primário)</li>
-            <li>IVA (14%, 7%, 5%, 1%)</li>
-            <li>Imposto Industrial (25%, 10%, 35%)</li>
-            <li>Retenção na fonte 6,5%</li>
-            <li>Contribuição cambial 2,5% / 10%</li>
-        </ul>
-    </section>
 @elseif (!empty($props['prerender']) && is_array($props['prerender']))
     @php $pr = $props['prerender']; @endphp
     <section class="seo-prerender" style="max-width:760px;margin:0 auto;padding:2rem 1rem;font-family:Georgia,serif;color:#14213d;">
