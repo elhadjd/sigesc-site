@@ -19,10 +19,13 @@ class Post extends Model
      */
     protected $fillable = [
         'title',
+        'meta_title',
         'slug',
         'excerpt',
+        'meta_description',
         'content',
         'image',
+        'media',
         'category',
         'author_name',
         'author_avatar',
@@ -30,6 +33,9 @@ class Post extends Model
         'publish_date',
         'read_time',
         'tags',
+        'source_urls',
+        'generation_topic',
+        'is_ai_generated',
         'is_featured',
         'is_published',
         'views',
@@ -43,6 +49,9 @@ class Post extends Model
     protected $casts = [
         'publish_date' => 'date',
         'tags' => 'array',
+        'media' => 'array',
+        'source_urls' => 'array',
+        'is_ai_generated' => 'boolean',
         'is_featured' => 'boolean',
         'is_published' => 'boolean',
         'read_time' => 'integer',

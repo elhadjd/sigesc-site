@@ -13,6 +13,7 @@ use App\Http\Controllers\profile\UserProfileController;
 use App\Http\Controllers\public\Blog\EngagementController;
 use App\Http\Controllers\public\BlogController;
 use App\Http\Controllers\public\ChatController;
+use App\Http\Controllers\public\SitemapController;
 use App\Http\Controllers\public\clientDepoimentsController;
 use App\Http\Controllers\public\CompanyController;
 use App\Http\Controllers\public\DownloadController;
@@ -38,6 +39,8 @@ Route::get('auth/callback', [AuthenticatedSessionController::class, 'authenticat
 require __DIR__ . '/auth.php';
 
 Route::get('/', [DashboardController::class, 'index']);
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::controller(AuthenticatedSessionController::class)->group(function () {
     Route::get('/auth', 'create')->name('auth');
@@ -121,17 +124,13 @@ Route::controller(NewsletterController::class)->group(function () {
     Route::get('/newsletter/unsigned/{newsletter}', 'destroy')->name('destroy-newsletter');
 });
 
-Route::prefix('blog')->name('blog')->group(function () {
-    Route::prefix('posts')->name('.posts')->group(function () {
-        Route::get('', [BlogController::class, 'index']);
-        Route::get('{slug}', [BlogController::class, 'show'])->name('.show');
-        Route::prefix('{post}')->group(function () {
-            Route::post('like', [EngagementController::class, 'likePost'])->name('.like');
-            Route::get('comments', [EngagementController::class, 'getComments'])->name('.comments');
-            Route::post('comment', [EngagementController::class, 'storeComment'])->name('.comment');
-            Route::post('comment/{comment}/like', [EngagementController::class, 'likeComment'])->name('.comment.like');
-        });
-    });
+Route::prefix('blog/posts')->group(function () {
+    Route::get('', [BlogController::class, 'index'])->name('blog.posts');
+    Route::get('{slug}', [BlogController::class, 'show'])->name('blog.posts.show');
+    Route::post('{post}/like', [EngagementController::class, 'likePost'])->name('blog.posts.like');
+    Route::get('{post}/comments', [EngagementController::class, 'getComments'])->name('blog.posts.comments');
+    Route::post('{post}/comment', [EngagementController::class, 'storeComment'])->name('blog.posts.comment');
+    Route::post('{post}/comment/{comment}/like', [EngagementController::class, 'likeComment'])->name('blog.posts.comment.like');
 });
 
 

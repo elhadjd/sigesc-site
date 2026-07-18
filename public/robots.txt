@@ -1,2 +1,12 @@
 User-agent: *
-https://sisgesc.net/sitemap.xml
+Allow: /
+Allow: /blog/posts
+Allow: /blog/posts/*
+
+Disallow: /authenticate
+Disallow: /auth/
+Disallow: /profile
+Disallow: /chat-conversation
+Disallow: /new-chat
+
+Sitemap: https://www.sisgesc.net/sitemap.xml

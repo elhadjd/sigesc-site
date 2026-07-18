@@ -6,7 +6,7 @@ import { HeaderComponent } from '@/Components/home/Header';
 import { FormStateProvider } from '@/contexts/stateForm';
 import { UserLoggedProvider } from '@/contexts/loggedUser';
 import FooterComponent from '@/Components/home/Footer';
-import { Helmet } from 'react-helmet';
+import SeoHead, { SeoPayload } from '@/Components/seo/SeoHead';
 import {
     FiSearch,
     FiFilter,
@@ -75,6 +75,7 @@ interface BlogPageProps {
         search: string;
         sort: string;
     };
+    seo?: SeoPayload;
 }
 
 // Componente Skeleton para loading
@@ -665,7 +666,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, isLoading }) => {
 };
 
 // Componente Principal
-export default function BlogPage({ auth, local, posts: initialPosts, categories, featuredPosts, recentPosts, trendingPosts, pagination: initialPagination, filters: initialFilters }: BlogPageProps) {
+export default function BlogPage({ auth, local, posts: initialPosts, categories, featuredPosts, recentPosts, trendingPosts, pagination: initialPagination, filters: initialFilters, seo }: BlogPageProps) {
     const [posts, setPosts] = useState<Post[]>(initialPosts);
     const [isLoading, setIsLoading] = useState(false);
     const [activeCategory, setActiveCategory] = useState(initialFilters?.category || 'all');
@@ -718,17 +719,11 @@ export default function BlogPage({ auth, local, posts: initialPosts, categories,
     return (
         <UserLoggedProvider>
             <FormStateProvider>
-                <Helmet>
-                    <title>Blog SIGESC | Artigos sobre Gestão Empresarial e Tecnologia</title>
-                    <meta
-                        name="description"
-                        content="Blog oficial SIGESC com artigos exclusivos sobre gestão empresarial, produtividade, finanças e tecnologia. Aprenda com especialistas e transforme seu negócio."
-                    />
-                    <meta
-                        name="keywords"
-                        content="blog sigesc, gestão empresarial, produtividade, finanças, tecnologia, artigos gestão, dicas negócios, software gestão"
-                    />
-                </Helmet>
+                <SeoHead
+                    seo={seo}
+                    fallbackTitle="Blog SIGESC | Artigos sobre Gestão Empresarial e Tecnologia"
+                    fallbackDescription="Blog oficial SIGESC com artigos exclusivos sobre gestão empresarial, produtividade, finanças e tecnologia. Aprenda com especialistas e transforme seu negócio."
+                />
 
                 <HeaderComponent auth={auth} />
 

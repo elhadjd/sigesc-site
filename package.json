@@ -3,7 +3,9 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build && vite build --ssr",
+        "build:ssr": "vite build --ssr",
+        "ssr": "node bootstrap/ssr/ssr.mjs"
     },
     "devDependencies": {
         "@headlessui/react": "^1.4.2",

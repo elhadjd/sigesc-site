@@ -5,7 +5,7 @@ import { HeaderComponent } from '@/Components/home/Header';
 import { FormStateProvider } from '@/contexts/stateForm';
 import { UserLoggedProvider } from '@/contexts/loggedUser';
 import FooterComponent from '@/Components/home/Footer';
-import { Helmet } from 'react-helmet';
+import SeoHead, { SeoPayload } from '@/Components/seo/SeoHead';
 import {
     FiClock,
     FiCalendar,
@@ -58,6 +58,15 @@ interface Comment {
     isLiked?: boolean;
 }
 
+interface MediaItem {
+    type: 'image' | 'video' | string;
+    url?: string;
+    embed_url?: string;
+    alt?: string;
+    title?: string;
+    role?: string;
+}
+
 interface Post {
     id: number;
     title: string;
@@ -65,6 +74,7 @@ interface Post {
     excerpt: string;
     content: string;
     image: string;
+    media?: MediaItem[];
     category: string;
     author_name: string;
     author_avatar: string;
@@ -75,6 +85,7 @@ interface Post {
     views: number;
     likes: number;
     comments_count?: number;
+    is_ai_generated?: boolean;
 }
 
 interface RelatedPost {
@@ -93,6 +104,7 @@ interface BlogShowProps {
     post: Post;
     relatedPosts: RelatedPost[];
     popularPosts: RelatedPost[];
+    seo?: SeoPayload;
 }
 
 // Componente de Comentário Individual
@@ -442,7 +454,7 @@ const CommentsSection = ({ post }: { post: Post }) => {
 };
 
 // Componente Principal da Página
-const BlogShowPage = ({ auth, local, post, relatedPosts, popularPosts }: BlogShowProps) => {
+const BlogShowPage = ({ auth, local, post, relatedPosts, popularPosts, seo }: BlogShowProps) => {
     const [isLiked, setIsLiked] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [likesCount, setLikesCount] = useState(post.likes);
@@ -510,17 +522,11 @@ const BlogShowPage = ({ auth, local, post, relatedPosts, popularPosts }: BlogSho
     return (
         <UserLoggedProvider>
             <FormStateProvider>
-                <Helmet>
-                    <title>{post.title} | Blog SIGESC</title>
-                    <meta name="description" content={post.excerpt} />
-                    <meta name="keywords" content={post.tags.join(', ')} />
-                    <meta property="og:title" content={post.title} />
-                    <meta property="og:description" content={post.excerpt} />
-                    <meta property="og:image" content={post.image} />
-                    <meta property="og:type" content="article" />
-                    <meta property="article:published_time" content={post.publish_date} />
-                    <meta property="article:author" content={post.author_name} />
-                </Helmet>
+                <SeoHead
+                    seo={seo}
+                    fallbackTitle={`${post.title} | Blog SIGESC`}
+                    fallbackDescription={post.excerpt}
+                />
 
                 <HeaderComponent auth={auth} />
 
