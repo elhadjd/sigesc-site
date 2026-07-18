@@ -15,15 +15,12 @@ class AnswerExpertQuestion implements ShouldQueue
 
     public int $tries = 1;
 
-    public int $timeout = 600;
+    public int $timeout = 3600;
 
-    /**
-     * @param  array{question: string, asker_name?: string, asker_email?: string}  $input
-     */
-    public function __construct(public array $input) {}
+    public function __construct(public int $expertQuestionId) {}
 
     public function handle(AskExpertService $service): void
     {
-        $service->ask($this->input);
+        $service->processQueued($this->expertQuestionId);
     }
 }

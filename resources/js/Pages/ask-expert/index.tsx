@@ -29,7 +29,6 @@ export default function AskExpertIndex({
                 question,
                 asker_name: askerName,
                 asker_email: askerEmail,
-                async: false,
             },
             {
                 onFinish: () => setLoading(false),
@@ -52,9 +51,9 @@ export default function AskExpertIndex({
                             Pergunte ao Especialista
                         </h1>
                         <p className="mt-4 text-lg text-slate-600">
-                            Pergunte sobre AGT, IVA, faturação, gestão comercial ou empreendedorismo em Angola.
-                            A IA pesquisa fontes e responde com cuidado — e pode transformar a resposta num artigo
-                            do blog.
+                            Pergunte sobre vendas online, anúncios, sistemas de gestão, AGT, IVA, faturação ou
+                            empreendedorismo em Angola. A pesquisa corre em segundo plano (fila) para não
+                            sobrecarregar o site — e pode virar artigo no blog.
                         </p>
 
                         {flash?.success && (
@@ -73,7 +72,7 @@ export default function AskExpertIndex({
                                     value={question}
                                     onChange={(e) => setQuestion(e.target.value)}
                                     className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-800 outline-none ring-[#0b3d91] focus:ring-2"
-                                    placeholder="Ex.: O que muda com a faturação eletrónica da AGT para PME em Luanda?"
+                                    placeholder="Ex.: Qual o melhor sistema de gestão comercial para PME em Angola? Ou: como fazer anúncios de sucesso no Instagram?"
                                 />
                             </label>
                             <div className="grid gap-4 sm:grid-cols-2">
@@ -92,15 +91,21 @@ export default function AskExpertIndex({
                                         value={askerEmail}
                                         onChange={(e) => setAskerEmail(e.target.value)}
                                         className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3"
+                                        placeholder="nome@empresa.ao"
                                     />
                                 </label>
                             </div>
+                            <p className="rounded-xl bg-[#e8eef8] px-4 py-3 text-sm leading-relaxed text-slate-700">
+                                Se indicar o email, o resultado será enviado para si assim que a resposta estiver
+                                pronta — incluindo o link do artigo no blog quando a pergunta gerar um post SIGESC.
+                                Sem email, acompanhe a página de resposta (o processamento corre em fila).
+                            </p>
                             <button
                                 type="submit"
                                 disabled={loading}
                                 className="rounded-xl bg-[#0b3d91] px-6 py-3 text-sm font-semibold text-white hover:bg-[#0a347c] disabled:opacity-60"
                             >
-                                {loading ? 'A pesquisar…' : 'Obter resposta'}
+                                {loading ? 'A enviar para a fila…' : 'Obter resposta'}
                             </button>
                         </form>
                     </section>

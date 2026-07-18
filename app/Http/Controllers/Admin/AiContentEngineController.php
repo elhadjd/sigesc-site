@@ -144,7 +144,15 @@ class AiContentEngineController extends Controller
     {
         ProcessArticlePipeline::dispatch($article->id)->afterResponse();
 
-        return $this->actionResponse($request, true, 'Pipeline do artigo enviado para a fila.');
+        $message = 'Pipeline do artigo enviado para a fila (job).';
+        if ((string) config('queue.default') === 'database') {
+            $message .= ' Com QUEUE_CONNECTION=database, mantenha `php artisan queue:work database --timeout=3600` a correr.';
+        }
+
+        return $this->actionResponse($request, true, $message, 200, [
+            'article_id' => $article->id,
+            'queue' => (string) config('queue.default'),
+        ]);
     }
 
     public function approve(Request $request, Article $article, PublisherAgent $publisher)

@@ -13,12 +13,15 @@ class ExpertQuestion extends Model
     protected $fillable = [
         'uuid', 'asker_name', 'asker_email', 'question', 'answer_html',
         'status', 'quality_score', 'article_id', 'research', 'convert_to_article',
+        'email_notified_at', 'article_email_notified_at',
     ];
 
     protected $casts = [
         'quality_score' => 'float',
         'research' => 'array',
         'convert_to_article' => 'boolean',
+        'email_notified_at' => 'datetime',
+        'article_email_notified_at' => 'datetime',
     ];
 
     protected static function booted(): void

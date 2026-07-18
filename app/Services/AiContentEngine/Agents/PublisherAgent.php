@@ -4,7 +4,9 @@ namespace App\Services\AiContentEngine\Agents;
 
 use App\Models\AiContent\AiJob;
 use App\Models\AiContent\Article;
+use App\Models\AiContent\ExpertQuestion;
 use App\Models\Post;
+use App\Services\AiContentEngine\AskExpert\ExpertResultMailer;
 use App\Services\AiContentEngine\Contracts\AgentInterface;
 use App\Services\AiContentEngine\Support\AiLogger;
 use Illuminate\Support\Facades\Cache;
@@ -13,7 +15,8 @@ use Illuminate\Support\Str;
 class PublisherAgent implements AgentInterface
 {
     public function __construct(
-        protected AiLogger $logger
+        protected AiLogger $logger,
+        protected ExpertResultMailer $expertMailer,
     ) {}
 
     public function name(): string
@@ -99,6 +102,7 @@ class PublisherAgent implements AgentInterface
 
         $article->markRevision('published', $article->content_html, ['post_id' => $postId]);
         $this->flushCaches($article);
+        $this->notifyExpertAsker($article);
 
         $this->logger->info('Article published', $job, $article, $this->name(), [
             'post_id' => $postId,
@@ -109,6 +113,25 @@ class PublisherAgent implements AgentInterface
             'published' => true,
             'post_id' => $postId,
         ];
+    }
+
+    protected function notifyExpertAsker(Article $article): void
+    {
+        $expertId = data_get($article->pipeline_meta, 'from_expert_question');
+        if (! $expertId) {
+            return;
+        }
+
+        $question = ExpertQuestion::find($expertId);
+        if (! $question) {
+            return;
+        }
+
+        try {
+            $this->expertMailer->notifyPublishedArticle($question->fresh(['article']));
+        } catch (\Throwable $e) {
+            $this->logger->warning('Expert article email failed: '.$e->getMessage(), null, $article, $this->name());
+        }
     }
 
     protected function syncToBlogPost(Article $article): int
@@ -201,6 +224,7 @@ class PublisherAgent implements AgentInterface
     protected function flushCaches(Article $article): void
     {
         Cache::forget('sitemap_blog_posts');
+        Cache::forget('sitemap_ai_articles');
         Cache::forget('featured_posts');
         Cache::forget('recent_posts');
         Cache::forget('trending_posts');

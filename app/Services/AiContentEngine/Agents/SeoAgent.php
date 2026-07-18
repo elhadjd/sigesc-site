@@ -6,6 +6,7 @@ use App\Models\AiContent\AiJob;
 use App\Models\AiContent\Article;
 use App\Services\AiContentEngine\Contracts\AgentInterface;
 use App\Services\AiContentEngine\Support\AiLogger;
+use App\Services\AiContentEngine\Support\CreditSaver;
 use App\Services\AiContentEngine\Support\LlmGateway;
 use Illuminate\Support\Str;
 
@@ -26,10 +27,12 @@ class SeoAgent implements AgentInterface
         $article->update(['status' => Article::STATUS_SEO]);
         $canonical = url('/blog/posts/'.$article->slug);
 
-        $seo = $this->llm->chatJson([
-            [
-                'role' => 'system',
-                'content' => <<<'PROMPT'
+        $seo = CreditSaver::heuristicSeo()
+            ? $this->buildHeuristicSeo($article, $canonical)
+            : $this->llm->chatJson([
+                [
+                    'role' => 'system',
+                    'content' => <<<'PROMPT'
 És o AISEOAgent. Otimizas conteúdo empresarial angolano para Google.
 JSON:
 {
@@ -47,18 +50,18 @@ JSON:
   "schema_hints":{}
 }
 PROMPT
-            ],
-            [
-                'role' => 'user',
-                'content' => json_encode([
-                    'title' => $article->title,
-                    'excerpt' => $article->excerpt,
-                    'category' => $article->category?->name,
-                    'content_html' => Str::limit(strip_tags((string) $article->content_html), 4000, ''),
-                    'canonical' => $canonical,
-                ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            ],
-        ], null, 0.3);
+                ],
+                [
+                    'role' => 'user',
+                    'content' => json_encode([
+                        'title' => $article->title,
+                        'excerpt' => $article->excerpt,
+                        'category' => $article->category?->name,
+                        'content_html' => Str::limit(strip_tags((string) $article->content_html), 4000, ''),
+                        'canonical' => $canonical,
+                    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                ],
+            ], null, 0.3);
 
         $faqs = $article->faqs()->get(['question', 'answer_html']);
         $schema = [
@@ -161,5 +164,61 @@ PROMPT
         ]);
 
         return ['seo' => $seo];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function buildHeuristicSeo(Article $article, string $canonical): array
+    {
+        $title = trim((string) $article->title);
+        $excerpt = trim((string) ($article->excerpt ?: Str::limit(strip_tags((string) $article->content_html), 155, '')));
+        $focus = $article->focus_keyword
+            ?: $article->keywords()->where('type', 'focus')->value('keyword')
+            ?: Str::of($title)->lower()->explode(' ')->take(4)->implode(' ');
+        $secondary = $article->keywords()
+            ->where('type', 'secondary')
+            ->pluck('keyword')
+            ->take(5)
+            ->values()
+            ->all();
+        $tags = array_values(array_unique(array_filter([
+            $article->category?->name,
+            'Angola',
+            'PME',
+            'SIGESC',
+            $focus,
+        ])));
+
+        $metaTitle = Str::limit($title.(str_contains(Str::lower($title), 'sigesc') ? '' : ' | SIGESC'), 70, '');
+        $metaDescription = Str::limit($excerpt.' Gestão comercial com SIGESC.', 160, '');
+
+        return [
+            'meta_title' => $metaTitle,
+            'meta_description' => $metaDescription,
+            'focus_keyword' => $focus,
+            'secondary_keywords' => $secondary,
+            'tags' => $tags,
+            'seo_score' => 82,
+            'internal_links' => [
+                ['anchor' => 'Soluções SIGESC', 'path' => '/solucoes'],
+                ['anchor' => 'Blog SIGESC', 'path' => '/blog/posts'],
+            ],
+            'external_links' => [],
+            'image_alt' => $title.' — SIGESC',
+            'open_graph' => [
+                'title' => $metaTitle,
+                'description' => $metaDescription,
+                'image' => $article->featured_image,
+            ],
+            'twitter_card' => [
+                'card' => 'summary_large_image',
+                'title' => $metaTitle,
+                'description' => $metaDescription,
+                'image' => $article->featured_image,
+            ],
+            'schema_hints' => ['canonical' => $canonical],
+            'heuristic' => true,
+        ];
     }
 }

@@ -12,6 +12,7 @@ use App\Services\AiContentEngine\Research\Providers\InternalKnowledgeProvider;
 use App\Services\AiContentEngine\Research\Providers\NewsSearchProvider;
 use App\Services\AiContentEngine\Research\Providers\OfficialSourcesProvider;
 use App\Services\AiContentEngine\Research\Providers\TavilyResearchProvider;
+use App\Services\AiContentEngine\Support\CreditSaver;
 use App\Services\AiContentEngine\Support\LlmGateway;
 use Illuminate\Support\Str;
 
@@ -260,6 +261,10 @@ class HybridResearchEngine
             ];
         }
 
+        if (CreditSaver::skipResearchSummaryLlm()) {
+            return $this->heuristicSummary($topic, $findings);
+        }
+
         try {
             $summary = $this->llm->chatJson([
                 [
@@ -302,22 +307,46 @@ PROMPT
 
             return $summary;
         } catch (\Throwable $e) {
-            return [
-                'topic' => $topic,
-                'main_points' => collect($findings)->pluck('snippet')->filter()->take(5)->values()->all(),
-                'important_dates' => [],
-                'numbers' => [],
-                'laws' => [],
-                'changes' => [],
-                'sources' => collect($findings)->map(fn ($f) => [
-                    'title' => $f['title'] ?? '',
-                    'url' => $f['url'] ?? '',
-                    'trust_score' => $f['trust_score'] ?? 0,
-                ])->values()->all(),
-                'confidence_level' => $this->averageTrust($findings),
-                'warnings' => ['Resumo LLM indisponível: '.$e->getMessage()],
-            ];
+            $fallback = $this->heuristicSummary($topic, $findings);
+            $fallback['warnings'][] = 'Resumo LLM indisponível: '.$e->getMessage();
+
+            return $fallback;
         }
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $findings
+     * @return array<string, mixed>
+     */
+    protected function heuristicSummary(string $topic, array $findings): array
+    {
+        $points = collect($findings)
+            ->map(fn ($f) => trim((string) ($f['snippet'] ?? $f['summary'] ?? $f['content'] ?? '')))
+            ->filter()
+            ->map(fn ($text) => Str::limit($text, 280, ''))
+            ->unique()
+            ->take(6)
+            ->values()
+            ->all();
+
+        return [
+            'topic' => $topic,
+            'main_points' => $points,
+            'important_dates' => [],
+            'numbers' => [],
+            'laws' => [],
+            'changes' => [],
+            'sources' => collect($findings)->map(fn ($f) => [
+                'title' => $f['title'] ?? '',
+                'url' => $f['url'] ?? '',
+                'trust_score' => $f['trust_score'] ?? 0,
+            ])->values()->all(),
+            'confidence_level' => $this->averageTrust($findings),
+            'warnings' => [
+                'Resumo heurístico (credit saver): o Writer deve citar apenas o que estas fontes suportam.',
+            ],
+            'heuristic' => true,
+        ];
     }
 
     /**
