@@ -6,6 +6,7 @@ use App\Models\AiContent\AiJob;
 use App\Models\AiContent\Article;
 use App\Services\AiContentEngine\Contracts\AgentInterface;
 use App\Services\AiContentEngine\Support\AiLogger;
+use App\Services\AiContentEngine\Support\CreditSaver;
 use App\Services\AiContentEngine\Support\LlmGateway;
 
 class ReviewerAgent implements AgentInterface
@@ -23,6 +24,24 @@ class ReviewerAgent implements AgentInterface
     public function handle(Article $article, AiJob $job, array $context = []): array
     {
         $article->update(['status' => Article::STATUS_REVIEWING]);
+
+        // Credit saver: Writer + FactChecker keep quality; skip a full Research rewrite pass.
+        if (CreditSaver::skipReviewerLlm()) {
+            $review = [
+                'content_html' => $article->content_html,
+                'changes' => [],
+                'hallucination_flags' => [],
+                'readability_score' => 80,
+                'notes' => 'Review LLM skipped (credit saver). Fact-check remains the quality gate.',
+                'skipped' => true,
+            ];
+            $meta = $article->pipeline_meta ?? [];
+            $meta['review'] = $review;
+            $article->update(['pipeline_meta' => $meta]);
+            $this->logger->info('Review skipped (credit saver)', $job, $article, $this->name());
+
+            return ['review' => $review];
+        }
 
         $review = $this->llm->chatJson([
             [

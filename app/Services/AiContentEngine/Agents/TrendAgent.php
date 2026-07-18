@@ -7,6 +7,7 @@ use App\Models\AiContent\Article;
 use App\Models\AiContent\Category;
 use App\Services\AiContentEngine\Contracts\AgentInterface;
 use App\Services\AiContentEngine\Support\AiLogger;
+use App\Services\AiContentEngine\Support\CreditSaver;
 use App\Services\AiContentEngine\Support\LlmGateway;
 use App\Services\AiContentEngine\Support\ResearchGateway;
 use Illuminate\Support\Str;
@@ -28,10 +29,15 @@ class TrendAgent implements AgentInterface
     {
         // TrendAgent discovers NEW topics; article may be a placeholder.
         $seedQueries = $context['queries'] ?? config('ai_content_engine.seed_queries', []);
+        if (! is_array($seedQueries)) {
+            $seedQueries = [];
+        }
+        // Rotate seeds daily so we cover ads, vendas online, sistemas, fiscalidade, etc.
+        $seedQueries = collect($seedQueries)->shuffle()->values()->all();
         $bundle = [];
 
-        foreach (array_slice($seedQueries, 0, 5) as $query) {
-            $search = $this->research->search($query, 5);
+        foreach (array_slice($seedQueries, 0, CreditSaver::trendSeedLimit()) as $query) {
+            $search = $this->research->search($query, CreditSaver::enabled() ? 4 : 5);
             $bundle[] = [
                 'query' => $query,
                 'provider' => $search['provider'],
@@ -45,10 +51,13 @@ class TrendAgent implements AgentInterface
             [
                 'role' => 'system',
                 'content' => <<<PROMPT
-És o AITrendAgent do SIGESC (Angola). Descobres QUALQUER tema útil a empresários angolanos:
-fiscalidade (AGT/IVA/IRT/II), faturação, licenças, RH, salários, stock, PDV, farmácias, restaurantes,
-salões, lojas, câmbio, crédito, aduaneira, marketing, contratos, INAPEM, BNA, e gestão do dia-a-dia.
-Varie os assuntos — não fiques só num tema. Nunca inventes leis/datas/números. Usa só a pesquisa.
+És o AITrendAgent do SIGESC (Angola). Prioriza o que empresários angolanos mais pesquisam e discutem:
+como vender na internet, anúncios de sucesso (Facebook/Instagram/Google/WhatsApp), sistemas de gestão
+mais usados em Angola, PDV/ERP/CRM, faturação eletrónica AGT, IVA/IRT, abrir empresa, precificação,
+fluxo de caixa, stock, marketing digital, delivery, e-commerce, crédito PME, e gestão do dia-a-dia.
+Cada tema deve ser prático e acionável. Quando fizer sentido, o ângulo pode ligar naturalmente a software
+de gestão comercial (SIGESC) sem ser propaganda vazia.
+Varie os assuntos — não fiques só em impostos. Nunca inventes leis/datas/números. Usa só a pesquisa.
 Devolve JSON: {"topics":[{"title":"","summary":"","category":"","priority":1,"keywords":[],"reason":""}]}
 priority: 1=alta, 5=baixa. category deve ser uma de: {$categories}
 Máximo 5 topics, focados no mercado angolano.

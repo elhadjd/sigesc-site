@@ -2,11 +2,11 @@
 
 namespace App\Services\AiContentEngine\AskExpert;
 
+use App\Jobs\AiContent\ProcessArticlePipeline;
 use App\Models\AiContent\AiJob;
 use App\Models\AiContent\Article;
 use App\Models\AiContent\Category;
 use App\Models\AiContent\ExpertQuestion;
-use App\Services\AiContentEngine\Pipeline\ContentPipeline;
 use App\Services\AiContentEngine\Research\HybridResearchEngine;
 use App\Services\AiContentEngine\Support\AiLogger;
 use App\Services\AiContentEngine\Support\LlmGateway;
@@ -17,8 +17,8 @@ class AskExpertService
     public function __construct(
         protected HybridResearchEngine $research,
         protected LlmGateway $llm,
-        protected ContentPipeline $pipeline,
-        protected AiLogger $logger
+        protected AiLogger $logger,
+        protected ExpertResultMailer $mailer,
     ) {}
 
     /**
@@ -30,8 +30,16 @@ class AskExpertService
             'question' => $input['question'],
             'asker_name' => $input['asker_name'] ?? null,
             'asker_email' => $input['asker_email'] ?? null,
-            'status' => 'researching',
+            'status' => 'queued',
         ]);
+
+        return $this->processQueued($question->id);
+    }
+
+    public function processQueued(int $expertQuestionId): ExpertQuestion
+    {
+        $question = ExpertQuestion::findOrFail($expertQuestionId);
+        $question->update(['status' => 'researching']);
 
         $job = AiJob::create([
             'type' => 'ask_expert',
@@ -42,15 +50,18 @@ class AskExpertService
         ]);
 
         try {
-            $bundle = $this->research->research($question->question.' Angola');
+            $bundle = $this->research->research($question->question.' Angola negócios empreendedorismo');
 
+            $cta = config('ai_content_engine.pipeline.brand_cta');
             $answer = $this->llm->chatJson([
                 [
                     'role' => 'system',
-                    'content' => <<<'PROMPT'
+                    'content' => <<<PROMPT
 És o especialista SIGESC para empresários em Angola.
 Responde com precisão, português de Angola, cita incerteza quando existir.
 Nunca inventes leis/datas/números.
+Inclui no final do answer_html um parágrafo curto com CTA natural ao SIGESC (gestão comercial, faturação, stock, PDV) sem parecer spam.
+CTA de referência: {$cta}
 JSON:
 {
   "answer_html":"",
@@ -98,9 +109,11 @@ PROMPT
                     'status' => 'converted',
                 ]);
 
-                // Process asynchronously-friendly: run pipeline inline for now (queued by job wrapper).
-                $this->pipeline->processArticle($article, $job);
+                // Already inside a queue worker — plain dispatch is enough.
+                ProcessArticlePipeline::dispatch($article->id);
             }
+
+            $this->mailer->notifyAnswer($question->fresh(['article']));
 
             $job->update([
                 'status' => 'completed',
