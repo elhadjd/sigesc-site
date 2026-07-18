@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
         (new \Database\Seeders\PostSeeder())->run();
+        (new \Database\Seeders\AiContentEngineSeeder())->run();
     }
 }

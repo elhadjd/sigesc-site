@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'local'=> \App\Http\Middleware\LocalMiddleware::class,
+        'ai-content-admin' => \App\Http\Middleware\EnsureAiContentAdmin::class,
     ];
 }

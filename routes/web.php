@@ -10,6 +10,8 @@ use App\Http\Controllers\public\contactController;
 use App\Http\Controllers\public\paymentsController;
 use App\Http\Controllers\public\pricesController;
 use App\Http\Controllers\profile\UserProfileController;
+use App\Http\Controllers\Admin\AiContentEngineController;
+use App\Http\Controllers\public\AskExpertController;
 use App\Http\Controllers\public\Blog\EngagementController;
 use App\Http\Controllers\public\BlogController;
 use App\Http\Controllers\public\ChatController;
@@ -133,6 +135,29 @@ Route::prefix('blog/posts')->group(function () {
     Route::post('{post}/comment/{comment}/like', [EngagementController::class, 'likeComment'])->name('blog.posts.comment.like');
 });
 
+Route::prefix('pergunte-ao-especialista')->name('ask-expert.')->group(function () {
+    Route::get('', [AskExpertController::class, 'index'])->name('index');
+    Route::post('', [AskExpertController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('store');
+    Route::get('{uuid}', [AskExpertController::class, 'show'])->name('show');
+});
+
+Route::middleware(['auth', 'ai-content-admin'])
+    ->prefix('admin/ai-content')
+    ->name('admin.ai-content.')
+    ->group(function () {
+        Route::get('', [AiContentEngineController::class, 'dashboard'])->name('dashboard');
+        Route::get('articles', [AiContentEngineController::class, 'articles'])->name('articles');
+        Route::get('articles/{article}', [AiContentEngineController::class, 'show'])->name('articles.show');
+        Route::post('articles/{article}/process', [AiContentEngineController::class, 'processArticle'])->name('articles.process');
+        Route::post('articles/{article}/approve', [AiContentEngineController::class, 'approve'])->name('articles.approve');
+        Route::post('articles/{article}/schedule', [AiContentEngineController::class, 'schedule'])->name('articles.schedule');
+        Route::post('run-daily', [AiContentEngineController::class, 'runDaily'])->name('run-daily');
+        Route::get('jobs', [AiContentEngineController::class, 'jobs'])->name('jobs');
+        Route::get('logs', [AiContentEngineController::class, 'logs'])->name('logs');
+        Route::get('expert', [AiContentEngineController::class, 'expertQuestions'])->name('expert');
+    });
 
 Route::fallback(function () {
     return Inertia::render('dashboard', [

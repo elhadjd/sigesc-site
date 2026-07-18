@@ -1,0 +1,98 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\AiContent\Article;
+use App\Models\AiContent\Category;
+use App\Models\User;
+use Database\Seeders\AiContentEngineSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class AiContentEngineTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutVite();
+    }
+
+    public function test_seeder_creates_categories_and_trusted_sources(): void
+    {
+        $this->seed(AiContentEngineSeeder::class);
+
+        $this->assertDatabaseHas('ai_categories', ['name' => 'AGT']);
+        $this->assertDatabaseHas('ai_categories', ['name' => 'ERP']);
+        $this->assertDatabaseHas('research_sources', [
+            'domain' => 'agt.minfin.gov.ao',
+            'is_trusted' => 1,
+        ]);
+    }
+
+    public function test_ask_expert_page_is_public(): void
+    {
+        $this->get('/pergunte-ao-especialista')->assertOk();
+    }
+
+    public function test_ask_expert_validates_question(): void
+    {
+        $this->post('/pergunte-ao-especialista', [
+            'question' => 'curta',
+        ])->assertSessionHasErrors('question');
+    }
+
+    public function test_admin_dashboard_requires_auth(): void
+    {
+        $this->get('/admin/ai-content')->assertRedirect(route('auth', ['local' => 'en']));
+    }
+
+    public function test_admin_can_view_dashboard_in_local_without_allowlist(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'editor@example.com',
+        ]);
+
+        $this->actingAs($user)
+            ->get('/admin/ai-content')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('admin/ai-content/dashboard')->has('stats'));
+    }
+
+    public function test_article_show_in_admin(): void
+    {
+        $this->seed(AiContentEngineSeeder::class);
+        $category = Category::first();
+
+        $article = Article::create([
+            'title' => 'IVA e faturação eletrónica em Angola',
+            'slug' => 'iva-faturacao-eletronica-angola',
+            'status' => Article::STATUS_NEEDS_REVIEW,
+            'category_id' => $category->id,
+            'excerpt' => 'Guia para PME',
+            'content_html' => '<p>Conteúdo</p>',
+            'author_name' => 'Equipa',
+            'author_role' => 'AI',
+            'author_avatar' => '/img/sigesc capa.png',
+            'needs_human_review' => true,
+        ]);
+
+        $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
+
+        $this->actingAs($user)
+            ->get('/admin/ai-content/articles/'.$article->id)
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('admin/ai-content/show')
+                ->where('article.slug', 'iva-faturacao-eletronica-angola')
+            );
+    }
+
+    public function test_config_exposes_agent_pipeline_settings(): void
+    {
+        $this->assertTrue(config('ai_content_engine.pipeline.require_fact_check'));
+        $this->assertContains('AGT', config('ai_content_engine.categories'));
+        $this->assertContains('agt.minfin.gov.ao', config('ai_content_engine.trusted_domains'));
+    }
+}

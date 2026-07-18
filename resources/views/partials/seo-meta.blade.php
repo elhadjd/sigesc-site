@@ -3,20 +3,26 @@
 @endphp
 
 @if (is_array($seo))
-    <title>{{ $seo['title'] }}</title>
-    <meta name="description" content="{{ $seo['description'] }}">
+    @php
+        $seoTitle = $seo['title'] ?? 'SIGESC';
+        $seoDescription = $seo['description'] ?? '';
+        $seoCanonical = $seo['canonical'] ?? url()->current();
+        $seoImage = $seo['og_image'] ?? 'https://admin.sisgesc.net/logo.png';
+    @endphp
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ $seoDescription }}">
     @if (!empty($seo['keywords']))
         <meta name="keywords" content="{{ $seo['keywords'] }}">
     @endif
     <meta name="robots" content="{{ $seo['robots'] ?? 'index,follow' }}">
-    <link rel="canonical" href="{{ $seo['canonical'] }}">
+    <link rel="canonical" href="{{ $seoCanonical }}">
 
     <meta property="og:site_name" content="{{ $seo['site_name'] ?? 'SIGESC' }}">
     <meta property="og:type" content="{{ $seo['og_type'] ?? 'website' }}">
-    <meta property="og:title" content="{{ $seo['title'] }}">
-    <meta property="og:description" content="{{ $seo['description'] }}">
-    <meta property="og:url" content="{{ $seo['canonical'] }}">
-    <meta property="og:image" content="{{ $seo['og_image'] }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:url" content="{{ $seoCanonical }}">
+    <meta property="og:image" content="{{ $seoImage }}">
     <meta property="og:locale" content="{{ $seo['locale'] ?? 'pt_AO' }}">
 
     @if (($seo['og_type'] ?? null) === 'article' && !empty($seo['article']))
@@ -29,10 +35,10 @@
         @endforeach
     @endif
 
-    <meta name="twitter:card" content="{{ $seo['twitter_card'] ?? 'summary_large_image' }}">
-    <meta name="twitter:title" content="{{ $seo['title'] }}">
-    <meta name="twitter:description" content="{{ $seo['description'] }}">
-    <meta name="twitter:image" content="{{ $seo['og_image'] }}">
+    <meta name="twitter:card" content="{{ is_string($seo['twitter_card'] ?? null) ? $seo['twitter_card'] : 'summary_large_image' }}">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $seoImage }}">
 
     @foreach ($seo['json_ld'] ?? [] as $block)
         <script type="application/ld+json">{!! json_encode($block, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}</script>
