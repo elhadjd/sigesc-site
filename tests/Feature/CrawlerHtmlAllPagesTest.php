@@ -25,6 +25,7 @@ class CrawlerHtmlAllPagesTest extends TestCase
             ['/', 'SIGESC'],
             ['/solutions', 'Soluções'],
             ['/modules/ponto-de-venda', 'Ponto'],
+            ['/modules/dropshipping', 'Dropshipping'],
             ['/prices', 'Preços'],
             ['/contact', 'Contacto'],
             ['/blog/posts', 'Blog'],
@@ -77,6 +78,8 @@ class CrawlerHtmlAllPagesTest extends TestCase
         $this->assertStringContainsString('seo-prerender', $html);
         $this->assertStringContainsString('Ponto de Venda', $html);
         $this->assertStringContainsString('/modules/ponto-de-venda', $html);
+        $this->assertStringContainsString('Dropshipping', $html);
+        $this->assertStringContainsString('/modules/dropshipping', $html);
     }
 
     public function test_home_and_solutions_expose_module_submenu_before_js(): void
@@ -86,8 +89,26 @@ class CrawlerHtmlAllPagesTest extends TestCase
             $this->assertStringContainsString('Ponto de Venda', $html);
             $this->assertStringContainsString('Gestão de Estoque', $html);
             $this->assertStringContainsString('Faturamento', $html);
+            $this->assertStringContainsString('Dropshipping', $html);
             $this->assertStringContainsString('/modules/gestao-de-stock', $html);
+            $this->assertStringContainsString('/modules/dropshipping', $html);
         }
+    }
+
+    public function test_dropshipping_module_page_has_rich_seo_for_crawlers(): void
+    {
+        $response = $this->withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        ])->get('/modules/dropshipping');
+
+        $response->assertOk();
+        $html = $response->getContent();
+
+        $this->assertStringContainsString('Dropshipping', $html);
+        $this->assertStringContainsString('stock próprio', $html);
+        $this->assertStringContainsString('fornecedores', $html);
+        $this->assertStringContainsString('/solutions', $html);
+        $this->assertStringContainsString('Conteúdo indexável gerado no servidor', $html);
     }
 
     public function test_calculators_prerender_has_legal_detail(): void

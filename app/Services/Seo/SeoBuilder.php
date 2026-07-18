@@ -220,9 +220,9 @@ class SeoBuilder
     {
         return $this->forPage([
             'title' => 'SIGESC - Software de Gestão Integrado para Empresas em Angola',
-            'description' => 'Software de gestão comercial completo para PME em Angola: PDV, estoque, finanças, faturação eletrónica AGT e mais — numa só plataforma.',
+            'description' => 'Software de gestão comercial completo para PME em Angola: PDV, estoque, finanças, dropshipping, faturação eletrónica AGT e mais — numa só plataforma.',
             'path' => '/',
-            'keywords' => 'SIGESC, software gestão Angola, ERP, PDV, faturação eletrónica AGT, PME',
+            'keywords' => 'SIGESC, software gestão Angola, ERP, PDV, dropshipping Angola, faturação eletrónica AGT, PME',
         ]);
     }
 
@@ -230,21 +230,29 @@ class SeoBuilder
     {
         return $this->forPage([
             'title' => 'Soluções SIGESC | Módulos de Gestão Comercial',
-            'description' => 'Conheça as soluções SIGESC: ponto de venda, estoque, RH, finanças, logística e módulos feitos para empresas angolanas.',
+            'description' => 'Conheça as soluções SIGESC: ponto de venda, estoque, RH, finanças, logística, loja virtual, dropshipping e módulos feitos para empresas angolanas.',
             'path' => '/solutions',
-            'keywords' => 'soluções SIGESC, módulos ERP, PDV Angola, gestão de estoque',
+            'keywords' => 'soluções SIGESC, módulos ERP, PDV Angola, gestão de estoque, dropshipping Angola, loja virtual',
         ]);
     }
 
     public function forModule(string $moduleName): array
     {
         $slug = Str::slug($moduleName);
+        $catalog = collect(config('sigesc_modules', []))
+            ->first(fn (array $m) => ($m['slug'] ?? '') === $slug
+                || strcasecmp((string) ($m['name'] ?? ''), $moduleName) === 0);
+
+        $description = $catalog['description']
+            ?? "Saiba como o módulo {$moduleName} do SIGESC ajuda a gerir o seu negócio em Angola com eficiência e conformidade.";
+        $keywords = $catalog['keywords']
+            ?? "SIGESC {$moduleName}, módulo gestão, software Angola";
 
         return $this->forPage([
-            'title' => "Módulo {$moduleName} | SIGESC",
-            'description' => "Saiba como o módulo {$moduleName} do SIGESC ajuda a gerir o seu negócio em Angola com eficiência e conformidade.",
-            'path' => '/modules/'.$slug,
-            'keywords' => "SIGESC {$moduleName}, módulo gestão, software Angola",
+            'title' => "Módulo {$moduleName} | SIGESC Angola",
+            'description' => $description,
+            'path' => '/modules/'.($catalog['slug'] ?? $slug),
+            'keywords' => $keywords,
         ]);
     }
 

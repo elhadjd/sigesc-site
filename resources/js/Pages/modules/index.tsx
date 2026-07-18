@@ -3,15 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import { router, usePage } from '@inertiajs/react';
 import {
-    FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar,
-    FiBarChart2, FiShoppingBag, FiDollarSign, FiSearch,
-    FiArrowRight, FiCheck, FiPlay, FiDownload, FiGlobe,
-    FiShield, FiTrendingUp, FiAward, FiStar, FiChevronRight
+    FiSearch, FiArrowRight, FiCheck, FiPlay, FiStar
 } from 'react-icons/fi';
 import FooterComponent from '@/Components/home/Footer';
 import { StateChatToggleProvider } from '@/contexts/stateChatToggleContext';
 import { UserLoggedProvider } from '@/contexts/loggedUser';
 import { HeaderComponent } from '@/Components/home/Header';
+import { features } from '@/services/public/veriables';
 
 // Hook de Intersection Observer para lazy loading
 const useInView = (options = {}) => {
@@ -133,10 +131,10 @@ const SolutionsPage = () => {
 
     const categories = useMemo(() => [
         { id: 'all', name: 'Todas as Soluções', count: features.length },
-        { id: 'venda', name: 'Vendas', count: features.filter(f => f.name.includes('Venda') || f.name.includes('Faturamento')).length },
+        { id: 'venda', name: 'Vendas', count: features.filter(f => f.name.includes('Venda') || f.name.includes('Faturamento') || f.name.includes('Dropshipping')).length },
         { id: 'gestão', name: 'Gestão', count: features.filter(f => f.name.includes('Gestão') || f.name.includes('Funcionários')).length },
         { id: 'estoque', name: 'Estoque', count: features.filter(f => f.name.includes('Estoque') || f.name.includes('Compras')).length },
-        { id: 'marketing', name: 'Marketing', count: features.filter(f => f.name.includes('Marketing') || f.name.includes('Loja')).length }
+        { id: 'marketing', name: 'Marketing', count: features.filter(f => f.name.includes('Marketing') || f.name.includes('Loja') || f.name.includes('Dropshipping')).length }
     ], []);
 
     return (
@@ -144,10 +142,10 @@ const SolutionsPage = () => {
             <UserLoggedProvider>
                 <Helmet>
                     <title>Soluções Completas de Gestão Empresarial | SIGESC</title>
-                    <meta name="description" content="Descubra todas as soluções SIGESC: PDV, gestão de estoque, faturamento, marketing e muito mais. Sistema completo para transformar sua empresa." />
-                    <meta name="keywords" content="software gestão, sistema PDV, controle estoque, faturamento, gestão funcionários, marketing, loja virtual, logística, SIGESC Angola" />
+                    <meta name="description" content="Descubra todas as soluções SIGESC: PDV, gestão de estoque, faturamento, dropshipping, marketing e muito mais. Sistema completo para transformar sua empresa." />
+                    <meta name="keywords" content="software gestão, sistema PDV, controle estoque, faturamento, dropshipping Angola, gestão funcionários, marketing, loja virtual, logística, SIGESC Angola" />
                     <meta property="og:title" content="Soluções de Gestão Empresarial | SIGESC" />
-                    <meta property="og:description" content="Conheça todas as soluções integradas SIGESC para transformar a gestão da sua empresa." />
+                    <meta property="og:description" content="Conheça todas as soluções integradas SIGESC, incluindo o novo módulo de dropshipping, para transformar a gestão da sua empresa." />
                     <meta property="og:type" content="website" />
                     <link rel="canonical" href="https://sisgesc.net/solucoes" />
                     <script type="application/ld+json">
@@ -371,87 +369,3 @@ const SolutionsPage = () => {
 };
 
 export default SolutionsPage;
-
-// Seus dados de features (mantidos iguais)
-export const features = [
-    {
-        icon: FiShoppingCart,
-        className: "text-lg",
-        desc: "Gerencie vendas, clientes e produtos com eficiência em um sistema completo.",
-        name: "Ponto de Venda",
-        color: "blue",
-        href: route('modules', { module: 'ponto de venda' })
-    },
-    {
-        icon: FiPackage,
-        className: "text-lg",
-        desc: "Tenha controle total do inventário e dos níveis de estoque.",
-        name: "Gestão de Estoque",
-        color: "green",
-        href: route('modules', { module: 'gestao de stock' })
-    },
-    {
-        icon: FiUsers,
-        className: "text-lg",
-        desc: "Administre funcionários e equipes de forma prática.",
-        name: "Gestão de Funcionários",
-        color: "purple",
-        href: route('modules', { module: 'gestao de funcionarios' })
-    },
-    {
-        icon: FiTruck,
-        className: "text-lg",
-        desc: "Otimize processos logísticos e melhore a eficiência.",
-        name: "Logística",
-        color: "orange",
-        href: route('modules', { module: 'logisticas' })
-    },
-    {
-        icon: FiCalendar,
-        className: "text-lg",
-        desc: "Agende tarefas e compromissos com facilidade.",
-        name: "Agendamentos",
-        color: "pink",
-        href: route('modules', { module: 'agendamentos' })
-    },
-    {
-        icon: FiBarChart2,
-        className: "text-lg",
-        desc: "Analise dados e gere relatórios de desempenho detalhados.",
-        name: "Marketing",
-        color: "red",
-        href: route('modules', { module: 'marketing' })
-    },
-    {
-        icon: FiShoppingBag,
-        className: "text-lg",
-        desc: "Crie e gerencie sua loja virtual de maneira simples.",
-        name: "Loja Virtual",
-        color: "indigo",
-        href: route('modules', { module: 'loja virtual' })
-    },
-    {
-        icon: FiDollarSign,
-        className: "text-lg",
-        desc: "Gerencie finanças e contabilidade com ferramentas completas.",
-        name: "Gestao Financeira",
-        color: "emerald",
-        href: route('modules', { module: 'Gestao Financeira' })
-    },
-    {
-        icon: FiDollarSign,
-        className: "text-lg",
-        desc: "Emita faturas, gerencie clientes e controle financeiro de forma integrada.",
-        name: "Faturamento",
-        color: "teal",
-        href: route('modules', { module: 'faturamento' })
-    },
-    {
-        icon: FiShoppingCart,
-        className: "text-lg",
-        desc: "Gerencie compras e suprimentos de maneira eficiente.",
-        name: "Compras",
-        color: "blue",
-        href: route('modules', { module: 'gestao de compras' })
-    }
-];

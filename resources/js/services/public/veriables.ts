@@ -1,4 +1,4 @@
-import { FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar, FiBarChart2, FiShoppingBag, FiDollarSign } from "react-icons/fi";
+import { FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar, FiBarChart2, FiShoppingBag, FiDollarSign, FiGlobe } from "react-icons/fi";
 
 export const features = [
     {
@@ -80,6 +80,14 @@ export const features = [
         name: "Compras",
         color: "blue",
         href: route('modules', { module: 'gestao de compras' })
+    },
+    {
+        icon: FiGlobe,
+        className: "text-lg",
+        desc: "Venda online sem stock próprio: fornecedores, encomendas e entregas integradas.",
+        name: "Dropshipping",
+        color: "cyan",
+        href: route('modules', { module: 'dropshipping' })
     }
 ];
 
@@ -1487,6 +1495,145 @@ export const moduleData = {
             "Educação e formação",
             "Restauração e hotelaria"
         ]
+        }
+    },
+    dropshipping: {
+        title: "Dropshipping SIGESC | Venda Online sem Stock Próprio em Angola",
+        description: "Módulo de dropshipping do SIGESC: catálogo de fornecedores, encomendas automáticas, sync com loja virtual, logística e faturação integrada. Ideal para e-commerce e PME em Angola que querem vender sem investir em stock.",
+        keywords: "dropshipping Angola, software dropshipping, e-commerce sem stock, fornecedores dropship, loja virtual SIGESC, vendas online Angola, fulfillment, gestão encomendas",
+        heroTitle: "Dropshipping integrado ao SIGESC",
+        heroSubtitle: "Venda online sem stock próprio: fornecedores, pedidos, entregas e faturação no mesmo sistema que o seu PDV e a sua loja virtual.",
+        images: [
+            "/img/e-commerce/loja-virtual-dashboard.png",
+            "/img/e-commerce/catalogo-produtos.png",
+            "/img/e-commerce/Gestao de entregas e pagamentos.png",
+            "/img/e-commerce/Gestao de entregas e logistica Rastreamento em tempo real.png",
+            "/img/e-commerce/Edicao de Produtos.png"
+        ],
+        imageAlts: [
+            "Dashboard Dropshipping SIGESC - Visão de vendas e encomendas online",
+            "Catálogo de produtos de fornecedores para dropshipping",
+            "Gestão de pagamentos e portes em operações dropship",
+            "Rastreamento de entregas e logística de fornecedores",
+            "Edição de produtos e margens no catálogo dropshipping"
+        ],
+        features: [
+            {
+                icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10",
+                title: "Catálogo de Fornecedores",
+                description: "Importe e organize produtos de fornecedores sem manter stock próprio na sua empresa."
+            },
+            {
+                icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
+                title: "Encomendas Automáticas",
+                description: "Quando o cliente compra, o pedido é encaminhado ao fornecedor com dados de entrega."
+            },
+            {
+                icon: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6",
+                title: "Controlo de Margens",
+                description: "Defina preço de venda, custo do fornecedor e margem — veja lucro por produto e pedido."
+            },
+            {
+                icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
+                title: "Logística e Entregas",
+                description: "Acompanhe status de envio, portes e tracking até a entrega ao cliente final."
+            },
+            {
+                icon: "M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z",
+                title: "Integração Loja Virtual",
+                description: "Sincronize catálogo e pedidos com a Loja Virtual SIGESC e canais de venda online."
+            },
+            {
+                icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+                title: "Faturação Integrada",
+                description: "Emita documentos comerciais e alinhe o fluxo com faturação e finanças do SIGESC."
+            },
+            {
+                icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
+                title: "Relatórios de Canal",
+                description: "Analise vendas, fornecedores mais rentáveis, devoluções e desempenho do dropshipping."
+            },
+            {
+                icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                title: "Baixo Investimento",
+                description: "Comece a vender online sem comprar stock antecipadamente — reduza risco e capital imobilizado."
+            }
+        ],
+        benefits: [
+            {
+                number: "01",
+                title: "Sem Stock Próprio",
+                description: "Venda produtos sem armazém próprio: o fornecedor trata do fulfillment."
+            },
+            {
+                number: "02",
+                title: "Integração Total",
+                description: "Dropshipping ligado à loja virtual, faturação, finanças e operações SIGESC."
+            },
+            {
+                number: "03",
+                title: "Margens Visíveis",
+                description: "Saiba o lucro real de cada venda antes e depois dos portes."
+            },
+            {
+                number: "04",
+                title: "Escala Rápida",
+                description: "Amplie o catálogo com novos fornecedores sem aumentar stock físico."
+            },
+            {
+                number: "05",
+                title: "Entregas Controladas",
+                description: "Acompanhe o ciclo do pedido até à entrega ao cliente."
+            },
+            {
+                number: "06",
+                title: "Feito para Angola",
+                description: "Fluxos pensados para PME e e-commerce no mercado angolano."
+            }
+        ],
+        stats: [
+            { value: "0", label: "Stock próprio obrigatório" },
+            { value: "1", label: "Plataforma integrada" },
+            { value: "24/7", label: "Vendas online" },
+            { value: "100%", label: "Visibilidade de margem" }
+        ],
+        additionalContent: {
+            ctaTitle: "Pronto para vender com dropshipping?",
+            ctaDescription: "Experimente o módulo Dropshipping do SIGESC e lance o seu canal online sem investir em stock antecipado.",
+            ctaButtons: [
+                {
+                    text: "Falar com Especialista",
+                    link: "/contact",
+                    variant: "primary"
+                },
+                {
+                    text: "Ver todas as soluções",
+                    link: "/solutions",
+                    variant: "secondary"
+                },
+                {
+                    text: "Testar Grátis",
+                    link: "https://admin.sisgesc.net/getting-started",
+                    variant: "success",
+                    external: true
+                }
+            ],
+            specifications: [
+                "Catálogo multi-fornecedor para dropshipping",
+                "Encaminhamento automático de encomendas",
+                "Cálculo de margens e portes",
+                "Integração com Loja Virtual SIGESC",
+                "Tracking de entregas e status de pedido",
+                "Ligação a faturação e finanças",
+                "Relatórios de canal e fornecedores"
+            ],
+            targetBusinesses: [
+                "Lojas online e e-commerce",
+                "Empreendedores sem armazém",
+                "Retalho que quer expandir o catálogo",
+                "Marketplaces e revendedores",
+                "PME em crescimento digital"
+            ]
         }
     }
 

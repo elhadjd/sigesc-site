@@ -55,4 +55,18 @@ return [
         'slug' => 'gestao-de-compras',
         'description' => 'Pedidos a fornecedores, receção de mercadorias e controlo de custos de aquisição.',
     ],
+    [
+        'name' => 'Dropshipping',
+        'slug' => 'dropshipping',
+        'description' => 'Venda online sem stock próprio: catálogo de fornecedores, encomendas automáticas, sync com loja virtual, logística e faturação integrada para e-commerce em Angola.',
+        'keywords' => 'dropshipping Angola, software dropshipping, e-commerce sem stock, fornecedores dropship, loja virtual SIGESC, vendas online Angola, fulfillment',
+        'highlights' => [
+            'Catálogo de produtos de fornecedores sem necessidade de stock próprio',
+            'Encomendas automáticas ao fornecedor quando o cliente compra',
+            'Sincronização com Loja Virtual, PDV, stock e faturação SIGESC',
+            'Gestão de margens, portes e status de entrega em tempo real',
+            'Relatórios de vendas, fornecedores e desempenho do canal online',
+            'Ideal para PME angolanas que querem vender online com baixo investimento',
+        ],
+    ],
 ];
