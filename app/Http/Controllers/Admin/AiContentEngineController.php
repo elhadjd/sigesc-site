@@ -267,7 +267,7 @@ class AiContentEngineController extends Controller
             ResearchSetting::setValue($key, $value);
         }
 
-        return $this->actionResponse($request, true, 'Research Engine Settings atualizadas.');
+        return back()->with('success', 'Research Engine Settings atualizadas.');
     }
 
     public function toggleResearchSource(Request $request, ResearchSource $source)
@@ -278,9 +278,6 @@ class AiContentEngineController extends Controller
 
         $source->update(['is_active' => $data['is_active']]);
 
-        return $this->actionResponse($request, true, 'Fonte atualizada: '.$source->name, 200, [
-            'source_id' => $source->id,
-            'is_active' => (bool) $source->is_active,
-        ]);
+        return back()->with('success', 'Fonte atualizada: '.$source->name);
     }
 }
