@@ -104,7 +104,7 @@ return [
         'sync_to_blog_posts' => (bool) env('AI_CONTENT_SYNC_TO_POSTS', true),
         'locale' => 'pt_AO',
         'language' => 'Português de Angola',
-        'brand_cta' => 'Conheça o SIGESC — software de gestão comercial (faturação, stock, PDV e vendas) feito para empresas em Angola. Experimente em sisgesc.net/solucoes.',
+        'brand_cta' => 'Conheça o SIGESC — software de gestão comercial (faturação, stock, PDV e vendas) feito para empresas em Angola. Para experimentar ou aceder ao painel: https://admin.sisgesc.net/getting-started. Site: https://www.sisgesc.net',
     ],
 
     'author' => [

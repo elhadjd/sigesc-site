@@ -67,7 +67,7 @@ class OfficialSourcesProvider implements ResearchProviderInterface
     {
         try {
             $response = Http::withHeaders([
-                'User-Agent' => 'SIGESC-HybridResearch/1.0 (+https://www.sisgesc.net)',
+                'User-Agent' => 'SIGESC-HybridResearch/1.0 (+'.config('sigesc.site_url').')',
                 'Accept-Language' => 'pt-PT,pt;q=0.9',
             ])->timeout(12)->get($url);
 

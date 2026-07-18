@@ -49,7 +49,7 @@
     </style>
 </head>
 <body>
-    @php $base = rtrim(config('app.url') ?: 'https://www.sisgesc.net', '/'); @endphp
+    @php $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/'); @endphp
     <div class="wrap">
         <header class="site">
             <div class="brand">

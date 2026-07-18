@@ -63,7 +63,7 @@
             <p><strong>Email:</strong> {{ $email }}</p>
             <p><strong>Senha:</strong> {{ $password }}</p>
             <p>Por motivos de segurança, recomendamos que você altere sua senha após o primeiro login.</p>
-            <a href="https://sisgesc.net/auth" class="button">Acessar Conta</a>
+            <a href="https://admin.sisgesc.net" class="button">Acessar Conta</a>
             <p>Se precisar de ajuda ou tiver qualquer dúvida, sinta-se à vontade para entrar em contato conosco.</p>
         </div>
     </div>

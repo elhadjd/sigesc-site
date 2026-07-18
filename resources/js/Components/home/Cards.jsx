@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
 import {
   FiArrowRight,
   FiCheckCircle,
@@ -112,7 +113,7 @@ export default function Cards() {
               <motion.a
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                href="https://admin.sisgesc.net/getting-started"
+                href={SIGESC_GETTING_STARTED_URL}
                 className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 <span>Começar Agora - Grátis</span>

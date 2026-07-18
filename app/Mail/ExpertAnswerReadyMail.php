@@ -43,8 +43,10 @@ class ExpertAnswerReadyMail extends Mailable implements ShouldQueue
                 'postUrl' => $this->postUrl,
                 'postTitle' => $this->postTitle,
                 'postReady' => $this->postReady,
-                'siteUrl' => url('/'),
-                'solutionsUrl' => url('/solucoes'),
+                'siteUrl' => config('sigesc.site_url'),
+                'solutionsUrl' => config('sigesc.getting_started_url'),
+                'adminUrl' => config('sigesc.admin_url'),
+                'siteHost' => config('sigesc.site_host'),
             ],
         );
     }

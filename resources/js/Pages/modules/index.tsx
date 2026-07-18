@@ -10,6 +10,7 @@ import { StateChatToggleProvider } from '@/contexts/stateChatToggleContext';
 import { UserLoggedProvider } from '@/contexts/loggedUser';
 import { HeaderComponent } from '@/Components/home/Header';
 import { features } from '@/services/public/veriables';
+import { SIGESC_SITE_URL } from '@/services/public/domains';
 
 // Hook de Intersection Observer para lazy loading
 const useInView = (options = {}) => {
@@ -147,7 +148,7 @@ const SolutionsPage = () => {
                     <meta property="og:title" content="Soluções de Gestão Empresarial | SIGESC" />
                     <meta property="og:description" content="Conheça todas as soluções integradas SIGESC, incluindo o novo módulo de dropshipping, para transformar a gestão da sua empresa." />
                     <meta property="og:type" content="website" />
-                    <link rel="canonical" href="https://sisgesc.net/solucoes" />
+                    <link rel="canonical" href={`${SIGESC_SITE_URL}/solucoes`} />
                     <script type="application/ld+json">
                         {JSON.stringify({
                             "@context": "https://schema.org",

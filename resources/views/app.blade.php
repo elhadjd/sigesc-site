@@ -18,7 +18,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="generator" content="SIGESC">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="https://admin.sisgesc.net/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ config('sigesc.favicon_url') }}" type="image/x-icon">
     <link rel="alternate" type="application/rss+xml" title="Blog SIGESC" href="{{ url('/feed.xml') }}">
 
     {{-- Meta/OG/JSON-LD no HTML inicial (antes de qualquer JS) --}}

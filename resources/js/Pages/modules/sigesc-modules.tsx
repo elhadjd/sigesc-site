@@ -7,6 +7,7 @@ import { User } from '@/types';
 import { Link } from '@inertiajs/react';
 import { Helmet } from 'react-helmet';
 import { moduleData } from '@/services/public/veriables';
+import { SIGESC_GETTING_STARTED_URL, SIGESC_SITE_URL } from '@/services/public/domains';
 
 // Dados dinâmicos para todos os módulo
 
@@ -56,7 +57,7 @@ function ModulePage(props: { auth: { user: User }, moduleName: string }) {
                     <meta property="og:title" content={module.title} />
                     <meta property="og:description" content={module.description} />
                     <meta property="og:type" content="website" />
-                    <link rel="canonical" href={`https://sisgesc.net/${props.moduleName}`} />
+                    <link rel="canonical" href={`${SIGESC_SITE_URL}/${props.moduleName}`} />
                 </Helmet>
 
                 <HeaderComponent auth={props.auth} />
@@ -86,7 +87,7 @@ function ModulePage(props: { auth: { user: User }, moduleName: string }) {
 
                                     {/* Botão Testar Online */}
                                     <a
-                                        href="https://admin.sisgesc.net/getting-started"
+                                        href={SIGESC_GETTING_STARTED_URL}
                                         target='_blank'
                                         rel="noopener noreferrer"
                                         className="flex items-center justify-center gap-2 border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium py-3 px-6 rounded-lg transition-all duration-300 group"
@@ -230,7 +231,7 @@ function ModulePage(props: { auth: { user: User }, moduleName: string }) {
                                     Falar com Especialista
                                 </Link>
                                 <a
-                                    href="https://admin.sisgesc.net/getting-started"
+                                    href={SIGESC_GETTING_STARTED_URL}
                                     target='_blank'
                                     rel="noopener noreferrer"
                                     className="border border-white text-white hover:bg-blue-700 font-medium py-3 px-8 rounded-lg transition-all duration-300"
