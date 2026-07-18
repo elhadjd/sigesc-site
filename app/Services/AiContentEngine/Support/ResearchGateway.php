@@ -54,22 +54,27 @@ class ResearchGateway
 
         return [
             'provider' => 'duckduckgo',
-            'results' => $this->duckDuckGo($query, $maxResults),
+            'results' => $this->searchDuckDuckGo($query, $maxResults),
         ];
     }
 
     /**
+     * Free HTML search (no API key / no Tavily credits).
+     *
      * @return array<int, array<string, mixed>>
      */
-    protected function duckDuckGo(string $query, int $maxResults): array
+    public function searchDuckDuckGo(string $query, int $maxResults = 8): array
     {
         $hits = [];
+        $q = str_contains(mb_strtolower($query), 'angola')
+            ? $query
+            : $query.' Angola';
 
         try {
             $response = Http::withHeaders([
                 'User-Agent' => 'SIGESC-AIContentEngine/1.0 (+'.config('sigesc.site_url').')',
             ])->timeout(25)->get('https://html.duckduckgo.com/html/', [
-                'q' => $query.' Angola',
+                'q' => $q,
                 'kl' => 'pt-pt',
             ]);
 

@@ -43,8 +43,11 @@ export default function AiContentDashboard({
         enabled: boolean;
         llm_provider?: string | null;
         llm_ready?: boolean;
+        deepseek_ready?: boolean;
         tavily_ready?: boolean;
         openai_ready?: boolean;
+        ask_expert_llm?: string | null;
+        ask_expert_uses_tavily?: boolean;
     };
 }) {
     const [busy, setBusy] = useState(false);
@@ -114,15 +117,22 @@ export default function AiContentDashboard({
             )}
 
             <div className="mb-6 flex flex-wrap gap-2 text-xs">
-                <span className={`rounded-full px-3 py-1 ${config.tavily_ready ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
-                    Tavily {config.tavily_ready ? 'ok' : 'falta TAVILY_API_KEY'}
+                <span className={`rounded-full px-3 py-1 ${config.deepseek_ready ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-200'}`}>
+                    DeepSeek {config.deepseek_ready ? 'ok' : 'falta DEEPSEEK_API_KEY'}
+                </span>
+                <span className={`rounded-full px-3 py-1 ${config.tavily_ready ? 'bg-slate-500/20 text-slate-300' : 'bg-slate-700/40 text-slate-500'}`}>
+                    Tavily {config.tavily_ready ? 'opcional ok' : 'opcional'}
                 </span>
                 <span className={`rounded-full px-3 py-1 ${config.openai_ready ? 'bg-slate-500/20 text-slate-300' : 'bg-slate-700/40 text-slate-500'}`}>
-                    OpenAI {config.openai_ready ? 'opcional ativa' : 'opcional (não necessária)'}
+                    OpenAI {config.openai_ready ? 'opcional ativa' : 'opcional'}
+                </span>
+                <span className="rounded-full bg-sky-500/15 px-3 py-1 text-sky-200">
+                    Ask Expert: {config.ask_expert_llm ?? 'deepseek'}
+                    {config.ask_expert_uses_tavily ? ' + Tavily' : ' (sem Tavily)'}
                 </span>
                 {!config.llm_ready && (
                     <span className="rounded-full bg-amber-500/20 px-3 py-1 text-amber-200">
-                        Defina TAVILY_API_KEY no .env para correr o pipeline
+                        Defina DEEPSEEK_API_KEY (ou TAVILY/OPENAI) no .env
                     </span>
                 )}
             </div>

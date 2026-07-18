@@ -14,6 +14,7 @@ use App\Services\AiContentEngine\Agents\FactCheckerAgent;
 use App\Services\AiContentEngine\Agents\PublisherAgent;
 use App\Services\AiContentEngine\Agents\ResearchAgent;
 use App\Services\AiContentEngine\Research\HybridResearchEngine;
+use App\Services\AiContentEngine\Research\Providers\DuckDuckGoResearchProvider;
 use App\Services\AiContentEngine\Research\Providers\InternalKnowledgeProvider;
 use App\Services\AiContentEngine\Research\Providers\NewsSearchProvider;
 use App\Services\AiContentEngine\Research\Providers\OfficialSourcesProvider;
@@ -88,6 +89,7 @@ class HybridResearchEngineTest extends TestCase
             app(TavilyResearchProvider::class),
             app(NewsSearchProvider::class),
             app(InternalKnowledgeProvider::class),
+            app(DuckDuckGoResearchProvider::class),
             app(TrustScorer::class),
             $llm
         );
@@ -195,6 +197,7 @@ class HybridResearchEngineTest extends TestCase
     public function test_admin_research_settings_page_and_update(): void
     {
         $this->seed(AiContentEngineSeeder::class);
+        config(['ai_content_engine.admin_emails' => []]);
         $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
 
         $this->actingAs($user)

@@ -8,11 +8,11 @@ return [
     |--------------------------------------------------------------------------
     | Providers
     |--------------------------------------------------------------------------
-    | LLM generation defaults to Tavily Research (TAVILY_API_KEY).
-    | OpenAI is an optional fallback for chat/images — not required.
+    | Article pipeline LLM: auto | deepseek | tavily | openai
+    | Ask Expert defaults to DeepSeek (see ask_expert) to avoid Tavily credits.
     */
     'llm' => [
-        // auto | tavily | openai
+        // auto | deepseek | tavily | openai
         'provider' => env('AI_CONTENT_LLM_PROVIDER', 'auto'),
     ],
 
@@ -23,6 +23,17 @@ return [
         'review_model' => env('OPENAI_REVIEW_MODEL', env('OPENAI_MODEL', 'gpt-4o-mini')),
         'image_model' => env('OPENAI_IMAGE_MODEL', 'dall-e-3'),
         'timeout' => (int) env('OPENAI_TIMEOUT', 180),
+    ],
+
+    /*
+    | DeepSeek — OpenAI-compatible chat API (https://api.deepseek.com).
+    | Used by Ask Expert by default for grounded answers without Tavily Research spend.
+    */
+    'deepseek' => [
+        'api_key' => env('DEEPSEEK_API_KEY'),
+        'base_url' => rtrim(env('DEEPSEEK_BASE_URL', 'https://api.deepseek.com'), '/'),
+        'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
+        'timeout' => (int) env('DEEPSEEK_TIMEOUT', 180),
     ],
 
     'tavily' => [
@@ -37,6 +48,22 @@ return [
         'research_output_length' => env('TAVILY_RESEARCH_OUTPUT_LENGTH', 'short'),
         // Writer needs more room for full HTML articles
         'writer_output_length' => env('TAVILY_WRITER_OUTPUT_LENGTH', 'long'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ask Expert (pergunte ao especialista)
+    |--------------------------------------------------------------------------
+    | DeepSeek synthesizes answers from free/local research (official sources,
+    | DuckDuckGo, internal blog). Tavily Search/Research are off by default here.
+    */
+    'ask_expert' => [
+        // deepseek | openai | tavily | auto
+        'llm_provider' => env('ASK_EXPERT_LLM_PROVIDER', 'deepseek'),
+        'use_tavily_search' => (bool) env('ASK_EXPERT_USE_TAVILY', false),
+        'use_duckduckgo' => (bool) env('ASK_EXPERT_USE_DUCKDUCKGO', true),
+        'min_trust_score' => (int) env('ASK_EXPERT_MIN_TRUST_SCORE', 40),
+        'max_sources' => (int) env('ASK_EXPERT_MAX_SOURCES', 10),
     ],
 
     /*
@@ -69,6 +96,8 @@ return [
         // News doubles Tavily Search cost; keep off unless you need freshness bursts.
         'news_enabled' => (bool) env('RESEARCH_NEWS_ENABLED', false),
         'internal_knowledge_enabled' => (bool) env('RESEARCH_INTERNAL_ENABLED', true),
+        // Free web fallback used by Ask Expert when Tavily Search is disabled.
+        'duckduckgo_enabled' => (bool) env('RESEARCH_DUCKDUCKGO_ENABLED', true),
         'trust_scores' => [
             'official' => 100,
             'institutional' => 90,

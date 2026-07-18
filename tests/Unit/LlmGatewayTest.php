@@ -9,10 +9,11 @@ use Tests\TestCase;
 
 class LlmGatewayTest extends TestCase
 {
-    public function test_auto_provider_prefers_tavily_over_openai(): void
+    public function test_auto_provider_prefers_deepseek_over_tavily(): void
     {
         config([
             'ai_content_engine.llm.provider' => 'auto',
+            'ai_content_engine.deepseek.api_key' => 'sk-deepseek',
             'ai_content_engine.tavily.enabled' => true,
             'ai_content_engine.tavily.api_key' => 'tvly-test',
             'ai_content_engine.openai.api_key' => 'sk-openai',
@@ -21,13 +22,27 @@ class LlmGatewayTest extends TestCase
         $gateway = app(LlmGateway::class);
 
         $this->assertTrue($gateway->configured());
-        $this->assertSame('tavily', $gateway->provider());
+        $this->assertSame('deepseek', $gateway->provider());
     }
 
-    public function test_missing_keys_explain_tavily_is_required(): void
+    public function test_auto_falls_back_to_tavily_without_deepseek(): void
     {
         config([
             'ai_content_engine.llm.provider' => 'auto',
+            'ai_content_engine.deepseek.api_key' => null,
+            'ai_content_engine.tavily.enabled' => true,
+            'ai_content_engine.tavily.api_key' => 'tvly-test',
+            'ai_content_engine.openai.api_key' => 'sk-openai',
+        ]);
+
+        $this->assertSame('tavily', app(LlmGateway::class)->provider());
+    }
+
+    public function test_missing_keys_mention_deepseek(): void
+    {
+        config([
+            'ai_content_engine.llm.provider' => 'auto',
+            'ai_content_engine.deepseek.api_key' => null,
             'ai_content_engine.tavily.enabled' => true,
             'ai_content_engine.tavily.api_key' => null,
             'ai_content_engine.openai.api_key' => null,
@@ -36,21 +51,65 @@ class LlmGatewayTest extends TestCase
         $gateway = app(LlmGateway::class);
 
         $this->assertFalse($gateway->configured());
-        $this->assertStringContainsString('TAVILY_API_KEY', $gateway->missingConfigMessage());
-        $this->assertStringNotContainsString('OPENAI_API_KEY is required for the AI Content Engine', $gateway->missingConfigMessage());
+        $this->assertStringContainsString('DEEPSEEK_API_KEY', $gateway->missingConfigMessage());
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('TAVILY_API_KEY');
+        $this->expectExceptionMessage('DEEPSEEK_API_KEY');
         $gateway->chatJson([
             ['role' => 'system', 'content' => 'Return JSON'],
             ['role' => 'user', 'content' => '{"q":1}'],
         ]);
     }
 
+    public function test_chat_json_uses_deepseek_openai_compatible_api(): void
+    {
+        config([
+            'ai_content_engine.llm.provider' => 'deepseek',
+            'ai_content_engine.deepseek.api_key' => 'sk-deepseek',
+            'ai_content_engine.deepseek.base_url' => 'https://api.deepseek.com',
+            'ai_content_engine.deepseek.model' => 'deepseek-chat',
+            'ai_content_engine.deepseek.timeout' => 30,
+            'ai_content_engine.tavily.api_key' => null,
+            'ai_content_engine.openai.api_key' => null,
+        ]);
+
+        Http::fake([
+            'api.deepseek.com/*' => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => json_encode([
+                                'answer_html' => '<p>Resposta grounded</p>',
+                                'quality_score' => 80,
+                            ], JSON_UNESCAPED_UNICODE),
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $result = app(LlmGateway::class)->chatJson([
+            ['role' => 'system', 'content' => 'Devolve JSON'],
+            ['role' => 'user', 'content' => '{"question":"IVA"}'],
+        ], null, 0.2, null, 'deepseek');
+
+        $this->assertSame('<p>Resposta grounded</p>', $result['answer_html']);
+        Http::assertSent(function ($request) {
+            return str_contains($request->url(), 'api.deepseek.com')
+                && str_ends_with($request->url(), '/chat/completions')
+                && ($request['model'] ?? null) === 'deepseek-chat'
+                && ($request['response_format']['type'] ?? null) === 'json_object';
+        });
+        Http::assertNotSent(function ($request) {
+            return str_contains($request->url(), 'tavily.com');
+        });
+    }
+
     public function test_chat_json_uses_tavily_research_without_openai(): void
     {
         config([
-            'ai_content_engine.llm.provider' => 'auto',
+            'ai_content_engine.llm.provider' => 'tavily',
+            'ai_content_engine.deepseek.api_key' => null,
             'ai_content_engine.tavily.enabled' => true,
             'ai_content_engine.tavily.api_key' => 'tvly-test',
             'ai_content_engine.tavily.base_url' => 'https://api.tavily.com',
@@ -95,16 +154,13 @@ class LlmGatewayTest extends TestCase
 
         $this->assertSame('IVA em Angola para PME', $result['topics'][0]['title']);
         Http::assertSentCount(2);
-        Http::assertNotSent(function ($request) {
-            return str_contains($request->url(), 'openai.com')
-                || str_contains($request->url(), 'chat/completions');
-        });
     }
 
     public function test_openai_review_model_name_is_mapped_for_tavily(): void
     {
         config([
             'ai_content_engine.llm.provider' => 'tavily',
+            'ai_content_engine.deepseek.api_key' => null,
             'ai_content_engine.tavily.enabled' => true,
             'ai_content_engine.tavily.api_key' => 'tvly-test',
             'ai_content_engine.tavily.base_url' => 'https://api.tavily.com',
@@ -134,9 +190,7 @@ class LlmGatewayTest extends TestCase
                 return false;
             }
 
-            $model = $request['model'] ?? null;
-
-            return $model === 'mini';
+            return ($request['model'] ?? null) === 'mini';
         });
     }
 }
