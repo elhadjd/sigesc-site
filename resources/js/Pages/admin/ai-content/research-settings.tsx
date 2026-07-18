@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Api } from '@/axiosConfig';
+import { router, useForm } from '@inertiajs/react';
 import AiContentLayout from './Layout';
 
 type Settings = {
@@ -44,7 +44,7 @@ export default function ResearchSettingsPage({
     recentLogs: LogRow[];
     defaults: Partial<Settings>;
 }) {
-    const [form, setForm] = useState({
+    const form = useForm({
         tavily_enabled: !!settings.tavily_enabled,
         news_enabled: !!settings.news_enabled,
         internal_knowledge_enabled: !!settings.internal_knowledge_enabled,
@@ -52,12 +52,10 @@ export default function ResearchSettingsPage({
         min_trust_score: Number(settings.min_trust_score ?? 50),
         cache_days: Number(settings.cache_days ?? 30),
     });
-    const [sourceRows, setSourceRows] = useState(sources);
-    const [busy, setBusy] = useState(false);
-    const [flash, setFlash] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
+
     const [filter, setFilter] = useState('');
 
-    const filteredSources = sourceRows.filter((s) => {
+    const filteredSources = sources.filter((s) => {
         if (!filter.trim()) return true;
         const q = filter.toLowerCase();
         return (
@@ -67,42 +65,6 @@ export default function ResearchSettingsPage({
         );
     });
 
-    const saveSettings = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setBusy(true);
-        setFlash(null);
-        try {
-            const { data } = await Api.put('/admin/ai-content/research-settings', form);
-            setFlash({ type: 'ok', text: data.message || 'Settings guardadas.' });
-        } catch (error: any) {
-            setFlash({
-                type: 'error',
-                text: error?.response?.data?.message || error?.message || 'Falha ao guardar.',
-            });
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    const toggleSource = async (source: Source) => {
-        try {
-            const { data } = await Api.put(`/admin/ai-content/research-sources/${source.id}`, {
-                is_active: !source.is_active,
-            });
-            setSourceRows((rows) =>
-                rows.map((row) =>
-                    row.id === source.id ? { ...row, is_active: !source.is_active } : row
-                )
-            );
-            setFlash({ type: 'ok', text: data.message || 'Fonte atualizada.' });
-        } catch (error: any) {
-            setFlash({
-                type: 'error',
-                text: error?.response?.data?.message || error?.message || 'Falha ao atualizar fonte.',
-            });
-        }
-    };
-
     return (
         <AiContentLayout title="Research Engine Settings">
             <p className="mb-6 max-w-2xl text-sm text-slate-400">
@@ -110,20 +72,11 @@ export default function ResearchSettingsPage({
                 angolanas mantêm prioridade máxima no ranking de confiança.
             </p>
 
-            {flash && (
-                <div
-                    className={`mb-4 rounded-xl px-4 py-3 text-sm ${
-                        flash.type === 'ok'
-                            ? 'bg-emerald-500/15 text-emerald-200'
-                            : 'bg-rose-500/15 text-rose-200'
-                    }`}
-                >
-                    {flash.text}
-                </div>
-            )}
-
             <form
-                onSubmit={saveSettings}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.put('/admin/ai-content/research-settings');
+                }}
                 className="mb-10 rounded-2xl border border-white/10 bg-white/[0.03] p-6"
             >
                 <h3 className="mb-4 text-lg text-white">Parâmetros do motor</h3>
@@ -132,8 +85,8 @@ export default function ResearchSettingsPage({
                     <label className="flex items-center gap-3 text-sm text-slate-200">
                         <input
                             type="checkbox"
-                            checked={form.tavily_enabled}
-                            onChange={(e) => setForm((f) => ({ ...f, tavily_enabled: e.target.checked }))}
+                            checked={form.data.tavily_enabled}
+                            onChange={(e) => form.setData('tavily_enabled', e.target.checked)}
                             className="h-4 w-4 rounded border-white/20 bg-transparent"
                         />
                         Ativar Tavily AI (pesquisa web principal)
@@ -142,8 +95,8 @@ export default function ResearchSettingsPage({
                     <label className="flex items-center gap-3 text-sm text-slate-200">
                         <input
                             type="checkbox"
-                            checked={form.news_enabled}
-                            onChange={(e) => setForm((f) => ({ ...f, news_enabled: e.target.checked }))}
+                            checked={form.data.news_enabled}
+                            onChange={(e) => form.setData('news_enabled', e.target.checked)}
                             className="h-4 w-4 rounded border-white/20 bg-transparent"
                         />
                         Ativar pesquisa de notícias
@@ -152,9 +105,9 @@ export default function ResearchSettingsPage({
                     <label className="flex items-center gap-3 text-sm text-slate-200 sm:col-span-2">
                         <input
                             type="checkbox"
-                            checked={form.internal_knowledge_enabled}
+                            checked={form.data.internal_knowledge_enabled}
                             onChange={(e) =>
-                                setForm((f) => ({ ...f, internal_knowledge_enabled: e.target.checked }))
+                                form.setData('internal_knowledge_enabled', e.target.checked)
                             }
                             className="h-4 w-4 rounded border-white/20 bg-transparent"
                         />
@@ -167,8 +120,8 @@ export default function ResearchSettingsPage({
                             type="number"
                             min={1}
                             max={40}
-                            value={form.max_sources}
-                            onChange={(e) => setForm((f) => ({ ...f, max_sources: Number(e.target.value) }))}
+                            value={form.data.max_sources}
+                            onChange={(e) => form.setData('max_sources', Number(e.target.value))}
                             className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white"
                         />
                     </label>
@@ -179,9 +132,9 @@ export default function ResearchSettingsPage({
                             type="number"
                             min={0}
                             max={100}
-                            value={form.min_trust_score}
+                            value={form.data.min_trust_score}
                             onChange={(e) =>
-                                setForm((f) => ({ ...f, min_trust_score: Number(e.target.value) }))
+                                form.setData('min_trust_score', Number(e.target.value))
                             }
                             className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white"
                         />
@@ -193,8 +146,8 @@ export default function ResearchSettingsPage({
                             type="number"
                             min={1}
                             max={365}
-                            value={form.cache_days}
-                            onChange={(e) => setForm((f) => ({ ...f, cache_days: Number(e.target.value) }))}
+                            value={form.data.cache_days}
+                            onChange={(e) => form.setData('cache_days', Number(e.target.value))}
                             className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white"
                         />
                         <span className="mt-1 block text-xs text-slate-500">
@@ -206,10 +159,10 @@ export default function ResearchSettingsPage({
 
                 <button
                     type="submit"
-                    disabled={busy}
+                    disabled={form.processing}
                     className="mt-6 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-400 disabled:opacity-60"
                 >
-                    {busy ? 'A guardar…' : 'Guardar definições'}
+                    Guardar definições
                 </button>
             </form>
 
@@ -261,7 +214,13 @@ export default function ResearchSettingsPage({
                                     <td className="px-2 py-3">
                                         <button
                                             type="button"
-                                            onClick={() => toggleSource(source)}
+                                            onClick={() =>
+                                                router.put(
+                                                    `/admin/ai-content/research-sources/${source.id}`,
+                                                    { is_active: !source.is_active },
+                                                    { preserveScroll: true }
+                                                )
+                                            }
                                             className={`rounded px-2 py-1 text-xs font-medium ${
                                                 source.is_active
                                                     ? 'bg-emerald-500/20 text-emerald-300'
