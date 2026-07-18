@@ -94,7 +94,13 @@ class BlogController extends Controller
             'trendingPosts' => $trendingPosts,
         ];
 
-        if ($request->header('X-Requested-With') === 'XMLHttpRequest') {
+        // Filter/pagination AJAX on the blog page uses fetch + Accept: application/json.
+        // Inertia also sends X-Requested-With: XMLHttpRequest — never treat those as JSON APIs.
+        if (
+            $request->header('X-Inertia') === null
+            && $request->header('X-Requested-With') === 'XMLHttpRequest'
+            && $request->wantsJson()
+        ) {
             return response()->json($data);
         }
 
