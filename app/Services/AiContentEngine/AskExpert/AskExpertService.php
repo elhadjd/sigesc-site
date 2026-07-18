@@ -51,19 +51,54 @@ class AskExpertService
         ]);
 
         try {
-            $bundle = $this->research->research($question->question.' Angola negócios empreendedorismo');
+            $askCfg = config('ai_content_engine.ask_expert', []);
+            $useTavily = (bool) ($askCfg['use_tavily_search'] ?? false);
+            $llmProvider = strtolower((string) ($askCfg['llm_provider'] ?? 'deepseek'));
+            if (! $this->llm->isProviderReady($llmProvider)) {
+                $llmProvider = null; // fall back to global AI_CONTENT_LLM_PROVIDER
+            }
+
+            $bundle = $this->research->research(
+                $question->question.' Angola negócios empreendedorismo',
+                null,
+                false,
+                [
+                    'skip_tavily' => ! $useTavily,
+                    'skip_news' => ! $useTavily,
+                    'use_duckduckgo' => (bool) ($askCfg['use_duckduckgo'] ?? true),
+                    'min_trust_score' => (int) ($askCfg['min_trust_score'] ?? 40),
+                    'max_sources' => (int) ($askCfg['max_sources'] ?? 10),
+                ]
+            );
 
             $cta = config('ai_content_engine.pipeline.brand_cta');
+            $findingsForPrompt = array_map(static function (array $f): array {
+                return [
+                    'title' => $f['title'] ?? null,
+                    'url' => $f['url'] ?? null,
+                    'snippet' => $f['snippet'] ?? ($f['content'] ?? null),
+                    'trust_score' => $f['trust_score'] ?? null,
+                    'provider' => $f['provider'] ?? null,
+                ];
+            }, array_slice($bundle['findings'] ?? [], 0, 12));
+
             $answer = $this->llm->chatJson([
                 [
                     'role' => 'system',
                     'content' => <<<PROMPT
 És o especialista SIGESC para empresários em Angola.
-Responde com precisão, português de Angola, cita incerteza quando existir.
-Nunca inventes leis/datas/números.
-Inclui no final do answer_html um parágrafo curto com CTA natural ao SIGESC (gestão comercial, faturação, stock, PDV) sem parecer spam.
+
+REGRAS ANTI-ALUCINAÇÃO (obrigatórias):
+1) Usa APENAS factos suportados pelas fontes em "findings" / "research_summary".
+2) Nunca inventes leis, taxas, datas, números, nomes de instituições ou URLs.
+3) Se as fontes forem insuficientes, diz claramente o que falta e orienta onde confirmar (AGT, MINFIN, BNA, GUE, etc.).
+4) Cada passo prático importante deve citar a fonte com URL quando existir: (fonte: URL).
+5) Prefere fontes oficiais (.gov.ao, AGT, MINFIN, BNA, INAPEM). Ignora conteúdo irrelevante.
+6) Resposta em português de Angola, guia viável passo a passo (HTML semântico: h2, ol/ul, p, strong).
+7) No final do answer_html, um parágrafo curto com CTA natural ao SIGESC (sem spam).
 CTA de referência: {$cta}
-JSON:
+
+JSON obrigatório:
 {
   "answer_html":"",
   "quality_score":0-100,
@@ -71,8 +106,10 @@ JSON:
   "suggested_title":"",
   "category":"",
   "keywords":[],
-  "summary":""
+  "summary":"",
+  "uncertainty_notes":""
 }
+quality_score deve refletir confiança nas fontes (baixo se poucas fontes oficiais).
 PROMPT
                 ],
                 [
@@ -80,11 +117,12 @@ PROMPT
                     'content' => json_encode([
                         'question' => $question->question,
                         'research_summary' => $bundle['summary'],
-                        'findings' => $bundle['findings'],
+                        'findings' => $findingsForPrompt,
                         'avg_trust_score' => $bundle['avg_trust_score'],
+                        'providers_used' => $bundle['providers'],
                     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 ],
-            ], null, 0.35);
+            ], null, 0.2, null, $llmProvider);
 
             $quality = (float) ($answer['quality_score'] ?? 0);
             $shouldConvert = (bool) ($answer['should_become_article'] ?? false) && $quality >= 75;

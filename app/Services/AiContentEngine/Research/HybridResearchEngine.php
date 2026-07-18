@@ -8,6 +8,7 @@ use App\Models\AiContent\ResearchLog;
 use App\Models\AiContent\ResearchResult;
 use App\Models\AiContent\ResearchSetting;
 use App\Models\AiContent\ResearchSource;
+use App\Services\AiContentEngine\Research\Providers\DuckDuckGoResearchProvider;
 use App\Services\AiContentEngine\Research\Providers\InternalKnowledgeProvider;
 use App\Services\AiContentEngine\Research\Providers\NewsSearchProvider;
 use App\Services\AiContentEngine\Research\Providers\OfficialSourcesProvider;
@@ -23,6 +24,7 @@ class HybridResearchEngine
         protected TavilyResearchProvider $tavily,
         protected NewsSearchProvider $news,
         protected InternalKnowledgeProvider $internal,
+        protected DuckDuckGoResearchProvider $duckduckgo,
         protected TrustScorer $scorer,
         protected LlmGateway $llm
     ) {}
@@ -30,6 +32,14 @@ class HybridResearchEngine
     /**
      * Hybrid research used by AIResearchAgent and artisan research:test.
      *
+     * @param  array{
+     *   skip_tavily?: bool,
+     *   use_duckduckgo?: bool,
+     *   skip_news?: bool,
+     *   max_sources?: int,
+     *   min_trust_score?: int,
+     *   force_refresh?: bool
+     * }  $options
      * @return array{
      *   topic: string,
      *   from_cache: bool,
@@ -41,14 +51,18 @@ class HybridResearchEngine
      *   session: ResearchResult|null
      * }
      */
-    public function research(string $topic, ?Article $article = null, bool $forceRefresh = false): array
+    public function research(string $topic, ?Article $article = null, bool $forceRefresh = false, array $options = []): array
     {
         $started = microtime(true);
         $topic = trim($topic);
         $settings = ResearchSetting::allMapped();
         $cacheDays = (int) ($settings['cache_days'] ?? 30);
-        $maxSources = (int) ($settings['max_sources'] ?? 12);
-        $minTrust = (int) ($settings['min_trust_score'] ?? 50);
+        $maxSources = (int) ($options['max_sources'] ?? $settings['max_sources'] ?? 12);
+        $minTrust = (int) ($options['min_trust_score'] ?? $settings['min_trust_score'] ?? 50);
+        $forceRefresh = $forceRefresh || ! empty($options['force_refresh']);
+        $skipTavily = (bool) ($options['skip_tavily'] ?? false);
+        $useDuckDuckGo = (bool) ($options['use_duckduckgo'] ?? false);
+        $skipNews = (bool) ($options['skip_news'] ?? false);
 
         if (! $forceRefresh) {
             $cached = $this->findFreshCache($topic, $cacheDays);
@@ -79,20 +93,26 @@ class HybridResearchEngine
         $findings = array_merge($findings, $this->safeProviderSearch($this->official, $topic, min(6, $maxSources), $article?->id));
         $providersUsed[] = 'official';
 
-        // 2) Tavily AI — primary web research for recent / complementary content.
-        if (! empty($settings['tavily_enabled'])) {
+        // 2) Tavily AI — optional (skipped for Ask Expert by default to save credits).
+        if (! $skipTavily && ! empty($settings['tavily_enabled'])) {
             $tavilyLimit = min(max(6, (int) config('ai_content_engine.tavily.max_results', 8)), $maxSources);
             $findings = array_merge($findings, $this->safeProviderSearch($this->tavily, $topic, $tavilyLimit, $article?->id));
             $providersUsed[] = 'tavily';
         }
 
-        // 3) News via Tavily (topic=news) when enabled.
-        if (! empty($settings['news_enabled'])) {
+        // 3) Free web fallback (DuckDuckGo) when Tavily is skipped or as complement.
+        if ($useDuckDuckGo || ($skipTavily && empty($settings['tavily_enabled']))) {
+            $findings = array_merge($findings, $this->safeProviderSearch($this->duckduckgo, $topic, min(8, $maxSources), $article?->id));
+            $providersUsed[] = 'duckduckgo';
+        }
+
+        // 4) News via Tavily (topic=news) when enabled.
+        if (! $skipNews && ! $skipTavily && ! empty($settings['news_enabled'])) {
             $findings = array_merge($findings, $this->safeProviderSearch($this->news, $topic, min(5, $maxSources), $article?->id));
             $providersUsed[] = 'news';
         }
 
-        // 4) Internal knowledge (published blog / prior research).
+        // 5) Internal knowledge (published blog / prior research).
         $findings = array_merge($findings, $this->safeProviderSearch($this->internal, $topic, min(4, $maxSources), $article?->id));
         $providersUsed[] = 'internal';
 

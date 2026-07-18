@@ -70,8 +70,11 @@ class AiContentEngineController extends Controller
                 'enabled' => config('ai_content_engine.enabled'),
                 'llm_provider' => $llm->provider(),
                 'llm_ready' => $llm->configured(),
+                'deepseek_ready' => filled(config('ai_content_engine.deepseek.api_key')),
                 'tavily_ready' => $tavily->configured(),
                 'openai_ready' => filled(config('ai_content_engine.openai.api_key')),
+                'ask_expert_llm' => config('ai_content_engine.ask_expert.llm_provider'),
+                'ask_expert_uses_tavily' => (bool) config('ai_content_engine.ask_expert.use_tavily_search'),
             ],
         ]);
     }
