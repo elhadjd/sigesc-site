@@ -38,7 +38,8 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('auth/callback', [AuthenticatedSessionController::class, 'authenticateWithSocialCallback']);
+Route::get('auth/callback', [AuthenticatedSessionController::class, 'authenticateWithSocialCallback'])
+    ->name('auth.social.callback');
 
 require __DIR__ . '/auth.php';
 
@@ -56,9 +57,15 @@ Route::prefix('calculadoras')->name('calculators.')->group(function () {
 
 Route::controller(AuthenticatedSessionController::class)->group(function () {
     Route::get('/auth', 'create')->name('auth');
-    Route::get('/loginWithSocial/{drive}', 'authenticateWithSocial')->middleware('guest');
-    Route::post('authenticate', 'store')->middleware('guest');
-    Route::get('authenticate/logout', 'destroy');
+    // Accept POST on /auth too — native form submit without JS would otherwise 405.
+    Route::post('/auth', 'store')->middleware('guest');
+    Route::get('/loginWithSocial/{drive}', 'authenticateWithSocial')
+        ->middleware('guest')
+        ->name('auth.social');
+    Route::post('authenticate', 'store')->middleware('guest')->name('authenticate');
+    // Frontend axios posts to auth/login — keep this alias.
+    Route::post('auth/login', 'store')->middleware('guest')->name('auth.login');
+    Route::match(['get', 'post'], 'authenticate/logout', 'destroy')->name('authenticate.logout');
 });
 
 Route::controller(modules::class)->group(function () {

@@ -34,19 +34,26 @@ export const loginServices = () => {
     })
 
     const handelSubmitForm = (async(event: React.FormEvent<HTMLFormElement>)=>{
-        event.preventDefault(),
-        setStateForm({...stateForm})
-        setIsFormSubmitted(true)
-        await Login(formData).then((response) => {
-            if(response.data.message) toast.success(response.data.message,{position: 'top-right'})
-            if(response.data.message && response.data.type == 'success') router.get('/')
-        }).catch((err) => {
-            console.log(err);
-            toast.error(err.response.data.message,{position: 'top-right'})
-            if (err.response.data.type) return toast.error(err.response.data.message,{position: 'top-right'})
-        }).finally(()=>{
-            setIsFormSubmitted(false)
-        });
+        event.preventDefault();
+        setStateForm({...stateForm});
+        setIsFormSubmitted(true);
+        try {
+            const response = await Login(formData);
+            if (response.data?.message) {
+                toast.success(response.data.message, { position: 'top-right' });
+            }
+            if (response.data?.type === 'success') {
+                router.get('/');
+            }
+        } catch (err: any) {
+            const message =
+                err?.response?.data?.message ||
+                err?.response?.data?.errors?.email?.[0] ||
+                'Não foi possível iniciar sessão.';
+            toast.error(message, { position: 'top-right' });
+        } finally {
+            setIsFormSubmitted(false);
+        }
     })
 
     return {

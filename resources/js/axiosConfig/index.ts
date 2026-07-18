@@ -1,37 +1,59 @@
-import axios from "axios";
-import { Auth, User } from "firebase/auth";
+import axios from 'axios';
+
+function csrfToken(): string {
+    const meta = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (meta) {
+        return meta;
+    }
+
+    const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+}
 
 export const Api = axios.create({
-    baseURL: `/`
-    // headers: {
-    //     'Authorization': `Bearer `
-    // }
+    baseURL: '/',
+    withCredentials: true,
+    headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        Accept: 'application/json',
+    },
 });
 
-export const routeApi = ()=>{
-    const loginWithSocial = async(type: string)=>{
-        return await Api.get(`loginWithSocial/${type}`)
+Api.interceptors.request.use((config) => {
+    const token = csrfToken();
+    if (token) {
+        config.headers.set('X-CSRF-TOKEN', token);
+        config.headers.set('X-XSRF-TOKEN', token);
     }
+    return config;
+});
 
-    const checkLoggedUser = ((data:User)=>{
-        return Api.post('checkLoggedUser',{...data})
-    })
+export const routeApi = () => {
+    const loginWithSocial = async (type: string) => {
+        // Full browser navigation — OAuth redirect cannot run inside XHR.
+        window.location.href = `/loginWithSocial/${type}`;
+        return Promise.resolve();
+    };
 
-    const Login = async(data:any)=>{
-        return Api.post(`auth/login`,{...data})
-    }
+    const checkLoggedUser = (data: unknown) => {
+        return Api.post('checkLoggedUser', { ...(data as object) });
+    };
 
-    const RoutePost = (async(route:string,data:any)=>{
-        return await Api.post(route,{...data})
-    })
+    const Login = async (data: unknown) => {
+        return Api.post('auth/login', data);
+    };
 
-    const RouteGet = (async(route:string)=>{
-        return await Api.get(route)
-    })
+    const RoutePost = async (route: string, data: unknown) => {
+        return Api.post(route, data);
+    };
 
-    const RouteDelete = (async(route:string)=>{
-        return await Api.get(route)
-    })
+    const RouteGet = async (route: string) => {
+        return Api.get(route);
+    };
+
+    const RouteDelete = async (route: string) => {
+        return Api.get(route);
+    };
 
     return {
         loginWithSocial,
@@ -39,6 +61,6 @@ export const routeApi = ()=>{
         Login,
         RoutePost,
         RouteGet,
-        RouteDelete
-    }
-}
+        RouteDelete,
+    };
+};

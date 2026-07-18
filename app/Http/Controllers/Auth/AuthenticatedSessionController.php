@@ -5,17 +5,17 @@ namespace App\Http\Controllers\Auth;
 use App\Events\welcomeUserEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Mail\welcomeUser;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\InvalidStateException;
+use Throwable;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -31,68 +31,105 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Handle an incoming authentication request.
+     * Handle an incoming authentication request (email/password).
      */
     public function store(LoginRequest $request)
     {
         $checkUser = User::where('email', $request->email)->first();
-        if ($checkUser) {
-            if ($checkUser->socialType != 'sisgesc.net') {
-                return $this->RespondWarn("A sua conta esta registrada com o provedor $checkUser->socialType, por favor clique no icon abaixo para iniciar a sesão");
-            } else {
-                $request->authenticate();
-                $request->session()->regenerate();
-                return $this->RespondSuccess(__('success'));
-            }
+
+        if (! $checkUser) {
+            return $this->RespondWarn(__('User not found'));
         }
-        return $this->RespondWarn(__('User not found'));
+
+        if ($checkUser->socialType && $checkUser->socialType !== 'sisgesc.net') {
+            return $this->RespondWarn(
+                "A sua conta esta registrada com o provedor {$checkUser->socialType}, por favor clique no icon abaixo para iniciar a sesão"
+            );
+        }
+
+        $request->authenticate();
+        $request->session()->regenerate();
+
+        return $this->RespondSuccess(__('success'));
     }
 
     public function authenticateWithSocial(Request $request, string $drive)
     {
         $drives = ['google', 'github'];
-        if (!in_array($drive, $drives)) return redirect($request->getLocale() . "/auth")->with('Tipo de authenticação não suportada');
-        Cache::put('provider_' . $request->ip(), $drive, now()->addMinutes(5));
+
+        if (! in_array($drive, $drives, true)) {
+            return redirect('/auth')->with('error', 'Tipo de autenticação não suportada');
+        }
+
+        // Prefer session (survives OAuth round-trip); keep IP cache as soft fallback.
+        $request->session()->put('oauth_provider', $drive);
+        $request->session()->save();
+
         return Socialite::driver($drive)->redirect();
     }
 
-    function authenticateWithSocialCallback(Request $request)
+    public function authenticateWithSocialCallback(Request $request)
     {
-        if (!Cache::has('provider_' . $request->ip())) return redirect('/auth');
-        $provider = Cache::get('provider_' . $request->ip());
-        $socialUser = Socialite::driver($provider)->user();
-        $user = User::updateOrCreate([
-            'email' => $socialUser->email
-        ], [
-            'social_id' => $socialUser->id,
-            'socialType' => $provider,
-            'accountType' => 'client',
-            'name' => $socialUser->name == null ? $socialUser->getNickname() : $socialUser->name,
-            'email' => $socialUser->email,
-            'social_token' => $socialUser->token,
-            'social_refresh_token' => $socialUser->refreshToken,
-        ]);
+        $provider = $request->session()->pull('oauth_provider');
 
-        Auth::login($user);
-
-        if (!$request->user()->hasVerifiedEmail()) {
-            $user->markEmailAsVerified();
+        if (! $provider || ! in_array($provider, ['google', 'github'], true)) {
+            return redirect('/auth')->with('error', 'Sessão de autenticação social expirada. Tente novamente.');
         }
 
-        $request->user()->userProfile()
-            ->updateOrCreate([
-                'user_id' => $request->user()->id
-            ], [
-                'surname' => $user->name,
-                'image' => $socialUser->avatar,
+        try {
+            try {
+                $socialUser = Socialite::driver($provider)->user();
+            } catch (InvalidStateException $e) {
+                // Common on XAMPP / localhost when the OAuth "state" cookie/session is lost.
+                Log::warning('Socialite InvalidStateException — retrying stateless', [
+                    'provider' => $provider,
+                    'error' => $e->getMessage(),
+                ]);
+                $socialUser = Socialite::driver($provider)->stateless()->user();
+            }
+        } catch (Throwable $e) {
+            Log::error('Social login failed', [
+                'provider' => $provider,
+                'error' => $e->getMessage(),
             ]);
+
+            return redirect('/auth')->with('error', 'Falha ao autenticar com '.$provider.'. Tente novamente.');
+        }
+
+        if (blank($socialUser->getEmail())) {
+            return redirect('/auth')->with('error', 'A conta social não devolveu um email válido.');
+        }
+
+        $user = User::updateOrCreate(
+            ['email' => $socialUser->getEmail()],
+            [
+                'social_id' => $socialUser->getId(),
+                'socialType' => $provider,
+                'accountType' => 'client',
+                'name' => $socialUser->getName() ?: ($socialUser->getNickname() ?: 'Utilizador'),
+                'social_token' => $socialUser->token,
+                'social_refresh_token' => $socialUser->refreshToken,
+            ]
+        );
+
+        Auth::login($user, true);
+
+        if (! $user->hasVerifiedEmail()) {
+            $user->forceFill(['email_verified_at' => now()])->save();
+        }
+
+        $user->userProfile()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'surname' => $user->name,
+                'image' => $socialUser->getAvatar(),
+            ]
+        );
 
         event(new welcomeUserEvent($user));
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }
-
-
 
     /**
      * Destroy an authenticated session.
@@ -100,14 +137,14 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request)
     {
         Auth::guard('web')->logout();
-        Auth::logout();
-
-        return Auth::user();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return Inertia::location($request->getLocale() . '/');
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['type' => 'success', 'message' => 'Logout']);
+        }
+
+        return Inertia::location('/');
     }
 }
