@@ -15,6 +15,8 @@ use App\Models\AiContent\ResearchSetting;
 use App\Models\AiContent\ResearchSource;
 use App\Services\AiContentEngine\Agents\FactCheckerAgent;
 use App\Services\AiContentEngine\Agents\PublisherAgent;
+use App\Services\AiContentEngine\Research\TavilyClient;
+use App\Services\AiContentEngine\Support\LlmGateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +24,7 @@ use Inertia\Inertia;
 
 class AiContentEngineController extends Controller
 {
-    public function dashboard()
+    public function dashboard(LlmGateway $llm, TavilyClient $tavily)
     {
         $stats = Cache::remember('ai_content_dashboard_stats', 60, function () {
             return [
@@ -65,6 +67,10 @@ class AiContentEngineController extends Controller
                 'auto_publish' => config('ai_content_engine.pipeline.auto_publish'),
                 'topics_per_day' => config('ai_content_engine.pipeline.topics_per_day'),
                 'enabled' => config('ai_content_engine.enabled'),
+                'llm_provider' => $llm->provider(),
+                'llm_ready' => $llm->configured(),
+                'tavily_ready' => $tavily->configured(),
+                'openai_ready' => filled(config('ai_content_engine.openai.api_key')),
             ],
         ]);
     }
@@ -111,11 +117,20 @@ class AiContentEngineController extends Controller
         ]);
     }
 
-    public function runDaily()
+    public function runDaily(LlmGateway $llm)
     {
+        if (! $llm->configured()) {
+            return back()->with('error', $llm->missingConfigMessage());
+        }
+
         RunDailyContentPipeline::dispatch();
 
-        return back()->with('success', 'Pipeline diário enviado para a fila.');
+        $provider = $llm->provider();
+
+        return back()->with(
+            'success',
+            'Pipeline diário enviado para a fila (LLM: '.($provider ?? 'n/d').').'
+        );
     }
 
     public function processArticle(Article $article)

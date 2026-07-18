@@ -94,5 +94,47 @@ class AiContentEngineTest extends TestCase
         $this->assertTrue(config('ai_content_engine.pipeline.require_fact_check'));
         $this->assertContains('AGT', config('ai_content_engine.categories'));
         $this->assertContains('agt.minfin.gov.ao', config('ai_content_engine.trusted_domains'));
+        $this->assertSame('auto', config('ai_content_engine.llm.provider'));
+    }
+
+    public function test_run_daily_blocks_without_tavily_or_openai(): void
+    {
+        config([
+            'ai_content_engine.tavily.enabled' => true,
+            'ai_content_engine.tavily.api_key' => null,
+            'ai_content_engine.openai.api_key' => null,
+            'ai_content_engine.llm.provider' => 'auto',
+        ]);
+
+        $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
+
+        $this->actingAs($user)
+            ->from('/admin/ai-content')
+            ->post('/admin/ai-content/run-daily')
+            ->assertRedirect('/admin/ai-content')
+            ->assertSessionHas('error');
+    }
+
+    public function test_dashboard_shows_tavily_provider_status(): void
+    {
+        config([
+            'ai_content_engine.tavily.enabled' => true,
+            'ai_content_engine.tavily.api_key' => 'tvly-test',
+            'ai_content_engine.openai.api_key' => null,
+            'ai_content_engine.llm.provider' => 'auto',
+        ]);
+
+        $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
+
+        $this->actingAs($user)
+            ->get('/admin/ai-content')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('admin/ai-content/dashboard')
+                ->where('config.llm_provider', 'tavily')
+                ->where('config.llm_ready', true)
+                ->where('config.tavily_ready', true)
+                ->where('config.openai_ready', false)
+            );
     }
 }
