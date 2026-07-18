@@ -29,11 +29,26 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+        $admins = array_filter(config('ai_content_engine.admin_emails', []));
+        $canAccessAiContent = false;
+
+        if ($user) {
+            $isAllowlisted = in_array(
+                strtolower((string) $user->email),
+                array_map('strtolower', $admins),
+                true
+            );
+            $canAccessAiContent = $isAllowlisted
+                || (app()->environment(['local', 'testing']) && empty($admins));
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
+            'canAccessAiContent' => $canAccessAiContent,
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

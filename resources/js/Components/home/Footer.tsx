@@ -66,13 +66,28 @@ export default function FooterComponent() {
                         <h4 className="text-lg font-semibold mb-5 text-gray-900">Links Rápidos</h4>
                         <ul className="space-y-3">
                             <li>
+                                <Link href="/blog/posts" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                    <span className="text-sm">Blog</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/calculadoras" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                    <span className="text-sm">Calculadoras fiscais</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/pergunte-ao-especialista" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                    <span className="text-sm">Pergunte ao Especialista</span>
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/contact" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <AiOutlineContacts className="text-blue-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm">Contato</span>
                                 </Link>
                             </li>
                             <li>
-                                <Link href={route('download-page', { post: '' })} className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                <Link href={route('download-page')} className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <FaDownload className="text-blue-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm">Downloads</span>
                                 </Link>
@@ -84,13 +99,13 @@ export default function FooterComponent() {
                                 </a>
                             </li>
                             <li>
-                                <Link href={`/prices`} className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                <Link href="/prices" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <BiTag className="text-blue-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm">Lista de Preço</span>
                                 </Link>
                             </li>
                             <li>
-                                <Link href={`/payments`} className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                <Link href="/payments" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <BsCash className="text-blue-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm">Pagamentos</span>
                                 </Link>
