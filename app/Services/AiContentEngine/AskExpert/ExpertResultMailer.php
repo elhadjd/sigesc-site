@@ -20,8 +20,8 @@ class ExpertResultMailer
         [$postUrl, $postTitle, $postReady] = $this->resolvePost($question->article);
 
         Mail::to($email)->send(new ExpertAnswerReadyMail(
-            question: $question->fresh(),
-            answerUrl: route('ask-expert.show', $question->uuid),
+            expertQuestion: $question->fresh(),
+            answerUrl: $this->publicUrl('/pergunte-ao-especialista/'.$question->uuid),
             postUrl: $postUrl,
             postTitle: $postTitle,
             postReady: $postReady,
@@ -48,8 +48,8 @@ class ExpertResultMailer
         }
 
         Mail::to($email)->send(new ExpertAnswerReadyMail(
-            question: $question->fresh(),
-            answerUrl: route('ask-expert.show', $question->uuid),
+            expertQuestion: $question->fresh(),
+            answerUrl: $this->publicUrl('/pergunte-ao-especialista/'.$question->uuid),
             postUrl: $postUrl,
             postTitle: $postTitle,
             postReady: true,
@@ -70,11 +70,18 @@ class ExpertResultMailer
             return [null, null, false];
         }
 
-        $postUrl = url('/blog/posts/'.$article->slug);
+        $postUrl = $this->publicUrl('/blog/posts/'.$article->slug);
         $postReady = $article->status === Article::STATUS_PUBLISHED
             || filled($article->post_id)
             || filled($article->published_at);
 
         return [$postUrl, $article->title, $postReady];
+    }
+
+    protected function publicUrl(string $path): string
+    {
+        $base = rtrim((string) config('sigesc.site_url', config('app.url')), '/');
+
+        return $base.'/'.ltrim($path, '/');
     }
 }

@@ -9,13 +9,14 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Str;
 
 class ExpertAnswerReadyMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     public function __construct(
-        public ExpertQuestion $question,
+        public ExpertQuestion $expertQuestion,
         public string $answerUrl,
         public ?string $postUrl = null,
         public ?string $postTitle = null,
@@ -25,7 +26,7 @@ class ExpertAnswerReadyMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $subject = $this->postReady && $this->postTitle
-            ? 'A sua resposta SIGESC + artigo: '.$this->postTitle
+            ? 'Resposta SIGESC + artigo: '.Str::limit((string) $this->postTitle, 60, '…')
             : 'A sua resposta do Especialista SIGESC está pronta';
 
         return new Envelope(subject: $subject);
@@ -33,12 +34,16 @@ class ExpertAnswerReadyMail extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
+        $questionText = (string) $this->expertQuestion->question;
+        $answerHtml = (string) ($this->expertQuestion->answer_html ?? '');
+        $plainAnswer = trim(preg_replace('/\s+/u', ' ', strip_tags($answerHtml)) ?? '');
+
         return new Content(
             view: 'emails.expertAnswerReady',
             with: [
-                'askerName' => $this->question->asker_name ?: 'Empreendedor',
-                'question' => $this->question->question,
-                'answerHtml' => $this->question->answer_html,
+                'askerName' => $this->expertQuestion->asker_name ?: 'Empreendedor',
+                'questionText' => $questionText,
+                'answerExcerpt' => Str::limit($plainAnswer, 380, '…'),
                 'answerUrl' => $this->answerUrl,
                 'postUrl' => $this->postUrl,
                 'postTitle' => $this->postTitle,
