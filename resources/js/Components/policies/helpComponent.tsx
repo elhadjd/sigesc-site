@@ -2,6 +2,7 @@ import { useStateChatToggle } from '@/contexts/stateChatToggleContext';
 import { Link } from '@inertiajs/react'
 import React, { useState } from 'react'
 import { FiHome, FiMail, FiMessageSquare, FiHelpCircle, FiArrowRight, FiExternalLink, FiChevronDown, FiChevronUp } from 'react-icons/fi'
+import { SIGESC_ADMIN_URL, SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
 
 export default function HelpComponent() {
     const [openSections, setOpenSections] = useState({
@@ -77,7 +78,7 @@ export default function HelpComponent() {
                                         <FiExternalLink className="w-5 h-5" />
                                     </span>
                                     <div>
-                                        <a href="https://admin.sisgesc.net/getting-started" target="_blank" className="text-lg font-medium text-gray-900 hover:text-blue-500 transition-colors duration-200">
+                                        <a href={SIGESC_GETTING_STARTED_URL} target="_blank" className="text-lg font-medium text-gray-900 hover:text-blue-500 transition-colors duration-200">
                                             Como criar sua conta no SIGESC
                                         </a>
                                         <p className="text-gray-600 text-sm mt-1">Guia passo a passo para configurar sua conta</p>
@@ -88,7 +89,7 @@ export default function HelpComponent() {
                                         <FiExternalLink className="w-5 h-5" />
                                     </span>
                                     <div>
-                                        <a href="https://admin.sisgesc.net/" target="_blank" className="text-lg font-medium text-gray-900 hover:text-blue-500 transition-colors duration-200">
+                                        <a href={SIGESC_ADMIN_URL} target="_blank" className="text-lg font-medium text-gray-900 hover:text-blue-500 transition-colors duration-200">
                                             Acessar admin SIGESC
                                         </a>
                                         <p className="text-gray-600 text-sm mt-1">Painel administrativo do sistema</p>

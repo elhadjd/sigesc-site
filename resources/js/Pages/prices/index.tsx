@@ -380,6 +380,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import { Link, usePage, router } from '@inertiajs/react';
+import { SIGESC_GETTING_STARTED_URL, SIGESC_SITE_URL } from '@/services/public/domains';
 import {
     FiCheck,
     FiStar,
@@ -474,7 +475,7 @@ const PlanCard = ({
         </ul>
 
         <a
-            href='https://admin.sisgesc.net/getting-started' target='_blank' rel='noopener noreferrer'
+            href={SIGESC_GETTING_STARTED_URL} target='_blank' rel='noopener noreferrer'
             className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors duration-300
         ${popular
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
@@ -659,7 +660,7 @@ export const Prices = () => {
                     content="software de gestão, preços SIGESC, PDV avançado, controle financeiro, gestão de estoque, planos de gestão, software comercial, eficiência empresarial, gestão integrada"
                 />
                 <meta property="og:type" content="website" />
-                <link rel="canonical" href="https://sisgesc.net/prices" />
+                <link rel="canonical" href={`${SIGESC_SITE_URL}/prices`} />
                 <script type="application/ld+json">
                     {JSON.stringify({
                         "@context": "https://schema.org",
@@ -814,7 +815,7 @@ export const Prices = () => {
                     <motion.a
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        href="https://admin.sisgesc.net/getting-started"
+                        href={SIGESC_GETTING_STARTED_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center px-6 py-3 border border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"

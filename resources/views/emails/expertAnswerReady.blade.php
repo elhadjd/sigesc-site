@@ -70,14 +70,15 @@
 
                             <p style="margin:28px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#64748b;">
                                 Quer organizar faturação, stock e vendas num só sistema?
-                                <a href="{{ $solutionsUrl }}" style="color:#0b3d91;font-weight:700;text-decoration:none;">Conheça o SIGESC</a>
+                                <a href="{{ $solutionsUrl }}" style="color:#0b3d91;font-weight:700;text-decoration:none;">Experimente o SIGESC</a>
+                                no painel <a href="{{ $adminUrl }}" style="color:#0b3d91;font-weight:700;text-decoration:none;">admin.sisgesc.net</a>
                                 — software de gestão comercial feito para empresas em Angola.
                             </p>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:20px 32px 28px;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#64748b;">
-                            Recebeu este email porque pediu uma resposta em <a href="{{ $siteUrl }}" style="color:#0b3d91;">sisgesc.net</a>.
+                            Recebeu este email porque pediu uma resposta em <a href="{{ $siteUrl }}" style="color:#0b3d91;">{{ $siteHost }}</a>.
                             Confirme sempre informação fiscal na AGT e na legislação vigente.
                         </td>
                     </tr>

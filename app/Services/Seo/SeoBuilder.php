@@ -14,7 +14,7 @@ class SeoBuilder
     public function defaults(array $overrides = []): array
     {
         $siteName = 'SIGESC';
-        $url = rtrim(config('app.url') ?: 'https://www.sisgesc.net', '/');
+        $url = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
 
         return array_replace_recursive([
             'site_name' => $siteName,
@@ -23,7 +23,7 @@ class SeoBuilder
             'keywords' => 'software de gestão, ERP Angola, faturação eletrónica AGT, PDV, gestão comercial, SIGESC',
             'canonical' => $url,
             'og_type' => 'website',
-            'og_image' => 'https://admin.sisgesc.net/logo.png',
+            'og_image' => config('sigesc.logo_url'),
             'robots' => 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
             'twitter_card' => 'summary_large_image',
             'locale' => 'pt_AO',
@@ -33,7 +33,7 @@ class SeoBuilder
                     '@type' => 'Organization',
                     'name' => $siteName,
                     'url' => $url,
-                    'logo' => 'https://admin.sisgesc.net/logo.png',
+                    'logo' => config('sigesc.logo_url'),
                 ],
             ],
         ], $overrides);
@@ -64,7 +64,7 @@ class SeoBuilder
                         'name' => 'SIGESC',
                         'logo' => [
                             '@type' => 'ImageObject',
-                            'url' => 'https://admin.sisgesc.net/logo.png',
+                            'url' => config('sigesc.logo_url'),
                         ],
                     ],
                 ],
@@ -111,7 +111,7 @@ class SeoBuilder
                 'name' => 'SIGESC',
                 'logo' => [
                     '@type' => 'ImageObject',
-                    'url' => 'https://admin.sisgesc.net/logo.png',
+                    'url' => config('sigesc.logo_url'),
                 ],
             ],
             'articleSection' => $post->category,
@@ -128,7 +128,7 @@ class SeoBuilder
                     '@type' => 'ListItem',
                     'position' => 1,
                     'name' => 'Início',
-                    'item' => rtrim(config('app.url') ?: 'https://www.sisgesc.net', '/'),
+                    'item' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/'),
                 ],
                 [
                     '@type' => 'ListItem',
@@ -188,7 +188,7 @@ class SeoBuilder
      */
     public function forPage(array $page): array
     {
-        $base = rtrim(config('app.url') ?: 'https://www.sisgesc.net', '/');
+        $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
         $path = $page['path'] ?? '/';
         $canonical = str_starts_with($path, 'http') ? $path : $base.'/'.ltrim($path, '/');
 
@@ -339,13 +339,13 @@ class SeoBuilder
     protected function absoluteUrl(?string $url): string
     {
         if (! $url) {
-            return 'https://admin.sisgesc.net/logo.png';
+            return config('sigesc.logo_url');
         }
 
         if (Str::startsWith($url, ['http://', 'https://'])) {
             return $url;
         }
 
-        return rtrim(config('app.url') ?: 'https://www.sisgesc.net', '/').'/'.ltrim($url, '/');
+        return rtrim(config('app.url') ?: config('sigesc.site_url'), '/').'/'.ltrim($url, '/');
     }
 }

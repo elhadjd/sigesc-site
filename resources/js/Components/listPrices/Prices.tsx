@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { router } from '@inertiajs/react';
+import { SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
 
 export const Prices = () => {
     const handleSelectPlan = (route: string) => {
@@ -64,7 +65,7 @@ const PlanCard = ({ title, description, price, features, onSelectPlan }: { title
                 </li>
             ))}
         </ul>
-        <a href='https://admin.sisgesc.net/getting-started' target='_blank' rel='noopener noreferrer'
+        <a href={SIGESC_GETTING_STARTED_URL} target='_blank' rel='noopener noreferrer'
             onClick={onSelectPlan}
             className="mt-4 bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors duration-300 w-full"
         >

@@ -6,6 +6,7 @@ import { FaDownload, FaUsers } from 'react-icons/fa';
 import { Link } from '@inertiajs/react';
 import { useLoggedUser } from '@/contexts/loggedUser';
 import ChatComponent from '@/ui/chat';
+import { SIGESC_ADMIN_URL, SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
 
 export default function FooterComponent() {
     const { local } = useLoggedUser();
@@ -124,13 +125,13 @@ export default function FooterComponent() {
                                 </Link>
                             </li>
                             <li>
-                                <a href="https://admin.sisgesc.net/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                <a href={SIGESC_ADMIN_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <FaUsers className="text-blue-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm">Área do Cliente</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="https://admin.sisgesc.net/getting-started" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                <a href={SIGESC_GETTING_STARTED_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <BsBuilding className="text-blue-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm">Crie sua empresa</span>
                                 </a>

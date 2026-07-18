@@ -1,6 +1,7 @@
 import { useStateChatToggle } from '@/contexts/stateChatToggleContext';
 import React, { useState } from 'react'
 import { FiChevronDown, FiChevronUp, FiSearch, FiMessageCircle, FiMail, FiShield, FiCreditCard } from 'react-icons/fi'
+import { SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
 
 export default function FaqComponent() {
     const [openItems, setOpenItems] = useState({
@@ -29,7 +30,7 @@ export default function FaqComponent() {
             answer: 'Você pode acessar o SIGESC através do nosso site, fazendo login com suas credenciais de usuário. Se você ainda não tem uma conta,',
             link: {
                 text: 'clique aqui para se registrar gratuitamente',
-                url: 'https://admin.sisgesc.net/getting-started'
+                url: SIGESC_GETTING_STARTED_URL
             },
             icon: <FiMessageCircle className="w-5 h-5" />
         },

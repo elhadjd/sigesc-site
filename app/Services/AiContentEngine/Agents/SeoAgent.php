@@ -76,7 +76,7 @@ PROMPT
                 'publisher' => [
                     '@type' => 'Organization',
                     'name' => 'SIGESC',
-                    'logo' => ['@type' => 'ImageObject', 'url' => 'https://admin.sisgesc.net/logo.png'],
+                    'logo' => ['@type' => 'ImageObject', 'url' => config('sigesc.logo_url')],
                 ],
                 'mainEntityOfPage' => $canonical,
                 'inLanguage' => 'pt-AO',
@@ -202,6 +202,7 @@ PROMPT
             'seo_score' => 82,
             'internal_links' => [
                 ['anchor' => 'Soluções SIGESC', 'path' => '/solucoes'],
+                ['anchor' => 'Experimentar SIGESC', 'path' => config('sigesc.getting_started_url')],
                 ['anchor' => 'Blog SIGESC', 'path' => '/blog/posts'],
             ],
             'external_links' => [],

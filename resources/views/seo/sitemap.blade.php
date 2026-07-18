@@ -20,7 +20,7 @@
         <priority>0.8</priority>
         @if ($post->image)
         <image:image>
-            <image:loc>{{ \Illuminate\Support\Str::startsWith($post->image, ['http://', 'https://']) ? $post->image : rtrim(config('app.url') ?: 'https://www.sisgesc.net', '/') . '/' . ltrim($post->image, '/') }}</image:loc>
+            <image:loc>{{ \Illuminate\Support\Str::startsWith($post->image, ['http://', 'https://']) ? $post->image : rtrim(config('app.url') ?: config('sigesc.site_url'), '/') . '/' . ltrim($post->image, '/') }}</image:loc>
             <image:title>{{ $post->title ?? $post->slug }}</image:title>
         </image:image>
         @endif
@@ -35,7 +35,7 @@
         <priority>0.75</priority>
         @if ($article->featured_image)
         <image:image>
-            <image:loc>{{ \Illuminate\Support\Str::startsWith($article->featured_image, ['http://', 'https://']) ? $article->featured_image : rtrim(config('app.url') ?: 'https://www.sisgesc.net', '/') . '/' . ltrim($article->featured_image, '/') }}</image:loc>
+            <image:loc>{{ \Illuminate\Support\Str::startsWith($article->featured_image, ['http://', 'https://']) ? $article->featured_image : rtrim(config('app.url') ?: config('sigesc.site_url'), '/') . '/' . ltrim($article->featured_image, '/') }}</image:loc>
             <image:title>{{ $article->title }}</image:title>
         </image:image>
         @endif
