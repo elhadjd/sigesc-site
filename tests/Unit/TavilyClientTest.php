@@ -113,4 +113,18 @@ class TavilyClientTest extends TestCase
         $this->assertSame('auto', $client->normalizeResearchModel('auto'));
         $this->assertSame('mini', $client->normalizeResearchModel(null));
     }
+
+    public function test_normalize_output_length_maps_concise_and_aliases(): void
+    {
+        config(['ai_content_engine.tavily.research_output_length' => 'concise']);
+
+        $client = app(TavilyClient::class);
+
+        $this->assertSame('short', $client->normalizeOutputLength('concise'));
+        $this->assertSame('short', $client->normalizeOutputLength(null));
+        $this->assertSame('standard', $client->normalizeOutputLength('medium'));
+        $this->assertSame('long', $client->normalizeOutputLength('full'));
+        $this->assertSame('long', $client->normalizeOutputLength('long'));
+        $this->assertSame('short', $client->normalizeOutputLength('invalid-value'));
+    }
 }

@@ -39,8 +39,12 @@ class LlmGateway
      * @param  array<int, array{role: string, content: string}>  $messages
      * @return array<string, mixed>
      */
-    public function chatJson(array $messages, ?string $model = null, float $temperature = 0.5): array
-    {
+    public function chatJson(
+        array $messages,
+        ?string $model = null,
+        float $temperature = 0.5,
+        ?string $outputLength = null
+    ): array {
         $provider = $this->resolveProvider();
 
         if ($provider === null) {
@@ -48,7 +52,7 @@ class LlmGateway
         }
 
         return match ($provider) {
-            'tavily' => $this->chatJsonViaTavily($messages, $model),
+            'tavily' => $this->chatJsonViaTavily($messages, $model, $outputLength),
             'openai' => $this->chatJsonViaOpenAi($messages, $model, $temperature),
             default => throw new RuntimeException('Unsupported LLM provider: '.$provider),
         };
@@ -84,7 +88,7 @@ class LlmGateway
      * @param  array<int, array{role: string, content: string}>  $messages
      * @return array<string, mixed>
      */
-    protected function chatJsonViaTavily(array $messages, ?string $model = null): array
+    protected function chatJsonViaTavily(array $messages, ?string $model = null, ?string $outputLength = null): array
     {
         if (! $this->tavily->configured()) {
             throw new RuntimeException('TAVILY_API_KEY is required for the AI Content Engine (Tavily provider).');
@@ -127,7 +131,8 @@ PROMPT);
                     'data' => base64_encode($userPayload),
                     'type' => 'base64',
                 ],
-            ] : []
+            ] : [],
+            $outputLength
         );
 
         return $this->normalizeStructuredContent($content);
@@ -220,7 +225,7 @@ PROMPT);
         if (is_string($content)) {
             $decoded = $this->decodeJsonString($content);
             if (is_array($decoded)) {
-                return $decoded;
+                return $this->normalizeStructuredContent($decoded);
             }
 
             throw new RuntimeException('Tavily Research returned a non-JSON string.');
@@ -233,12 +238,42 @@ PROMPT);
             }
         }
 
-        if (isset($content['result']) && is_array($content['result'])) {
-            return $content['result'];
+        if (isset($content['json']) && is_array($content['json'])) {
+            return $content['json'];
         }
 
-        if (isset($content['data']) && is_array($content['data'])) {
-            return $content['data'];
+        foreach (['result', 'data', 'output', 'payload', 'response'] as $key) {
+            if (! isset($content[$key])) {
+                continue;
+            }
+            if (is_array($content[$key])) {
+                if ($this->looksLikeAgentPayload($content[$key])) {
+                    return $content[$key];
+                }
+                // Nested wrapper once more.
+                if (isset($content[$key]['json']) || isset($content[$key]['content_html']) || isset($content[$key]['answer_html'])) {
+                    return $this->normalizeStructuredContent($content[$key]);
+                }
+
+                return $content[$key];
+            }
+            if (is_string($content[$key])) {
+                $decoded = $this->decodeJsonString($content[$key]);
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
+            }
+        }
+
+        if (isset($content['content']) && is_string($content['content'])) {
+            $decoded = $this->decodeJsonString($content['content']);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        if (isset($content['content']) && is_array($content['content'])) {
+            return $this->normalizeStructuredContent($content['content']);
         }
 
         // Content itself may already be the agent payload (topics, content_html, …).
@@ -246,7 +281,7 @@ PROMPT);
             return $content;
         }
 
-        throw new RuntimeException('Tavily Research returned unexpected structured content.');
+        throw new RuntimeException('Tavily Research returned unexpected structured content: '.implode(', ', array_keys($content)));
     }
 
     /**
@@ -279,7 +314,13 @@ PROMPT);
      */
     protected function looksLikeAgentPayload(array $content): bool
     {
-        $keys = ['topics', 'title', 'content_html', 'excerpt', 'slug_hint', 'changes', 'hallucination_flags', 'seo_score', 'posts', 'verdict', 'confidence_score'];
+        $keys = [
+            'topics', 'title', 'content_html', 'excerpt', 'slug_hint', 'changes',
+            'hallucination_flags', 'seo_score', 'posts', 'verdict', 'confidence_score',
+            'answer_html', 'quality_score', 'should_become_article', 'suggested_title',
+            'summary', 'keywords', 'confidence', 'fact_check_status', 'meta_title',
+            'facebook', 'instagram', 'linkedin',
+        ];
 
         foreach ($keys as $key) {
             if (array_key_exists($key, $content)) {
