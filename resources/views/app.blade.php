@@ -18,7 +18,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="generator" content="SIGESC">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="https://admin.sisgesc.net/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ config('sigesc.favicon_url') }}" type="image/x-icon">
     <link rel="alternate" type="application/rss+xml" title="Blog SIGESC" href="{{ url('/feed.xml') }}">
 
     {{-- Meta/OG/JSON-LD no HTML inicial (antes de qualquer JS) --}}
@@ -26,7 +26,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;300;400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;600;700&display=swap"
         rel="stylesheet">
 
     @routes

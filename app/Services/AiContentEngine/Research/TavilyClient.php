@@ -90,6 +90,45 @@ class TavilyClient
         $merged = ['answer' => null, 'results' => []];
         $seen = [];
 
+        // Credit saver: one Search call — prefer trusted domains by scoring, not a second request.
+        if ((bool) config('ai_content_engine.credit_saver.single_search', true)) {
+            $open = $this->search([
+                'query' => $query,
+                'max_results' => $maxResults,
+                'topic' => $topic,
+                'include_answer' => true,
+                'days' => $topic === 'news' ? 30 : null,
+            ]);
+
+            $merged['answer'] = $open['answer'];
+            foreach ($open['results'] as $item) {
+                $url = (string) ($item['url'] ?? '');
+                if ($url === '' || isset($seen[$url])) {
+                    continue;
+                }
+                $seen[$url] = true;
+                $host = parse_url($url, PHP_URL_HOST) ?: '';
+                $host = strtolower(preg_replace('/^www\./', '', (string) $host));
+                $item['_preferred_domain'] = $host !== '' && collect($trusted)->contains(
+                    fn ($domain) => $host === $domain || str_ends_with($host, '.'.$domain)
+                );
+                $merged['results'][] = $item;
+            }
+
+            usort($merged['results'], function (array $a, array $b) {
+                $pref = ((int) ! empty($b['_preferred_domain'])) <=> ((int) ! empty($a['_preferred_domain']));
+                if ($pref !== 0) {
+                    return $pref;
+                }
+
+                return ((float) ($b['score'] ?? 0)) <=> ((float) ($a['score'] ?? 0));
+            });
+
+            $merged['results'] = array_slice($merged['results'], 0, $maxResults);
+
+            return $merged;
+        }
+
         try {
             if ($trusted !== []) {
                 $preferred = $this->search([

@@ -8,6 +8,7 @@ import { FaRegNewspaper, FaTools, FaRobot } from 'react-icons/fa';
 import { FaDownload } from 'react-icons/fa6';
 import { RiCustomerService2Line } from 'react-icons/ri';
 import { features } from '@/services/public/veriables';
+import { SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
 
 type NavItem = {
     href: string;
@@ -192,7 +193,7 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
                                     Entrar
                                 </Link>
                                 <a
-                                    href="https://admin.sisgesc.net/getting-started"
+                                    href={SIGESC_GETTING_STARTED_URL}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="px-3 xl:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-blue-300 hover:text-blue-600 transition-colors duration-300 font-medium text-sm hidden sm:block"
@@ -304,7 +305,7 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
                                                 Entrar
                                             </Link>
                                             <a
-                                                href="https://admin.sisgesc.net/getting-started"
+                                                href={SIGESC_GETTING_STARTED_URL}
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 className="block w-full text-center px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:border-blue-300 hover:text-blue-600 transition-colors duration-300 font-medium"

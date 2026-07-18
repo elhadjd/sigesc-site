@@ -129,8 +129,14 @@ class AiContentEngineController extends Controller
         $provider = $llm->provider();
         $message = 'Pipeline diário enviado para a fila (LLM: '.($provider ?? 'n/d').').';
 
+        $driver = (string) config('queue.default');
+        if ($driver === 'database') {
+            $message .= ' Com QUEUE_CONNECTION=database, mantenha `php artisan queue:work database --timeout=3600` a correr.';
+        }
+
         return $this->actionResponse($request, true, $message, 200, [
             'provider' => $provider,
+            'queue' => $driver,
         ]);
     }
 
@@ -138,7 +144,15 @@ class AiContentEngineController extends Controller
     {
         ProcessArticlePipeline::dispatch($article->id)->afterResponse();
 
-        return $this->actionResponse($request, true, 'Pipeline do artigo enviado para a fila.');
+        $message = 'Pipeline do artigo enviado para a fila (job).';
+        if ((string) config('queue.default') === 'database') {
+            $message .= ' Com QUEUE_CONNECTION=database, mantenha `php artisan queue:work database --timeout=3600` a correr.';
+        }
+
+        return $this->actionResponse($request, true, $message, 200, [
+            'article_id' => $article->id,
+            'queue' => (string) config('queue.default'),
+        ]);
     }
 
     public function approve(Request $request, Article $article, PublisherAgent $publisher)
@@ -200,6 +214,19 @@ class AiContentEngineController extends Controller
 
     public function jobs()
     {
+        $driver = (string) config('queue.default');
+        $laravelPending = 0;
+        $laravelFailed = 0;
+
+        try {
+            if ($driver === 'database') {
+                $laravelPending = (int) DB::table('jobs')->count();
+                $laravelFailed = (int) DB::table('failed_jobs')->count();
+            }
+        } catch (\Throwable) {
+            // tables may not exist yet
+        }
+
         return Inertia::render('admin/ai-content/jobs', [
             'jobs' => AiJob::with('article:id,title,slug,status')
                 ->latest()
@@ -210,6 +237,14 @@ class AiContentEngineController extends Controller
                 'failed' => AiJob::where('status', 'failed')->count(),
                 'completed' => AiJob::where('status', 'completed')->count(),
             ],
+            'queueDriver' => $driver,
+            'laravelQueue' => [
+                'pending' => $laravelPending,
+                'failed' => $laravelFailed,
+            ],
+            'workerHint' => $driver === 'database'
+                ? 'php artisan queue:work database --timeout=3600 --tries=1 --sleep=2'
+                : null,
         ]);
     }
 

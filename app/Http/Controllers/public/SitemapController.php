@@ -12,7 +12,7 @@ class SitemapController extends Controller
 {
     public function index(): Response
     {
-        $base = rtrim(config('app.url') ?: 'https://www.sisgesc.net', '/');
+        $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
 
         $staticUrls = [
             ['loc' => $base.'/', 'changefreq' => 'weekly', 'priority' => '1.0'],

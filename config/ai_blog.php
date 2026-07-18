@@ -34,7 +34,7 @@ return [
     'research' => [
         'results_per_query' => 6,
         'max_pages_to_fetch' => 4,
-        'user_agent' => 'SIGESC-BlogBot/1.0 (+https://www.sisgesc.net)',
+        'user_agent' => 'SIGESC-BlogBot/1.0 (+'.rtrim((string) env('SIGESC_SITE_URL', 'https://www.sisgesc.net'), '/').')',
     ],
 
     /*

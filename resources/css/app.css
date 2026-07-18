@@ -1,43 +1,155 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-*{
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+*,
+*::before,
+*::after {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    @include scroll;
-    h1{
-      font-size: 17px !important;
-      font-weight: 500 !important;
-      color: rgba(44, 44, 44, 0.815)
-    }
-    p{
-      font-size: 15px !important;
-      color: rgba(0, 0, 0, 0.685);
-    }
 }
+
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+    font-family: Barlow, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 .bg-grid-pattern {
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
 }
 
 .blur-3xl {
-  filter: blur(64px);
+    filter: blur(64px);
 }
+
 @keyframes spin {
     from {
-      transform: rotate(0deg);
+        transform: rotate(0deg);
     }
     to {
-      transform: rotate(360deg);
+        transform: rotate(360deg);
     }
-  }
+}
 
-  /* Classe utilitária para usar no componente */
-  .LoadingButtons {
+.LoadingButtons {
     animation: spin 1s linear infinite;
-  }
+}
 
+/* Blog / article reading surface — titles, subtitles and links must stand out */
+.blog-display {
+    font-family: Fraunces, Georgia, 'Times New Roman', serif;
+    font-optical-sizing: auto;
+}
+
+.blog-body {
+    font-family: Barlow, system-ui, sans-serif;
+}
+
+.blog-prose {
+    color: #1e293b;
+    font-size: 1.125rem;
+    line-height: 1.85;
+}
+
+.blog-prose > *:first-child {
+    margin-top: 0;
+}
+
+.blog-prose h1,
+.blog-prose h2,
+.blog-prose h3,
+.blog-prose h4 {
+    font-family: Fraunces, Georgia, 'Times New Roman', serif;
+    color: #0f172a;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin-top: 2.25rem;
+    margin-bottom: 0.85rem;
+}
+
+.blog-prose h1 {
+    font-size: clamp(1.85rem, 2.5vw, 2.35rem);
+}
+
+.blog-prose h2 {
+    font-size: clamp(1.55rem, 2vw, 1.95rem);
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.blog-prose h3 {
+    font-size: clamp(1.25rem, 1.6vw, 1.45rem);
+}
+
+.blog-prose h4 {
+    font-size: 1.15rem;
+}
+
+.blog-prose p {
+    margin: 0 0 1.15rem;
+    color: #334155;
+    font-size: 1.125rem;
+}
+
+.blog-prose a {
+    color: #0b5cab;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.blog-prose a:hover {
+    color: #084078;
+    text-decoration-color: #084078;
+}
+
+.blog-prose ul,
+.blog-prose ol {
+    margin: 0 0 1.25rem;
+    padding-left: 1.35rem;
+    color: #334155;
+}
+
+.blog-prose li {
+    margin-bottom: 0.45rem;
+}
+
+.blog-prose li::marker {
+    color: #0b5cab;
+}
+
+.blog-prose strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.blog-prose blockquote {
+    margin: 1.5rem 0;
+    padding: 0.85rem 1.15rem;
+    border-left: 4px solid #0b5cab;
+    background: #f0f7fc;
+    color: #1e3a5f;
+    font-style: italic;
+}
+
+.blog-prose img {
+    border-radius: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.blog-prose code {
+    font-size: 0.92em;
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.3rem;
+}

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\public;
 use App\Http\Controllers\Controller;
 use App\Jobs\AiContent\AnswerExpertQuestion;
 use App\Models\AiContent\ExpertQuestion;
-use App\Services\AiContentEngine\AskExpert\AskExpertService;
 use App\Services\Seo\PublicPageContent;
 use App\Services\Seo\SeoBuilder;
 use Illuminate\Http\Request;
@@ -25,39 +24,35 @@ class AskExpertController extends Controller
         ]);
     }
 
-    public function store(Request $request, AskExpertService $service)
+    public function store(Request $request)
     {
         $data = $request->validate([
             'question' => 'required|string|min:12|max:1000',
             'asker_name' => 'nullable|string|max:120',
             'asker_email' => 'nullable|email|max:180',
-            'async' => 'nullable|boolean',
         ]);
 
-        if ($request->boolean('async')) {
-            AnswerExpertQuestion::dispatch([
-                'question' => $data['question'],
-                'asker_name' => $data['asker_name'] ?? null,
-                'asker_email' => $data['asker_email'] ?? null,
-            ]);
-
-            return back()->with('success', 'Pergunta recebida. A resposta será processada em breve.');
-        }
-
-        $question = $service->ask([
+        $question = ExpertQuestion::create([
             'question' => $data['question'],
             'asker_name' => $data['asker_name'] ?? null,
             'asker_email' => $data['asker_email'] ?? null,
+            'status' => 'queued',
         ]);
+
+        AnswerExpertQuestion::dispatch($question->id)->afterResponse();
+
+        $message = filled($question->asker_email)
+            ? 'Pergunta recebida. Estamos a pesquisar em segundo plano — a resposta também será enviada para o seu email (com link do artigo, se for publicado).'
+            : 'Pergunta recebida. Estamos a pesquisar em segundo plano. Acompanhe esta página ou indique um email na próxima vez para receber o resultado.';
 
         return redirect()
             ->route('ask-expert.show', $question->uuid)
-            ->with('success', 'Resposta gerada com sucesso.');
+            ->with('success', $message);
     }
 
     public function show(Request $request, string $uuid)
     {
-        $question = ExpertQuestion::with('article:id,title,slug,status')
+        $question = ExpertQuestion::with('article:id,title,slug,status,published_at,post_id')
             ->where('uuid', $uuid)
             ->firstOrFail();
 
@@ -72,7 +67,7 @@ class AskExpertController extends Controller
             'kicker' => 'Pergunte ao Especialista',
             'headline' => $question->question,
             'lead' => 'Resposta gerada com base em pesquisa. Confirme sempre na legislação e na AGT.',
-            'html' => $question->answer_html ?: '<p>Resposta em processamento.</p>',
+            'html' => $question->answer_html ?: '<p>Resposta em processamento na fila.</p>',
             'links' => [
                 ['href' => url('/pergunte-ao-especialista'), 'label' => 'Nova pergunta'],
                 ['href' => url('/blog/posts'), 'label' => 'Blog SIGESC'],
@@ -83,6 +78,9 @@ class AskExpertController extends Controller
             'question' => $question,
             'seo' => $seo,
             'prerender' => $prerender,
+            'flash' => [
+                'success' => $request->session()->get('success'),
+            ],
         ]);
     }
 }

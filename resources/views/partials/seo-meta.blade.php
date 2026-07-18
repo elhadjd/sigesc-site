@@ -7,7 +7,7 @@
         $seoTitle = $seo['title'] ?? 'SIGESC';
         $seoDescription = $seo['description'] ?? '';
         $seoCanonical = $seo['canonical'] ?? url()->current();
-        $seoImage = $seo['og_image'] ?? 'https://admin.sisgesc.net/logo.png';
+        $seoImage = $seo['og_image'] ?? config('sigesc.logo_url');
     @endphp
     <title>{{ $seoTitle }}</title>
     <meta name="description" content="{{ $seoDescription }}">
@@ -48,33 +48,33 @@
         content="openerp, código aberto, odoo, negócios, aplicativos, saas, nuvem, insider, erp, software empresarial, software de gestão, PDV avançado, controle financeiro, gestão de estoque, gestão de compras, pequenas e médias empresas, eficiência empresarial" />
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="SIGESC">
-    <link rel="canonical" href="https://www.sisgesc.net" />
-    <meta property="og:url" content="https://www.sisgesc.net">
+    <link rel="canonical" href="{{ config('sigesc.site_url') }}" />
+    <meta property="og:url" content="{{ config('sigesc.site_url') }}">
     <meta property="og:title" content="Software de gestão comercial" />
-    <meta property="og:image" content="https://admin.sisgesc.net/favicon.ico" />
+    <meta property="og:image" content="{{ config('sigesc.favicon_url') }}" />
     <meta name="description"
         content="O SIGESC é o software de gestão comercial completo para pequenas e médias empresas. Gerencie PDV, estoque, finanças e compras em uma única plataforma. Simplifique seus processos e impulsione seu negócio com eficiência e inovação.">
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "SIGESC - Software de Gestão Integrado",
-        "description": "O SIGESC é um software de gestão completo para pequenas e médias empresas, oferecendo PDV, controle financeiro, estoque e compras em uma única plataforma.",
-        "url": "https://www.sisgesc.net",
-        "logo": "https://admin.sisgesc.net/favicon.ico",
-        "image": "https://admin.sisgesc.net/logo.png",
-        "applicationCategory": "BusinessApplication",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "AOA"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "SIGESC",
-            "url": "https://www.sisgesc.net"
-        }
-    }
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'SoftwareApplication',
+        'name' => 'SIGESC - Software de Gestão Integrado',
+        'description' => 'O SIGESC é um software de gestão completo para pequenas e médias empresas, oferecendo PDV, controle financeiro, estoque e compras em uma única plataforma.',
+        'url' => config('sigesc.site_url'),
+        'logo' => config('sigesc.favicon_url'),
+        'image' => config('sigesc.logo_url'),
+        'applicationCategory' => 'BusinessApplication',
+        'offers' => [
+            '@type' => 'Offer',
+            'price' => '0',
+            'priceCurrency' => 'AOA',
+        ],
+        'publisher' => [
+            '@type' => 'Organization',
+            'name' => 'SIGESC',
+            'url' => config('sigesc.site_url'),
+        ],
+    ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT) !!}
     </script>
     <title>SIGESC - Software de Gestão Integrado para Empresas</title>
 @endif

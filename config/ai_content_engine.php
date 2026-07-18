@@ -28,12 +28,30 @@ return [
     'tavily' => [
         'api_key' => env('TAVILY_API_KEY'),
         'base_url' => rtrim(env('TAVILY_BASE_URL', 'https://api.tavily.com'), '/'),
-        'max_results' => (int) env('TAVILY_MAX_RESULTS', 8),
+        'max_results' => (int) env('TAVILY_MAX_RESULTS', 5),
         'enabled' => (bool) env('TAVILY_ENABLED', true),
         'research_model' => env('TAVILY_RESEARCH_MODEL', 'mini'),
         'research_timeout' => (int) env('TAVILY_RESEARCH_TIMEOUT', 240),
         'research_poll_seconds' => (int) env('TAVILY_RESEARCH_POLL_SECONDS', 4),
-        'research_output_length' => env('TAVILY_RESEARCH_OUTPUT_LENGTH', 'standard'),
+        // concise uses fewer Research credits while keeping structure
+        'research_output_length' => env('TAVILY_RESEARCH_OUTPUT_LENGTH', 'concise'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tavily credit saver — fewer API calls without dropping article quality
+    |--------------------------------------------------------------------------
+    | Keeps Writer + FactChecker as Research LLM steps; SEO/social/review/summary
+    | use heuristics; Search uses a single call per query.
+    */
+    'credit_saver' => [
+        'enabled' => (bool) env('AI_CONTENT_CREDIT_SAVER', true),
+        'single_search' => (bool) env('AI_CONTENT_SINGLE_SEARCH', true),
+        'heuristic_seo' => (bool) env('AI_CONTENT_HEURISTIC_SEO', true),
+        'heuristic_social' => (bool) env('AI_CONTENT_HEURISTIC_SOCIAL', true),
+        'skip_reviewer_llm' => (bool) env('AI_CONTENT_SKIP_REVIEWER_LLM', true),
+        'skip_research_summary_llm' => (bool) env('AI_CONTENT_SKIP_RESEARCH_SUMMARY_LLM', true),
+        'trend_seed_queries' => (int) env('AI_CONTENT_TREND_SEED_QUERIES', 2),
     ],
 
     /*
@@ -43,10 +61,11 @@ return [
     */
     'research' => [
         'cache_days' => (int) env('RESEARCH_CACHE_DAYS', 30),
-        'max_sources' => (int) env('RESEARCH_MAX_SOURCES', 12),
+        'max_sources' => (int) env('RESEARCH_MAX_SOURCES', 8),
         'min_trust_score' => (int) env('RESEARCH_MIN_TRUST_SCORE', 50),
         'prefer_official' => true,
-        'news_enabled' => (bool) env('RESEARCH_NEWS_ENABLED', true),
+        // News doubles Tavily Search cost; keep off unless you need freshness bursts.
+        'news_enabled' => (bool) env('RESEARCH_NEWS_ENABLED', false),
         'internal_knowledge_enabled' => (bool) env('RESEARCH_INTERNAL_ENABLED', true),
         'trust_scores' => [
             'official' => 100,
@@ -76,7 +95,8 @@ return [
     |--------------------------------------------------------------------------
     */
     'pipeline' => [
-        'topics_per_day' => (int) env('AI_CONTENT_TOPICS_PER_DAY', 2),
+        // 1 article/day keeps quality high and Tavily spend predictable; raise via env if needed.
+        'topics_per_day' => (int) env('AI_CONTENT_TOPICS_PER_DAY', 1),
         'require_fact_check' => (bool) env('AI_CONTENT_REQUIRE_FACT_CHECK', true),
         'auto_publish' => (bool) env('AI_CONTENT_AUTO_PUBLISH', false),
         'schedule_delay_hours' => (int) env('AI_CONTENT_SCHEDULE_DELAY_HOURS', 6),
@@ -84,7 +104,7 @@ return [
         'sync_to_blog_posts' => (bool) env('AI_CONTENT_SYNC_TO_POSTS', true),
         'locale' => 'pt_AO',
         'language' => 'Português de Angola',
-        'brand_cta' => 'Conheça o SIGESC — software de gestão comercial feito para empresas em Angola.',
+        'brand_cta' => 'Conheça o SIGESC — software de gestão comercial (faturação, stock, PDV e vendas) feito para empresas em Angola. Para experimentar ou aceder ao painel: https://admin.sisgesc.net/getting-started. Site: https://www.sisgesc.net',
     ],
 
     'author' => [
@@ -113,17 +133,17 @@ return [
     ],
 
     'seed_queries' => [
-        // Fiscalidade & compliance
-        'AGT Angola faturação eletrónica obrigações PME',
-        'IVA Angola taxa geral regime simplificado',
-        'IRT Angola tabela retenção 2026 salários',
-        'Imposto Industrial Angola taxa 25% PME',
-        'retenção na fonte serviços 6,5% Angola',
-        'NIF empresa Angola como obter AGT',
-        'certidão de não dívida AGT Angola',
-        'Imposto Predial Urbano Angola isenções habitação',
-        'Imposto de Selo contratos Angola',
-        'contribuição especial operações cambiais Angola',
+        // Negócios digitais & crescimento (alto interesse de empresários)
+        'como vender na internet Angola PME WhatsApp Instagram',
+        'como fazer anúncios de sucesso Facebook Instagram Angola',
+        'melhor sistema gestão comercial Angola PDV ERP',
+        'software mais usado empresas Angola faturação stock',
+        'e-commerce Angola como começar loja online',
+        'marketing digital PME Angola Google Ads Meta Ads',
+        'como precificar produtos loja Angola margem lucro',
+        'como aumentar vendas loja física Luanda',
+        'WhatsApp Business catálogo vendas Angola',
+        'delivery restaurante Angola gestão encomendas',
         // Gestão & operações
         'software gestão comercial Angola PDV stock',
         'como controlar fluxo de caixa PME Angola',
@@ -131,26 +151,35 @@ return [
         'formação preço de venda margem lucro Angola',
         'recursos humanos processamento salarial Angola',
         'contratos de trabalho Angola obrigações empregador',
+        'CRM vendas equipa comercial Angola',
+        'relatório de vendas diário PME boas práticas',
+        // Fiscalidade & compliance
+        'AGT Angola faturação eletrónica obrigações PME',
+        'IVA Angola taxa geral regime simplificado',
+        'IRT Angola tabela retenção salários',
+        'Imposto Industrial Angola PME',
+        'NIF empresa Angola como obter AGT',
+        'certidão de não dívida AGT Angola',
         // Empreendedorismo & setores
         'abrir empresa Angola INAPEM passos',
         'licenciamento comercial restaurante Luanda',
         'gestão de salão de beleza Angola',
         'gestão de farmácia Angola requisitos',
-        'contabilidade organizada vs simplificada Angola',
         'crédito PME banca Angola BNA',
         'exportação Angola documentação aduaneira',
-        'proteção de dados empresas Angola',
-        'marketing digital PME Angola WhatsApp Business',
-        'preços transferência cambial BNA empresas',
+        'dropshipping Angola como funciona',
+        'fornecedores e importação China Angola PME',
     ],
 
     'categories' => [
         'AGT', 'IVA', 'IRT', 'Imposto Industrial', 'Imposto Predial', 'Imposto de Selo',
         'Faturação Eletrónica', 'Compliance Fiscal', 'Gestão', 'Finanças', 'Fluxo de Caixa',
-        'Empreendedorismo', 'Licenciamento', 'Marketing', 'Software', 'ERP', 'CRM', 'POS',
+        'Empreendedorismo', 'Licenciamento', 'Marketing', 'Marketing Digital', 'Anúncios',
+        'Vendas Online', 'E-commerce', 'Software', 'ERP', 'CRM', 'POS', 'PDV',
         'Inventário', 'Recursos Humanos', 'Vendas', 'Preçário', 'Pequenas Empresas',
         'Restaurantes', 'Farmácias', 'Lojas', 'Salões', 'Importação/Exportação',
         'Câmbio', 'Banca', 'Tecnologia', 'Notícias', 'Legislação', 'Gestão Comercial',
+        'WhatsApp Business', 'Dropshipping',
     ],
 
     'admin_emails' => array_filter(array_map('trim', explode(',', env('AI_CONTENT_ADMIN_EMAILS', '')))),

@@ -67,7 +67,7 @@ class ResearchGateway
 
         try {
             $response = Http::withHeaders([
-                'User-Agent' => 'SIGESC-AIContentEngine/1.0 (+https://www.sisgesc.net)',
+                'User-Agent' => 'SIGESC-AIContentEngine/1.0 (+'.config('sigesc.site_url').')',
             ])->timeout(25)->get('https://html.duckduckgo.com/html/', [
                 'q' => $query.' Angola',
                 'kl' => 'pt-pt',

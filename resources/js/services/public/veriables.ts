@@ -1,3 +1,4 @@
+import { SIGESC_GETTING_STARTED_URL, SIGESC_ADMIN_URL } from './domains';
 import { FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar, FiBarChart2, FiShoppingBag, FiDollarSign, FiGlobe } from "react-icons/fi";
 
 export const features = [
@@ -238,7 +239,7 @@ export const moduleData = {
                 },
                 {
                     text: "Testar Grátis",
-                    link: "https://admin.sisgesc.net/getting-started",
+                    link: SIGESC_GETTING_STARTED_URL,
                     variant: "secondary",
                     external: true
                 }
@@ -366,7 +367,7 @@ export const moduleData = {
             },
             {
             text: "Testar Online",
-            link: "https://admin.sisgesc.net/getting-started",
+            link: SIGESC_GETTING_STARTED_URL,
             variant: "secondary",
             external: true
             },
@@ -509,7 +510,7 @@ export const moduleData = {
                 },
                 {
                 text: "Testar Online",
-                link: "https://admin.sisgesc.net/getting-started",
+                link: SIGESC_GETTING_STARTED_URL,
                 variant: "secondary",
                 external: true
                 },
@@ -658,7 +659,7 @@ export const moduleData = {
             },
             {
             text: "Testar Online",
-            link: "https://admin.sisgesc.net/getting-started",
+            link: SIGESC_GETTING_STARTED_URL,
             variant: "secondary",
             external: true
             },
@@ -806,7 +807,7 @@ export const moduleData = {
             },
             {
             text: "Testar Online",
-            link: "https://admin.sisgesc.net/getting-started",
+            link: SIGESC_GETTING_STARTED_URL,
             variant: "secondary",
             external: true
             },
@@ -964,7 +965,7 @@ export const moduleData = {
                 },
                 {
                 text: "Testar Plataforma",
-                link: "https://admin.sisgesc.net/ecommerce-demo",
+                link: `${SIGESC_ADMIN_URL}/ecommerce-demo`,
                 variant: "secondary",
                 external: true
                 },
@@ -1125,7 +1126,7 @@ export const moduleData = {
             },
             {
             text: "Testar Online",
-            link: "https://admin.sisgesc.net/finance-demo",
+            link: `${SIGESC_ADMIN_URL}/finance-demo`,
             variant: "secondary",
             external: true
             },
@@ -1285,7 +1286,7 @@ export const moduleData = {
             },
             {
             text: "Testar Online",
-            link: "https://admin.sisgesc.net/compras-demo",
+            link: `${SIGESC_ADMIN_URL}/compras-demo`,
             variant: "secondary",
             external: true
             },
@@ -1449,7 +1450,7 @@ export const moduleData = {
             },
             {
             text: "Testar Ferramentas",
-            link: "https://admin.sisgesc.net/marketing-demo",
+            link: `${SIGESC_ADMIN_URL}/marketing-demo`,
             variant: "secondary",
             external: true
             },
@@ -1613,7 +1614,7 @@ export const moduleData = {
                 },
                 {
                     text: "Testar Grátis",
-                    link: "https://admin.sisgesc.net/getting-started",
+                    link: SIGESC_GETTING_STARTED_URL,
                     variant: "success",
                     external: true
                 }
