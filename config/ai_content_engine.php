@@ -1,5 +1,84 @@
 <?php
 
+$topicBuckets = [
+    'fiscal' => [
+        'label' => 'Fiscalidade & AGT',
+        'categories' => [
+            'AGT', 'IVA', 'IRT', 'Imposto Industrial', 'Imposto Predial', 'Imposto de Selo',
+            'Faturação Eletrónica', 'Compliance Fiscal', 'Legislação',
+        ],
+        'queries' => [
+            'AGT Angola faturação eletrónica obrigações PME',
+            'IVA Angola taxa geral regime simplificado 14% 7%',
+            'IRT Angola tabela retenção salários 2026',
+            'Imposto Industrial Angola PME obrigações',
+            'NIF empresa Angola como obter AGT',
+            'certidão de não dívida AGT Angola como pedir',
+            'AGT documento fiscal eletrónico requisitos Angola',
+            'declaração periódica IVA Angola prazos AGT',
+            'retenção na fonte Angola obrigações empregador',
+            'imposto predial urbano Angola como funciona',
+        ],
+    ],
+    'gestao' => [
+        'label' => 'Gestão & operações',
+        'categories' => [
+            'Gestão', 'Gestão Comercial', 'Finanças', 'Fluxo de Caixa', 'Inventário',
+            'Recursos Humanos', 'Software', 'ERP', 'CRM', 'POS', 'PDV', 'Preçário', 'Vendas',
+        ],
+        'queries' => [
+            'software gestão comercial Angola PDV stock faturação',
+            'como controlar fluxo de caixa PME Angola',
+            'gestão de inventário farmácia loja Angola',
+            'formação preço de venda margem lucro Angola',
+            'recursos humanos processamento salarial Angola',
+            'contratos de trabalho Angola obrigações empregador',
+            'CRM vendas equipa comercial Angola',
+            'relatório de vendas diário PME boas práticas',
+            'melhor sistema gestão comercial Angola PDV ERP',
+            'implementar ERP CRM nuvem PME Angola',
+        ],
+    ],
+    'marketing' => [
+        'label' => 'Marketing & vendas digitais',
+        'categories' => [
+            'Marketing', 'Marketing Digital', 'Anúncios', 'Vendas Online', 'E-commerce',
+            'WhatsApp Business', 'Dropshipping',
+        ],
+        'queries' => [
+            'como vender na internet Angola PME WhatsApp Instagram',
+            'como fazer anúncios de sucesso Facebook Instagram Angola',
+            'e-commerce Angola como começar loja online',
+            'marketing digital PME Angola Google Ads Meta Ads',
+            'WhatsApp Business catálogo vendas Angola',
+            'delivery restaurante Angola gestão encomendas',
+            'como aumentar vendas loja física Luanda',
+            'como precificar produtos loja Angola margem lucro',
+            'campanhas lead ads Facebook Instagram Angola PME',
+            'dropshipping Angola como funciona',
+        ],
+    ],
+    'empreendedorismo' => [
+        'label' => 'Empreendedorismo & setores',
+        'categories' => [
+            'Empreendedorismo', 'Licenciamento', 'Pequenas Empresas', 'Restaurantes',
+            'Farmácias', 'Lojas', 'Salões', 'Importação/Exportação', 'Banca', 'Câmbio',
+        ],
+        'queries' => [
+            'abrir empresa Angola INAPEM GUE passos',
+            'licenciamento comercial restaurante Luanda',
+            'gestão de salão de beleza Angola',
+            'gestão de farmácia Angola requisitos AGT',
+            'crédito PME banca Angola BNA',
+            'exportação Angola documentação aduaneira',
+            'fornecedores e importação China Angola PME',
+            'Guiché Único Empresa Angola constituição',
+            'licença comercial municipal Luanda requisitos',
+            'como formalizar negócio informal Angola NIF',
+        ],
+    ],
+];
+
 return [
 
     'enabled' => env('AI_CONTENT_ENGINE_ENABLED', true),
@@ -163,44 +242,25 @@ return [
         'sisgesc.net',
     ],
 
-    'seed_queries' => [
-        // Negócios digitais & crescimento (alto interesse de empresários)
-        'como vender na internet Angola PME WhatsApp Instagram',
-        'como fazer anúncios de sucesso Facebook Instagram Angola',
-        'melhor sistema gestão comercial Angola PDV ERP',
-        'software mais usado empresas Angola faturação stock',
-        'e-commerce Angola como começar loja online',
-        'marketing digital PME Angola Google Ads Meta Ads',
-        'como precificar produtos loja Angola margem lucro',
-        'como aumentar vendas loja física Luanda',
-        'WhatsApp Business catálogo vendas Angola',
-        'delivery restaurante Angola gestão encomendas',
-        // Gestão & operações
-        'software gestão comercial Angola PDV stock',
-        'como controlar fluxo de caixa PME Angola',
-        'gestão de inventário farmácia loja Angola',
-        'formação preço de venda margem lucro Angola',
-        'recursos humanos processamento salarial Angola',
-        'contratos de trabalho Angola obrigações empregador',
-        'CRM vendas equipa comercial Angola',
-        'relatório de vendas diário PME boas práticas',
-        // Fiscalidade & compliance
-        'AGT Angola faturação eletrónica obrigações PME',
-        'IVA Angola taxa geral regime simplificado',
-        'IRT Angola tabela retenção salários',
-        'Imposto Industrial Angola PME',
-        'NIF empresa Angola como obter AGT',
-        'certidão de não dívida AGT Angola',
-        // Empreendedorismo & setores
-        'abrir empresa Angola INAPEM passos',
-        'licenciamento comercial restaurante Luanda',
-        'gestão de salão de beleza Angola',
-        'gestão de farmácia Angola requisitos',
-        'crédito PME banca Angola BNA',
-        'exportação Angola documentação aduaneira',
-        'dropshipping Angola como funciona',
-        'fornecedores e importação China Angola PME',
+    /*
+    |--------------------------------------------------------------------------
+    | Topic buckets — TrendAgent rotates these so the blog diversifies
+    |--------------------------------------------------------------------------
+    */
+    'topic_rotation' => [
+        'enabled' => (bool) env('AI_CONTENT_TOPIC_ROTATION', true),
+        'cooldown_days' => (int) env('AI_CONTENT_BUCKET_COOLDOWN_DAYS', 5),
+        'prefer_underused' => (bool) env('AI_CONTENT_PREFER_UNDERUSED_BUCKETS', true),
     ],
+
+    'topic_buckets' => $topicBuckets,
+
+    'seed_queries' => array_values(array_unique(array_merge(
+        ...array_map(
+            static fn (array $bucket): array => $bucket['queries'] ?? [],
+            array_values($topicBuckets)
+        )
+    ))),
 
     'categories' => [
         'AGT', 'IVA', 'IRT', 'Imposto Industrial', 'Imposto Predial', 'Imposto de Selo',
