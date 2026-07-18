@@ -15,6 +15,7 @@ use App\Models\AiContent\ResearchSetting;
 use App\Models\AiContent\ResearchSource;
 use App\Services\AiContentEngine\Agents\FactCheckerAgent;
 use App\Services\AiContentEngine\Agents\PublisherAgent;
+use App\Services\AiContentEngine\Pipeline\ContentPipeline;
 use App\Services\AiContentEngine\Research\TavilyClient;
 use App\Services\AiContentEngine\Support\LlmGateway;
 use Illuminate\Http\Request;
@@ -212,8 +213,10 @@ class AiContentEngineController extends Controller
         return back()->with($flash, $message);
     }
 
-    public function jobs()
+    public function jobs(ContentPipeline $pipeline)
     {
+        $pipeline->reapStuckJobs();
+
         $driver = (string) config('queue.default');
         $laravelPending = 0;
         $laravelFailed = 0;

@@ -57,36 +57,61 @@ class ContentPipeline
         ]);
 
         try {
+            $this->reapStuckJobs();
+
             $discovery = $this->trend->handle(new Article(), $job, [
                 'limit' => (int) config('ai_content_engine.pipeline.topics_per_day', 2),
             ]);
 
             $produced = [];
+            $failures = [];
             $topics = $discovery['topics'] ?? [];
 
             foreach ($topics as $index => $article) {
                 /** @var Article $article */
                 $job->update([
                     'article_id' => $article->id,
-                    'progress' => (int) (($index / max(1, count($topics))) * 100),
+                    'progress' => (int) (($index / max(1, count($topics))) * 90),
+                    'current_agent' => 'ContentPipeline',
                 ]);
 
-                $produced[] = $this->processArticle($article, $job);
+                try {
+                    // Own AiJob per article so a Writer failure does not mark the daily job failed mid-run.
+                    $produced[] = $this->processArticle($article, null, [
+                        'from_daily_job_id' => $job->id,
+                    ]);
+                } catch (Throwable $articleError) {
+                    $failures[] = [
+                        'article_id' => $article->id,
+                        'error' => $articleError->getMessage(),
+                    ];
+                    $this->logger->error(
+                        'Daily article failed: '.$articleError->getMessage(),
+                        $job,
+                        $article,
+                        'ContentPipeline'
+                    );
+                }
             }
 
             $job->update([
-                'status' => 'completed',
+                'status' => $failures !== [] && $produced === [] ? 'failed' : 'completed',
                 'progress' => 100,
                 'finished_at' => now(),
+                'error' => $failures !== []
+                    ? ('Alguns artigos falharam: '.collect($failures)->pluck('error')->take(3)->implode(' | '))
+                    : null,
                 'output' => [
                     'discovered' => count($topics),
                     'processed' => count($produced),
+                    'failed' => count($failures),
                     'article_ids' => collect($produced)->pluck('article_id')->all(),
+                    'failures' => $failures,
                 ],
                 'current_agent' => null,
             ]);
 
-            return $job->output;
+            return $job->output ?? [];
         } catch (Throwable $e) {
             $job->update([
                 'status' => 'failed',
@@ -96,6 +121,22 @@ class ContentPipeline
             $this->logger->error($e->getMessage(), $job, null, 'ContentPipeline');
             throw $e;
         }
+    }
+
+    /**
+     * Mark AI jobs stuck in "running" (crashed worker / timeout) as failed.
+     */
+    public function reapStuckJobs(int $minutes = 90): int
+    {
+        return AiJob::query()
+            ->where('status', 'running')
+            ->where('updated_at', '<', now()->subMinutes($minutes))
+            ->update([
+                'status' => 'failed',
+                'error' => 'Job marcado como falhado: ficou em running sem atualização (worker parado ou timeout).',
+                'finished_at' => now(),
+                'current_agent' => null,
+            ]);
     }
 
     /**
