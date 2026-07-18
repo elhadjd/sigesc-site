@@ -91,7 +91,7 @@ class BlogSeoTest extends TestCase
         );
     }
 
-    public function test_blog_filter_ajax_still_returns_json(): void
+    public function test_blog_page_never_returns_json_even_with_json_accept(): void
     {
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
@@ -99,7 +99,15 @@ class BlogSeoTest extends TestCase
         ])->get('/blog/posts');
 
         $response->assertOk();
+        $response->assertInertia(fn ($page) => $page->component('blog/index'));
+    }
+
+    public function test_blog_filter_data_endpoint_returns_json(): void
+    {
+        $response = $this->getJson('/blog/posts/data');
+
+        $response->assertOk();
         $response->assertJsonStructure(['posts', 'pagination', 'categories']);
-        $this->assertFalse($response->headers->has('X-Inertia'));
+        $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
     }
 }

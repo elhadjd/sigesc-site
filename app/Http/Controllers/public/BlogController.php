@@ -20,9 +20,65 @@ class BlogController extends Controller
     ) {}
 
     /**
-     * Display a listing of the resource.
+     * Blog index page — always HTML / Inertia. Never JSON.
+     * Filter AJAX uses {@see data()} at /blog/posts/data so caches/SW cannot collide.
      */
     public function index(Request $request)
+    {
+        $data = $this->listingPayload($request);
+        $seo = $this->seo->forBlogIndex();
+        $prerender = $this->content->blogIndex($data['posts'], $data['categories']);
+
+        if (CrawlerDetector::isSearchCrawler($request)) {
+            return response()
+                ->view('seo.blog-index', [
+                    'posts' => $data['posts'],
+                    'pagination' => $data['pagination'],
+                    'seo' => $seo,
+                    'page' => $prerender,
+                    'categories' => $data['categories'],
+                ])
+                ->header('X-Robots-Tag', 'index, follow');
+        }
+
+        return Inertia::render('blog/index', [
+            'posts' => $data['posts'],
+            'pagination' => $data['pagination'],
+            'categories' => $data['categories'],
+            'featuredPosts' => $data['featuredPosts'],
+            'recentPosts' => $data['recentPosts'],
+            'trendingPosts' => $data['trendingPosts'],
+            'filters' => [
+                'category' => $request->category ?? 'all',
+                'search' => $request->search ?? '',
+                'sort' => $request->sort ?? 'newest',
+            ],
+            'seo' => $seo,
+            'prerender' => $prerender,
+        ]);
+    }
+
+    /**
+     * JSON feed for blog filters / pagination (dedicated URL).
+     */
+    public function data(Request $request)
+    {
+        return response()
+            ->json($this->listingPayload($request))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+    }
+
+    /**
+     * @return array{
+     *   posts: array<int, mixed>,
+     *   pagination: array<string, int>,
+     *   categories: array<int, string>,
+     *   featuredPosts: \Illuminate\Support\Collection,
+     *   recentPosts: \Illuminate\Support\Collection,
+     *   trendingPosts: \Illuminate\Support\Collection
+     * }
+     */
+    protected function listingPayload(Request $request): array
     {
         $query = Post::published()
             ->orderBy('publish_date', 'desc');
@@ -55,86 +111,34 @@ class BlogController extends Controller
 
         $posts = $query->paginate(9);
 
-        $categories = Post::published()
-            ->select('category', DB::raw('count(*) as total'))
-            ->groupBy('category')
-            ->orderBy('total', 'desc')
-            ->pluck('category')
-            ->toArray();
-
-        $featuredPosts = Post::published()
-            ->featured()
-            ->orderBy('publish_date', 'desc')
-            ->limit(3)
-            ->get();
-
-        $recentPosts = Post::published()
-            ->orderBy('publish_date', 'desc')
-            ->limit(5)
-            ->get();
-
-        $trendingPosts = Post::published()
-            ->orderBy('views', 'desc')
-            ->limit(5)
-            ->get();
-
-        $pagination = [
-            'current_page' => $posts->currentPage(),
-            'last_page' => $posts->lastPage(),
-            'per_page' => $posts->perPage(),
-            'total' => $posts->total(),
-        ];
-
-        $data = [
+        return [
             'posts' => $posts->items(),
-            'pagination' => $pagination,
-            'categories' => $categories,
-            'featuredPosts' => $featuredPosts,
-            'recentPosts' => $recentPosts,
-            'trendingPosts' => $trendingPosts,
-        ];
-
-        // Filter/pagination AJAX on the blog page uses fetch + Accept: application/json.
-        // Inertia also sends X-Requested-With: XMLHttpRequest — never treat those as JSON APIs.
-        if (
-            $request->header('X-Inertia') === null
-            && $request->header('X-Requested-With') === 'XMLHttpRequest'
-            && $request->wantsJson()
-        ) {
-            return response()->json($data);
-        }
-
-        $seo = $this->seo->forBlogIndex();
-        $prerender = $this->content->blogIndex($posts->items(), $categories);
-
-        // Full HTML document for search engines / social crawlers.
-        if (CrawlerDetector::isSearchCrawler($request)) {
-            return response()
-                ->view('seo.blog-index', [
-                    'posts' => $posts->items(),
-                    'pagination' => $pagination,
-                    'seo' => $seo,
-                    'page' => $prerender,
-                    'categories' => $categories,
-                ])
-                ->header('X-Robots-Tag', 'index, follow');
-        }
-
-        return Inertia::render('blog/index', [
-            'posts' => $data['posts'],
-            'pagination' => $data['pagination'],
-            'categories' => $data['categories'],
-            'featuredPosts' => $data['featuredPosts'],
-            'recentPosts' => $data['recentPosts'],
-            'trendingPosts' => $data['trendingPosts'],
-            'filters' => [
-                'category' => $request->category ?? 'all',
-                'search' => $request->search ?? '',
-                'sort' => $request->sort ?? 'newest',
+            'pagination' => [
+                'current_page' => $posts->currentPage(),
+                'last_page' => $posts->lastPage(),
+                'per_page' => $posts->perPage(),
+                'total' => $posts->total(),
             ],
-            'seo' => $seo,
-            'prerender' => $prerender,
-        ]);
+            'categories' => Post::published()
+                ->select('category', DB::raw('count(*) as total'))
+                ->groupBy('category')
+                ->orderBy('total', 'desc')
+                ->pluck('category')
+                ->toArray(),
+            'featuredPosts' => Post::published()
+                ->featured()
+                ->orderBy('publish_date', 'desc')
+                ->limit(3)
+                ->get(),
+            'recentPosts' => Post::published()
+                ->orderBy('publish_date', 'desc')
+                ->limit(5)
+                ->get(),
+            'trendingPosts' => Post::published()
+                ->orderBy('views', 'desc')
+                ->limit(5)
+                ->get(),
+        ];
     }
 
     /**
