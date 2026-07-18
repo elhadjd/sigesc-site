@@ -166,7 +166,7 @@ class TavilyClient
 
         $payload = [
             'input' => $input,
-            'model' => $model ?: config('ai_content_engine.tavily.research_model', 'mini'),
+            'model' => $this->normalizeResearchModel($model),
             'stream' => false,
             'output_schema' => $outputSchema,
             'output_length' => config('ai_content_engine.tavily.research_output_length', 'standard'),
@@ -245,6 +245,23 @@ class TavilyClient
         } while (microtime(true) < $deadline);
 
         throw new \RuntimeException("Tavily Research timed out after {$timeout}s (request_id={$requestId}).");
+    }
+
+    /**
+     * Tavily Research only accepts mini|pro|auto.
+     * Agents may still pass OpenAI model names (e.g. gpt-4o-mini) — map those away.
+     */
+    public function normalizeResearchModel(?string $model): string
+    {
+        $candidate = strtolower(trim((string) ($model ?: config('ai_content_engine.tavily.research_model', 'mini'))));
+
+        if (in_array($candidate, ['mini', 'pro', 'auto'], true)) {
+            return $candidate;
+        }
+
+        $fallback = strtolower(trim((string) config('ai_content_engine.tavily.research_model', 'mini')));
+
+        return in_array($fallback, ['mini', 'pro', 'auto'], true) ? $fallback : 'mini';
     }
 
     protected function baseUrl(): string
