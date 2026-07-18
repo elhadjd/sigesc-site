@@ -100,4 +100,43 @@ class LlmGatewayTest extends TestCase
                 || str_contains($request->url(), 'chat/completions');
         });
     }
+
+    public function test_openai_review_model_name_is_mapped_for_tavily(): void
+    {
+        config([
+            'ai_content_engine.llm.provider' => 'tavily',
+            'ai_content_engine.tavily.enabled' => true,
+            'ai_content_engine.tavily.api_key' => 'tvly-test',
+            'ai_content_engine.tavily.base_url' => 'https://api.tavily.com',
+            'ai_content_engine.tavily.research_model' => 'mini',
+            'ai_content_engine.tavily.research_timeout' => 30,
+            'ai_content_engine.tavily.research_poll_seconds' => 1,
+            'ai_content_engine.openai.api_key' => null,
+        ]);
+
+        Http::fake([
+            'api.tavily.com/research' => Http::response([
+                'request_id' => 'req-map',
+                'status' => 'completed',
+                'content' => [
+                    'json' => json_encode(['content_html' => '<p>ok</p>', 'changes' => []], JSON_UNESCAPED_UNICODE),
+                ],
+            ], 201),
+        ]);
+
+        app(LlmGateway::class)->chatJson([
+            ['role' => 'system', 'content' => 'Review'],
+            ['role' => 'user', 'content' => '{}'],
+        ], 'gpt-4o-mini', 0.3);
+
+        Http::assertSent(function ($request) {
+            if (! str_ends_with($request->url(), '/research') || $request->method() !== 'POST') {
+                return false;
+            }
+
+            $model = $request['model'] ?? null;
+
+            return $model === 'mini';
+        });
+    }
 }

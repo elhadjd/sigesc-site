@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\AiContent\RunDailyContentPipeline;
 use App\Models\AiContent\Article;
 use App\Models\AiContent\Category;
 use App\Models\User;
 use Database\Seeders\AiContentEngineSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Tests\TestCase;
 
 class AiContentEngineTest extends TestCase
@@ -113,6 +115,51 @@ class AiContentEngineTest extends TestCase
             ->post('/admin/ai-content/run-daily')
             ->assertRedirect('/admin/ai-content')
             ->assertSessionHas('error');
+    }
+
+    public function test_run_daily_returns_json_for_axios(): void
+    {
+        Bus::fake();
+
+        config([
+            'ai_content_engine.tavily.enabled' => true,
+            'ai_content_engine.tavily.api_key' => 'tvly-test',
+            'ai_content_engine.openai.api_key' => null,
+            'ai_content_engine.llm.provider' => 'auto',
+        ]);
+
+        $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
+
+        $this->actingAs($user)
+            ->postJson('/admin/ai-content/run-daily')
+            ->assertOk()
+            ->assertJson([
+                'ok' => true,
+                'provider' => 'tavily',
+            ])
+            ->assertJsonPath('message', fn ($m) => str_contains((string) $m, 'Pipeline'));
+
+        Bus::assertDispatched(RunDailyContentPipeline::class);
+    }
+
+    public function test_run_daily_json_error_without_keys(): void
+    {
+        config([
+            'ai_content_engine.tavily.enabled' => true,
+            'ai_content_engine.tavily.api_key' => null,
+            'ai_content_engine.openai.api_key' => null,
+            'ai_content_engine.llm.provider' => 'auto',
+        ]);
+
+        $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
+
+        $this->actingAs($user)
+            ->postJson('/admin/ai-content/run-daily')
+            ->assertStatus(422)
+            ->assertJson([
+                'ok' => false,
+            ])
+            ->assertJsonPath('message', fn ($m) => str_contains((string) $m, 'TAVILY_API_KEY'));
     }
 
     public function test_dashboard_shows_tavily_provider_status(): void

@@ -1,5 +1,6 @@
-import React from 'react';
-import { Link, router } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Link } from '@inertiajs/react';
+import { Api } from '@/axiosConfig';
 import AiContentLayout from './Layout';
 
 type Stats = {
@@ -46,6 +47,9 @@ export default function AiContentDashboard({
         openai_ready?: boolean;
     };
 }) {
+    const [busy, setBusy] = useState(false);
+    const [flash, setFlash] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
+
     const cards = [
         { label: 'Artigos', value: stats.total },
         { label: 'Publicados', value: stats.published },
@@ -57,16 +61,38 @@ export default function AiContentDashboard({
         { label: 'Visitas', value: stats.views },
     ];
 
+    const runDaily = async () => {
+        if (busy || !config.llm_ready) {
+            return;
+        }
+
+        setBusy(true);
+        setFlash(null);
+
+        try {
+            // timeout 0: sync queues may run the full pipeline in-request
+            const { data } = await Api.post('/admin/ai-content/run-daily', null, { timeout: 0 });
+            setFlash({ type: 'ok', text: data.message || 'Pipeline enviado.' });
+        } catch (error: any) {
+            setFlash({
+                type: 'error',
+                text: error?.response?.data?.message || error?.message || 'Falha ao iniciar o pipeline diário.',
+            });
+        } finally {
+            setBusy(false);
+        }
+    };
+
     return (
         <AiContentLayout title="Painel operacional">
             <div className="mb-6 flex flex-wrap items-center gap-3">
                 <button
                     type="button"
-                    onClick={() => router.post('/admin/ai-content/run-daily')}
-                    disabled={!config.llm_ready}
+                    onClick={runDaily}
+                    disabled={!config.llm_ready || busy}
                     className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    Correr pipeline diário
+                    {busy ? 'A enviar…' : 'Correr pipeline diário'}
                 </button>
                 <span className="text-sm text-slate-400">
                     Engine {config.enabled ? 'ativa' : 'desligada'} · {config.topics_per_day} temas/dia ·
@@ -74,6 +100,18 @@ export default function AiContentDashboard({
                     {config.llm_provider ?? 'não configurado'}
                 </span>
             </div>
+
+            {flash && (
+                <div
+                    className={`mb-4 rounded-xl px-4 py-3 text-sm ${
+                        flash.type === 'ok'
+                            ? 'bg-emerald-500/15 text-emerald-200'
+                            : 'bg-rose-500/15 text-rose-200'
+                    }`}
+                >
+                    {flash.text}
+                </div>
+            )}
 
             <div className="mb-6 flex flex-wrap gap-2 text-xs">
                 <span className={`rounded-full px-3 py-1 ${config.tavily_ready ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
