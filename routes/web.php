@@ -145,6 +145,8 @@ Route::controller(NewsletterController::class)->group(function () {
 
 Route::prefix('blog/posts')->group(function () {
     Route::get('', [BlogController::class, 'index'])->name('blog.posts');
+    // Dedicated JSON endpoint (must stay above {slug}) — keeps page URL free of AJAX/SW cache collisions.
+    Route::get('data', [BlogController::class, 'data'])->name('blog.posts.data');
     Route::get('{slug}', [BlogController::class, 'show'])->name('blog.posts.show');
     Route::post('{post}/like', [EngagementController::class, 'likePost'])->name('blog.posts.like');
     Route::get('{post}/comments', [EngagementController::class, 'getComments'])->name('blog.posts.comments');

@@ -685,11 +685,13 @@ export default function BlogPage({ auth, local, posts: initialPosts, categories,
                 sort: filters.sort || sortBy
             });
 
-            const response = await fetch(route('blog.posts', { ...params }), {
+            // Separate URL from the Inertia page (/blog/posts) to avoid SW/browser cache collisions.
+            const response = await fetch(`${route('blog.posts.data')}?${params.toString()}`, {
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest', // Header para identificar como AJAX
-                    'Accept': 'application/json',
-                }
+                    'X-Requested-With': 'XMLHttpRequest',
+                    Accept: 'application/json',
+                },
+                cache: 'no-store',
             });
             const data = await response.json();
 
