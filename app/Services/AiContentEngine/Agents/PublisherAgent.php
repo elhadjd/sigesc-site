@@ -27,12 +27,25 @@ class PublisherAgent implements AgentInterface
         $autoPublish = (bool) config('ai_content_engine.pipeline.auto_publish', false);
         $requireFactCheck = (bool) config('ai_content_engine.pipeline.require_fact_check', true);
 
-        if ($article->needs_human_review && $requireFactCheck && ! $forcePublish) {
-            $article->update(['status' => Article::STATUS_NEEDS_REVIEW]);
-            $this->logger->warning('Publication blocked — needs human review', $job, $article, $this->name());
+        $factStatus = $article->fact_check_status;
+        // Auto-publish only when every important claim is source-linked (verified).
+        $blockedByFacts = $requireFactCheck && ! $forcePublish && (
+            $article->needs_human_review
+            || $factStatus !== FactCheckerAgent::STATUS_VERIFIED
+        );
+
+        if ($blockedByFacts) {
+            $article->update([
+                'status' => Article::STATUS_NEEDS_REVIEW,
+                'fact_check_status' => $factStatus ?: 'needs_review',
+            ]);
+            $this->logger->warning('Publication blocked — fact check not verified', $job, $article, $this->name(), [
+                'fact_check_status' => $article->fact_check_status,
+            ]);
 
             return [
                 'status' => Article::STATUS_NEEDS_REVIEW,
+                'fact_check_status' => $article->fact_check_status,
                 'published' => false,
             ];
         }

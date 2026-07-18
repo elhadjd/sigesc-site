@@ -10,6 +10,10 @@ use App\Models\AiContent\AiLog;
 use App\Models\AiContent\Article;
 use App\Models\AiContent\Category;
 use App\Models\AiContent\ExpertQuestion;
+use App\Models\AiContent\ResearchLog;
+use App\Models\AiContent\ResearchSetting;
+use App\Models\AiContent\ResearchSource;
+use App\Services\AiContentEngine\Agents\FactCheckerAgent;
 use App\Services\AiContentEngine\Agents\PublisherAgent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -125,6 +129,7 @@ class AiContentEngineController extends Controller
     {
         $article->update([
             'needs_human_review' => false,
+            'fact_check_status' => FactCheckerAgent::STATUS_VERIFIED,
             'status' => Article::STATUS_DRAFT,
         ]);
 
@@ -144,6 +149,7 @@ class AiContentEngineController extends Controller
             'status' => Article::STATUS_SCHEDULED,
             'scheduled_at' => $data['scheduled_at'],
             'needs_human_review' => false,
+            'fact_check_status' => FactCheckerAgent::STATUS_VERIFIED,
         ]);
 
         Cache::forget('ai_content_dashboard_stats');
@@ -182,5 +188,55 @@ class AiContentEngineController extends Controller
                 ->latest()
                 ->paginate(20),
         ]);
+    }
+
+    public function researchSettings()
+    {
+        return Inertia::render('admin/ai-content/research-settings', [
+            'settings' => ResearchSetting::allMapped(),
+            'sources' => ResearchSource::query()
+                ->orderByDesc('priority')
+                ->orderByDesc('trust_score')
+                ->get(),
+            'recentLogs' => ResearchLog::query()
+                ->latest()
+                ->limit(25)
+                ->get(['id', 'agent', 'action', 'provider', 'status', 'execution_time_ms', 'error', 'created_at']),
+            'defaults' => [
+                'cache_days' => (int) config('ai_content_engine.research.cache_days', 30),
+                'max_sources' => (int) config('ai_content_engine.research.max_sources', 12),
+                'min_trust_score' => (int) config('ai_content_engine.research.min_trust_score', 50),
+                'tavily_enabled' => (bool) config('ai_content_engine.tavily.enabled', true),
+            ],
+        ]);
+    }
+
+    public function updateResearchSettings(Request $request)
+    {
+        $data = $request->validate([
+            'tavily_enabled' => 'required|boolean',
+            'news_enabled' => 'required|boolean',
+            'internal_knowledge_enabled' => 'required|boolean',
+            'max_sources' => 'required|integer|min:1|max:40',
+            'min_trust_score' => 'required|integer|min:0|max:100',
+            'cache_days' => 'required|integer|min:1|max:365',
+        ]);
+
+        foreach ($data as $key => $value) {
+            ResearchSetting::setValue($key, $value);
+        }
+
+        return back()->with('success', 'Research Engine Settings atualizadas.');
+    }
+
+    public function toggleResearchSource(Request $request, ResearchSource $source)
+    {
+        $data = $request->validate([
+            'is_active' => 'required|boolean',
+        ]);
+
+        $source->update(['is_active' => $data['is_active']]);
+
+        return back()->with('success', 'Fonte atualizada: '.$source->name);
     }
 }

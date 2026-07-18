@@ -167,6 +167,9 @@ Route::middleware(['auth', 'ai-content-admin'])
         Route::get('jobs', [AiContentEngineController::class, 'jobs'])->name('jobs');
         Route::get('logs', [AiContentEngineController::class, 'logs'])->name('logs');
         Route::get('expert', [AiContentEngineController::class, 'expertQuestions'])->name('expert');
+        Route::get('research-settings', [AiContentEngineController::class, 'researchSettings'])->name('research-settings');
+        Route::put('research-settings', [AiContentEngineController::class, 'updateResearchSettings'])->name('research-settings.update');
+        Route::put('research-sources/{source}', [AiContentEngineController::class, 'toggleResearchSource'])->name('research-sources.toggle');
     });
 
 Route::fallback(function () {

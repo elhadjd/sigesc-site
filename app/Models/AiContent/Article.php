@@ -33,7 +33,7 @@ class Article extends Model
     protected $fillable = [
         'uuid', 'category_id', 'post_id', 'title', 'slug', 'status', 'priority',
         'focus_keyword', 'excerpt', 'content_html', 'content_markdown',
-        'featured_image', 'read_time', 'seo_score', 'fact_confidence',
+        'featured_image', 'read_time', 'seo_score', 'fact_confidence', 'fact_check_status',
         'needs_human_review', 'is_ai_generated', 'author_name', 'author_role',
         'author_avatar', 'meta_title', 'meta_description', 'canonical_url',
         'open_graph', 'twitter_card', 'schema_json_ld', 'social_posts',

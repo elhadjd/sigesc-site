@@ -22,6 +22,30 @@ return [
         'api_key' => env('TAVILY_API_KEY'),
         'base_url' => rtrim(env('TAVILY_BASE_URL', 'https://api.tavily.com'), '/'),
         'max_results' => (int) env('TAVILY_MAX_RESULTS', 8),
+        'enabled' => (bool) env('TAVILY_ENABLED', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hybrid Research Engine (evolves AIResearchAgent)
+    |--------------------------------------------------------------------------
+    */
+    'research' => [
+        'cache_days' => (int) env('RESEARCH_CACHE_DAYS', 30),
+        'max_sources' => (int) env('RESEARCH_MAX_SOURCES', 12),
+        'min_trust_score' => (int) env('RESEARCH_MIN_TRUST_SCORE', 50),
+        'prefer_official' => true,
+        'news_enabled' => (bool) env('RESEARCH_NEWS_ENABLED', true),
+        'internal_knowledge_enabled' => (bool) env('RESEARCH_INTERNAL_ENABLED', true),
+        'trust_scores' => [
+            'official' => 100,
+            'institutional' => 90,
+            'university' => 85,
+            'specialized' => 70,
+            'news' => 65,
+            'blog' => 50,
+            'web' => 45,
+        ],
     ],
 
     'gemini' => [

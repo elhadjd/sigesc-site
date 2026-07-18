@@ -7,15 +7,15 @@ use App\Models\AiContent\Article;
 use App\Models\AiContent\Category;
 use App\Models\AiContent\ExpertQuestion;
 use App\Services\AiContentEngine\Pipeline\ContentPipeline;
+use App\Services\AiContentEngine\Research\HybridResearchEngine;
 use App\Services\AiContentEngine\Support\AiLogger;
 use App\Services\AiContentEngine\Support\LlmGateway;
-use App\Services\AiContentEngine\Support\ResearchGateway;
 use Illuminate\Support\Str;
 
 class AskExpertService
 {
     public function __construct(
-        protected ResearchGateway $research,
+        protected HybridResearchEngine $research,
         protected LlmGateway $llm,
         protected ContentPipeline $pipeline,
         protected AiLogger $logger
@@ -42,7 +42,7 @@ class AskExpertService
         ]);
 
         try {
-            $search = $this->research->search($question->question.' Angola', 8);
+            $bundle = $this->research->research($question->question.' Angola');
 
             $answer = $this->llm->chatJson([
                 [
@@ -67,7 +67,9 @@ PROMPT
                     'role' => 'user',
                     'content' => json_encode([
                         'question' => $question->question,
-                        'research' => $search['results'],
+                        'research_summary' => $bundle['summary'],
+                        'findings' => $bundle['findings'],
+                        'avg_trust_score' => $bundle['avg_trust_score'],
                     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 ],
             ], null, 0.35);
@@ -78,7 +80,13 @@ PROMPT
             $question->update([
                 'answer_html' => $answer['answer_html'] ?? '<p>Não foi possível formular uma resposta confiável neste momento.</p>',
                 'quality_score' => $quality,
-                'research' => $search,
+                'research' => [
+                    'from_cache' => $bundle['from_cache'],
+                    'avg_trust_score' => $bundle['avg_trust_score'],
+                    'providers' => $bundle['providers'],
+                    'summary' => $bundle['summary'],
+                    'findings' => $bundle['findings'],
+                ],
                 'status' => 'answered',
                 'convert_to_article' => $shouldConvert,
             ]);

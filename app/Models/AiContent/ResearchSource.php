@@ -10,10 +10,13 @@ class ResearchSource extends Model
     protected $table = 'research_sources';
 
     protected $fillable = [
-        'name', 'domain', 'url', 'type', 'is_trusted', 'is_active', 'meta',
+        'name', 'domain', 'url', 'type', 'category', 'priority', 'country',
+        'trust_score', 'is_trusted', 'is_active', 'meta',
     ];
 
     protected $casts = [
+        'priority' => 'integer',
+        'trust_score' => 'integer',
         'is_trusted' => 'boolean',
         'is_active' => 'boolean',
         'meta' => 'array',
@@ -22,5 +25,10 @@ class ResearchSource extends Model
     public function articleSources(): HasMany
     {
         return $this->hasMany(ArticleSource::class, 'research_source_id');
+    }
+
+    public function findings(): HasMany
+    {
+        return $this->hasMany(ResearchFinding::class, 'source_id');
     }
 }

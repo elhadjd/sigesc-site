@@ -175,8 +175,14 @@ class ContentPipeline
             ->limit(20)
             ->get()
             ->each(function (Article $article) use (&$count) {
-                if ($article->needs_human_review && config('ai_content_engine.pipeline.require_fact_check')) {
-                    $article->update(['status' => Article::STATUS_NEEDS_REVIEW]);
+                if (config('ai_content_engine.pipeline.require_fact_check') && (
+                    $article->needs_human_review
+                    || $article->fact_check_status !== 'verified'
+                )) {
+                    $article->update([
+                        'status' => Article::STATUS_NEEDS_REVIEW,
+                        'fact_check_status' => $article->fact_check_status ?: 'needs_review',
+                    ]);
 
                     return;
                 }
