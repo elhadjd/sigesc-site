@@ -39,11 +39,17 @@ class AskExpertController extends Controller
             'status' => 'queued',
         ]);
 
-        AnswerExpertQuestion::dispatch($question->id)->afterResponse();
+        // database/redis: entra logo na tabela `jobs` para o worker processar.
+        // sync: afterResponse evita bloquear o redirect da página.
+        if (in_array((string) config('queue.default'), ['database', 'redis'], true)) {
+            AnswerExpertQuestion::dispatch($question->id);
+        } else {
+            AnswerExpertQuestion::dispatch($question->id)->afterResponse();
+        }
 
         $message = filled($question->asker_email)
-            ? 'Pergunta recebida. Estamos a pesquisar em segundo plano — a resposta também será enviada para o seu email (com link do artigo, se for publicado).'
-            : 'Pergunta recebida. Estamos a pesquisar em segundo plano. Acompanhe esta página ou indique um email na próxima vez para receber o resultado.';
+            ? 'Pergunta recebida. Estamos a preparar a resposta — também a enviaremos para o seu email (com o link do artigo, se for publicado).'
+            : 'Pergunta recebida. Estamos a preparar a resposta. Acompanhe esta página; com email avisamos quando estiver pronta.';
 
         return redirect()
             ->route('ask-expert.show', $question->uuid)
@@ -67,7 +73,7 @@ class AskExpertController extends Controller
             'kicker' => 'Pergunte ao Especialista',
             'headline' => $question->question,
             'lead' => 'Resposta gerada com base em pesquisa. Confirme sempre na legislação e na AGT.',
-            'html' => $question->answer_html ?: '<p>Resposta em processamento na fila.</p>',
+            'html' => $question->answer_html ?: '<p>A preparar a sua resposta…</p>',
             'links' => [
                 ['href' => url('/pergunte-ao-especialista'), 'label' => 'Nova pergunta'],
                 ['href' => url('/blog/posts'), 'label' => 'Blog SIGESC'],

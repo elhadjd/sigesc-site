@@ -124,16 +124,16 @@ class AiContentEngineController extends Controller
             return $this->actionResponse($request, false, $llm->missingConfigMessage(), 422);
         }
 
-        // afterResponse: even with QUEUE_CONNECTION=sync, axios gets JSON before the long pipeline runs
-        RunDailyContentPipeline::dispatch()->afterResponse();
+        $driver = (string) config('queue.default');
+        if (in_array($driver, ['database', 'redis'], true)) {
+            RunDailyContentPipeline::dispatch();
+        } else {
+            // sync: responde JSON primeiro e só depois corre o pipeline
+            RunDailyContentPipeline::dispatch()->afterResponse();
+        }
 
         $provider = $llm->provider();
-        $message = 'Pipeline diário enviado para a fila (LLM: '.($provider ?? 'n/d').').';
-
-        $driver = (string) config('queue.default');
-        if ($driver === 'database') {
-            $message .= ' Com QUEUE_CONNECTION=database, mantenha `php artisan queue:work database --timeout=3600` a correr.';
-        }
+        $message = 'Processamento diário iniciado em segundo plano (LLM: '.($provider ?? 'n/d').'). Acompanhe o progresso em Filas.';
 
         return $this->actionResponse($request, true, $message, 200, [
             'provider' => $provider,
@@ -143,16 +143,16 @@ class AiContentEngineController extends Controller
 
     public function processArticle(Request $request, Article $article)
     {
-        ProcessArticlePipeline::dispatch($article->id)->afterResponse();
-
-        $message = 'Pipeline do artigo enviado para a fila (job).';
-        if ((string) config('queue.default') === 'database') {
-            $message .= ' Com QUEUE_CONNECTION=database, mantenha `php artisan queue:work database --timeout=3600` a correr.';
+        $driver = (string) config('queue.default');
+        if (in_array($driver, ['database', 'redis'], true)) {
+            ProcessArticlePipeline::dispatch($article->id);
+        } else {
+            ProcessArticlePipeline::dispatch($article->id)->afterResponse();
         }
 
-        return $this->actionResponse($request, true, $message, 200, [
+        return $this->actionResponse($request, true, 'Processamento do artigo iniciado em segundo plano. Acompanhe o progresso em Filas.', 200, [
             'article_id' => $article->id,
-            'queue' => (string) config('queue.default'),
+            'queue' => $driver,
         ]);
     }
 

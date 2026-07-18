@@ -59,18 +59,20 @@ export default function AskExpertShow({
                         <h1 className="mt-4 font-serif text-3xl text-[#14213d] sm:text-4xl">
                             {question.question}
                         </h1>
-                        <p className="mt-2 text-sm text-slate-500">
-                            Qualidade estimada: {question.quality_score ?? '—'} · estado: {status}
-                        </p>
+                        {!processing && (
+                            <p className="mt-2 text-sm text-slate-500">
+                                Qualidade estimada: {question.quality_score ?? '—'}
+                            </p>
+                        )}
 
                         {processing ? (
                             <div className="mt-8 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5">
-                                <p className="text-lg font-medium text-[#14213d]">A processar na fila…</p>
+                                <p className="text-lg font-medium text-[#14213d]">A preparar a sua resposta…</p>
                                 <p className="mt-2 text-slate-600">
-                                    A pesquisa e a resposta correm em background para não pesar o site. Esta página
-                                    atualiza automaticamente.
+                                    Estamos a pesquisar fontes e a organizar a informação. Esta página atualiza
+                                    automaticamente em alguns segundos.
                                     {question.asker_email
-                                        ? ' Também enviamos o resultado para o seu email (com link do artigo, se for criado).'
+                                        ? ' Também enviamos o resultado para o seu email quando estiver pronto.'
                                         : ''}
                                 </p>
                             </div>

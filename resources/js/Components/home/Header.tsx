@@ -8,7 +8,7 @@ import { FaRegNewspaper, FaTools, FaRobot } from 'react-icons/fa';
 import { FaDownload } from 'react-icons/fa6';
 import { RiCustomerService2Line } from 'react-icons/ri';
 import { features } from '@/services/public/veriables';
-import { SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
+import { SIGESC_ADMIN_LOGIN_URL, SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
 
 type NavItem = {
     href: string;
@@ -186,12 +186,14 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
                             </Link>
                         ) : (
                             <div className="flex items-center space-x-2">
-                                <Link
-                                    href="/auth"
+                                <a
+                                    href={SIGESC_ADMIN_LOGIN_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="px-3 xl:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 font-medium text-sm shadow-sm hover:shadow-md"
                                 >
                                     Entrar
-                                </Link>
+                                </a>
                                 <a
                                     href={SIGESC_GETTING_STARTED_URL}
                                     target="_blank"
@@ -297,13 +299,15 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
 
                                     {!user?.id && (
                                         <div className="pt-4 mt-4 border-t border-gray-200 space-y-2">
-                                            <Link
-                                                href="/auth"
+                                            <a
+                                                href={SIGESC_ADMIN_LOGIN_URL}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
                                                 className="block w-full text-center px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 font-medium"
                                                 onClick={toggleMenu}
                                             >
                                                 Entrar
-                                            </Link>
+                                            </a>
                                             <a
                                                 href={SIGESC_GETTING_STARTED_URL}
                                                 target="_blank"

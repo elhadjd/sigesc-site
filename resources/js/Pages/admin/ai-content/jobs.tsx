@@ -1,6 +1,13 @@
 import React from 'react';
 import AiContentLayout from './Layout';
 
+const statusLabel: Record<string, string> = {
+    pending: 'Em espera',
+    running: 'A processar',
+    failed: 'Falhou',
+    completed: 'Concluído',
+};
+
 export default function AiContentJobs({
     jobs,
     queueStats,
@@ -15,44 +22,43 @@ export default function AiContentJobs({
     workerHint?: string | null;
 }) {
     return (
-        <AiContentLayout title="Filas da IA">
-            <div className="mb-6 space-y-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+        <AiContentLayout title="Processamentos">
+            <div className="mb-6 space-y-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-50">
                 <p>
-                    Esta tabela é o histórico <strong>ai_jobs</strong> (pipeline da IA). O driver Laravel{' '}
-                    <strong>{queueDriver || 'n/d'}</strong> usa a tabela <code className="rounded bg-black/30 px-1">jobs</code> só
-                    para executar o trabalho em background.
+                    Aqui vê o estado dos processamentos da IA (artigos, pipeline diário e perguntas ao especialista).
                 </p>
                 {laravelQueue ? (
                     <p>
-                        Laravel pendentes: <strong>{laravelQueue.pending}</strong>
-                        {' · '}
-                        Falhas Laravel: <strong>{laravelQueue.failed}</strong>
-                        {laravelQueue.pending === 0 ? (
-                            <span className="text-amber-50/80"> — fila vazia (worker já consumiu ou nada por fazer).</span>
+                        Em segundo plano agora: <strong>{laravelQueue.pending}</strong>
+                        {laravelQueue.failed > 0 ? (
+                            <>
+                                {' · '}
+                                falhas técnicas: <strong>{laravelQueue.failed}</strong>
+                            </>
                         ) : null}
+                        {laravelQueue.pending === 0 ? (
+                            <span className="text-sky-100/80"> — nada à espera; o trabalhador já consumiu a lista.</span>
+                        ) : (
+                            <span className="text-sky-100/80"> — a serem tratados pelo trabalhador em segundo plano.</span>
+                        )}
                     </p>
                 ) : null}
                 {workerHint ? (
-                    <p className="font-mono text-xs text-amber-50/90">
-                        Com QUEUE_CONNECTION=database, mantenha num terminal:{' '}
-                        <code className="rounded bg-black/30 px-1.5 py-0.5">{workerHint}</code>
+                    <p className="text-xs text-sky-100/85">
+                        Para o segundo plano funcionar com driver <strong>{queueDriver}</strong>, mantenha num terminal:{' '}
+                        <code className="rounded bg-black/30 px-1.5 py-0.5 font-mono">{workerHint}</code>
                     </p>
                 ) : (
-                    <p className="text-xs text-amber-50/80">
-                        Com sync, o trabalho corre no pedido HTTP. Com database/redis precisa de worker.
+                    <p className="text-xs text-sky-100/80">
+                        Modo atual ({queueDriver || 'n/d'}): o processamento corre no próprio pedido HTTP.
                     </p>
                 )}
-                <p className="text-xs text-amber-50/80">
-                    Se um artigo falhar no Writer (ex.: Tavily output_length inválido ou limite do plano), o artigo fica só com
-                    título/fontes — use Reprocessar depois de corrigir a config. Valor válido:{' '}
-                    <code className="rounded bg-black/30 px-1">TAVILY_RESEARCH_OUTPUT_LENGTH=short</code> (ou standard/long).
-                </p>
             </div>
 
             <div className="mb-6 grid gap-4 sm:grid-cols-4">
                 {Object.entries(queueStats).map(([key, value]) => (
                     <div key={key} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                        <p className="text-xs uppercase text-slate-500">{key}</p>
+                        <p className="text-xs uppercase text-slate-500">{statusLabel[key] || key}</p>
                         <p className="mt-1 font-serif text-2xl text-white">{value as number}</p>
                     </div>
                 ))}
@@ -61,13 +67,13 @@ export default function AiContentJobs({
                 <table className="min-w-full text-sm">
                     <thead className="bg-white/5 text-slate-400">
                         <tr>
-                            <th className="px-4 py-3 text-left">UUID</th>
+                            <th className="px-4 py-3 text-left">ID</th>
                             <th className="px-4 py-3 text-left">Tipo</th>
                             <th className="px-4 py-3 text-left">Artigo</th>
-                            <th className="px-4 py-3 text-left">Agente</th>
+                            <th className="px-4 py-3 text-left">Etapa</th>
                             <th className="px-4 py-3 text-left">Estado</th>
                             <th className="px-4 py-3 text-left">Progresso</th>
-                            <th className="px-4 py-3 text-left">Erro</th>
+                            <th className="px-4 py-3 text-left">Detalhe</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,7 +89,7 @@ export default function AiContentJobs({
                                     )}
                                 </td>
                                 <td className="px-4 py-3 text-slate-400">{job.current_agent || '—'}</td>
-                                <td className="px-4 py-3 text-slate-400">{job.status}</td>
+                                <td className="px-4 py-3 text-slate-400">{statusLabel[job.status] || job.status}</td>
                                 <td className="px-4 py-3 text-slate-400">{job.progress}%</td>
                                 <td className="px-4 py-3 text-rose-300/90">
                                     {job.error ? (

@@ -27,7 +27,7 @@ export const HeaderServices = ((props:{auth:{user:User},local:string})=>{
       },[])
 
       const Login = (()=>{
-        router.get('/auth')
+        window.open('https://admin.sisgesc.net/auth/login', '_blank', 'noopener,noreferrer')
       })
 
       const navigates = ((route: string) : void =>{

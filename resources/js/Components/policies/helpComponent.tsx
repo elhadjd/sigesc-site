@@ -2,7 +2,7 @@ import { useStateChatToggle } from '@/contexts/stateChatToggleContext';
 import { Link } from '@inertiajs/react'
 import React, { useState } from 'react'
 import { FiHome, FiMail, FiMessageSquare, FiHelpCircle, FiArrowRight, FiExternalLink, FiChevronDown, FiChevronUp } from 'react-icons/fi'
-import { SIGESC_ADMIN_URL, SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
+import { SIGESC_ADMIN_LOGIN_URL, SIGESC_ADMIN_URL, SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
 
 export default function HelpComponent() {
     const [openSections, setOpenSections] = useState({
@@ -100,9 +100,9 @@ export default function HelpComponent() {
                                         <FiExternalLink className="w-5 h-5" />
                                     </span>
                                     <div>
-                                        <Link href="/auth" className="text-lg font-medium text-gray-900 hover:text-blue-500 transition-colors duration-200">
-                                            Criar sua conta no nosso site
-                                        </Link>
+                                        <a href={SIGESC_ADMIN_LOGIN_URL} target="_blank" rel="noopener noreferrer" className="text-lg font-medium text-gray-900 hover:text-blue-500 transition-colors duration-200">
+                                            Entrar no painel SIGESC
+                                        </a>
                                         <p className="text-gray-600 text-sm mt-1">Registro para novos usuários</p>
                                     </div>
                                 </li>
