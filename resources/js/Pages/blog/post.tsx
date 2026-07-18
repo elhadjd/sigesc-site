@@ -535,42 +535,42 @@ const BlogShowPage = ({ auth, local, post, relatedPosts, popularPosts, seo }: Bl
                     <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                         {/* Voltar */}
                         <div className="mb-8">
-                            <a
+                            <Link
                                 href={route('blog.posts')}
-                                className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+                                className="blog-body inline-flex items-center font-semibold text-sky-700 underline decoration-sky-300 underline-offset-4 hover:text-sky-900"
                             >
-                                <FiArrowLeft className="w-5 h-5 mr-2" />
+                                <FiArrowLeft className="mr-2 h-5 w-5" />
                                 Voltar para o Blog
-                            </a>
+                            </Link>
                         </div>
 
                         {/* Cabeçalho do Artigo */}
                         <header className="mb-12">
-                            <div className="flex items-center space-x-4 mb-6">
-                                <span className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold capitalize">
+                            <div className="blog-body mb-6 flex flex-wrap items-center gap-3">
+                                <span className="rounded-md bg-sky-100 px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-sky-800">
                                     {post.category}
                                 </span>
-                                <div className="flex items-center space-x-6 text-sm text-gray-600">
-                                    <span className="flex items-center">
-                                        <FiCalendar className="w-4 h-4 mr-2" />
+                                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-slate-600">
+                                    <span className="inline-flex items-center">
+                                        <FiCalendar className="mr-2 h-4 w-4" />
                                         {formatDate(post.publish_date)}
                                     </span>
-                                    <span className="flex items-center">
-                                        <FiClock className="w-4 h-4 mr-2" />
+                                    <span className="inline-flex items-center">
+                                        <FiClock className="mr-2 h-4 w-4" />
                                         {estimatedReadTime} min de leitura
                                     </span>
-                                    <span className="flex items-center">
-                                        <FiEye className="w-4 h-4 mr-2" />
+                                    <span className="inline-flex items-center">
+                                        <FiEye className="mr-2 h-4 w-4" />
                                         {post.views} visualizações
                                     </span>
                                 </div>
                             </div>
 
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                            <h1 className="blog-display mb-5 text-4xl font-semibold leading-[1.1] tracking-tight text-slate-900 md:text-5xl lg:text-6xl">
                                 {post.title}
                             </h1>
 
-                            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                            <p className="blog-body mb-8 max-w-3xl text-xl leading-relaxed text-slate-600 md:text-2xl">
                                 {post.excerpt}
                             </p>
 
@@ -677,25 +677,25 @@ const BlogShowPage = ({ auth, local, post, relatedPosts, popularPosts, seo }: Bl
                             {/* Conteúdo Principal */}
                             <div className="lg:col-span-3">
                                 <div
-                                    className="prose prose-lg max-w-none"
+                                    className="blog-prose blog-body max-w-none"
                                     dangerouslySetInnerHTML={parseContent(post.content)}
                                 />
 
                                 {/* Tags */}
-                                <div className="mt-12 pt-8 border-t border-gray-200">
-                                    <h3 className="flex items-center text-lg font-semibold text-gray-900 mb-4">
-                                        <FiTag className="w-5 h-5 mr-2 text-blue-600" />
+                                <div className="mt-12 border-t border-slate-200 pt-8">
+                                    <h3 className="blog-display mb-4 flex items-center text-xl font-semibold text-slate-900">
+                                        <FiTag className="mr-2 h-5 w-5 text-sky-600" />
                                         Tags
                                     </h3>
                                     <div className="flex flex-wrap gap-2">
                                         {post.tags.map((tag, index) => (
-                                            <a
+                                            <Link
                                                 key={index}
                                                 href={route('blog.posts', { search: tag })}
-                                                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-blue-100 hover:text-blue-700 transition-colors text-sm"
+                                                className="blog-body rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 underline-offset-2 transition-colors hover:bg-sky-100 hover:text-sky-800 hover:underline"
                                             >
                                                 #{tag}
-                                            </a>
+                                            </Link>
                                         ))}
                                     </div>
                                 </div>
@@ -709,30 +709,30 @@ const BlogShowPage = ({ auth, local, post, relatedPosts, popularPosts, seo }: Bl
                                 {/* Posts Relacionados */}
                                 {relatedPosts.length > 0 && (
                                     <div className="bg-gray-50 rounded-2xl p-6">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                        <h3 className="blog-display mb-4 text-xl font-semibold text-slate-900">
                                             Posts Relacionados
                                         </h3>
-                                        <div className="space-y-4">
+                                        <div className="space-y-3">
                                             {relatedPosts.map((relatedPost) => (
                                                 <Link
                                                     key={relatedPost.id}
-                                                    href={`/blog/${relatedPost.slug}`}
-                                                    className="block group"
+                                                    href={route('blog.posts.show', { slug: relatedPost.slug })}
+                                                    className="group block"
                                                 >
-                                                    <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white transition-colors">
+                                                    <div className="flex items-center space-x-3 rounded-lg p-2 transition-colors hover:bg-white">
                                                         <img
                                                             src={relatedPost.image || '/img/placeholder-blog.jpg'}
                                                             alt={relatedPost.title}
-                                                            className="w-16 h-16 rounded-lg object-cover"
+                                                            className="h-16 w-16 rounded-lg object-cover"
                                                             onError={(e) => {
                                                                 e.currentTarget.src = '/img/placeholder-blog.jpg';
                                                             }}
                                                         />
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="blog-display text-sm font-semibold leading-snug text-slate-900 underline-offset-2 transition-colors group-hover:text-sky-800 group-hover:underline line-clamp-2">
                                                                 {relatedPost.title}
                                                             </p>
-                                                            <p className="text-xs text-gray-500 capitalize">
+                                                            <p className="blog-body mt-0.5 text-xs capitalize text-slate-500">
                                                                 {relatedPost.category}
                                                             </p>
                                                         </div>

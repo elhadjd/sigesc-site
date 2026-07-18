@@ -38,7 +38,8 @@ return [
             'driver' => 'database',
             'table' => 'jobs',
             'queue' => 'default',
-            'retry_after' => 90,
+            // Must be greater than longest job timeout (AI pipeline = 3600s).
+            'retry_after' => (int) env('QUEUE_RETRY_AFTER', 3700),
             'after_commit' => false,
         ],
 

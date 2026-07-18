@@ -16,7 +16,8 @@ class ProcessArticlePipeline implements ShouldQueue
 
     public int $tries = 1;
 
-    public int $timeout = 900;
+    /** Align with Tavily Research steps; keep below QUEUE_RETRY_AFTER. */
+    public int $timeout = 3600;
 
     public function __construct(
         public int $articleId,

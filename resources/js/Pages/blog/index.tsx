@@ -112,24 +112,31 @@ const BlogPostCard = ({ post, index }: { post: Post; index: number }) => {
         });
     };
 
-    const handleShare = async () => {
+    const postUrl = route('blog.posts.show', { slug: post.slug });
+
+    const handleShare = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const absolute = `${window.location.origin}${postUrl}`;
         if (navigator.share) {
             try {
                 await navigator.share({
                     title: post.title,
                     text: post.excerpt,
-                    url: `${window.location.origin}/blog/${post.slug}`,
+                    url: absolute,
                 });
             } catch (error) {
                 console.log('Erro ao compartilhar:', error);
             }
         } else {
-            navigator.clipboard.writeText(`${window.location.origin}/blog/${post.slug}`);
+            navigator.clipboard.writeText(absolute);
             alert('Link copiado para a área de transferência!');
         }
     };
 
-    const handleLike = async () => {
+    const handleLike = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         try {
             const response = await axios.post(route('blog.posts.like', { post: post.id }));
 
@@ -145,98 +152,104 @@ const BlogPostCard = ({ post, index }: { post: Post; index: number }) => {
 
     return (
         <motion.article
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 28 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="group"
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.55, delay: index * 0.06 }}
+            className="group h-full"
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
         >
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+            <Link
+                href={postUrl}
+                className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_12px_40px_-24px_rgba(15,23,42,0.45)] transition-all duration-300 hover:-translate-y-1 hover:border-sky-300 hover:shadow-[0_22px_50px_-28px_rgba(11,92,171,0.45)] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+            >
                 <div className="relative overflow-hidden">
                     <motion.img
                         src={post.image || '/img/placeholder-blog.jpg'}
                         alt={post.title}
-                        className="w-full h-48 object-cover"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.4 }}
+                        className="h-52 w-full object-cover"
+                        whileHover={{ scale: 1.04 }}
+                        transition={{ duration: 0.45 }}
                         onError={(e) => {
                             e.currentTarget.src = '/img/placeholder-blog.jpg';
                         }}
                     />
-                    <div className="absolute top-4 left-4">
-                        <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
+                    <div className="absolute left-4 top-4">
+                        <span className="blog-body rounded-md bg-sky-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
                             {post.category}
                         </span>
                     </div>
                 </div>
 
-                <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex items-center text-sm text-gray-500 mb-3">
-                        <FiCalendar className="w-4 h-4 mr-1" />
-                        <span className="mr-4">{formatDate(post.publish_date)}</span>
-                        <FiClock className="w-4 h-4 mr-1" />
-                        <span>{post.read_time} min de leitura</span>
+                <div className="flex flex-1 flex-col px-5 pb-5 pt-5">
+                    <div className="blog-body mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-slate-500">
+                        <span className="inline-flex items-center gap-1">
+                            <FiCalendar className="h-3.5 w-3.5" />
+                            {formatDate(post.publish_date)}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                            <FiClock className="h-3.5 w-3.5" />
+                            {post.read_time} min
+                        </span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                    <h3 className="blog-display mb-3 text-[1.45rem] font-semibold leading-snug tracking-tight text-slate-900 transition-colors group-hover:text-sky-800 line-clamp-2">
                         {post.title}
                     </h3>
 
-                    <p className="text-gray-600 mb-4 flex-grow line-clamp-3">
+                    <p className="blog-body mb-5 flex-grow text-[0.98rem] leading-relaxed text-slate-600 line-clamp-3">
                         {post.excerpt}
                     </p>
 
-                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                        <div className="flex items-center">
-                            <span className="text-sm font-medium text-gray-700">
-                                Por {post.author_name}
+                    <div className="blog-body mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
+                        <span className="text-sm font-semibold text-slate-700">
+                            {post.author_name}
+                        </span>
+                        <div className="flex items-center gap-3 text-xs text-slate-500">
+                            <span className="inline-flex items-center gap-1">
+                                <FiEye className="h-3.5 w-3.5" />
+                                {post.views}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                                <FiHeart className="h-3.5 w-3.5" />
+                                {likesCount}
                             </span>
                         </div>
+                    </div>
 
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1 text-sm text-gray-500">
-                                <FiEye className="w-4 h-4" />
-                                <span>{post.views}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-sm text-gray-500">
-                                <FiHeart className="w-4 h-4" />
-                                <span>{likesCount}</span>
-                            </div>
+                    <div className="blog-body mt-4 flex items-center justify-between">
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={handleLike}
+                                className={`rounded-lg p-2 transition-colors ${
+                                    isLiked ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                }`}
+                                aria-label="Curtir artigo"
+                            >
+                                <FiHeart className="h-4 w-4" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleShare}
+                                className="rounded-lg bg-slate-100 p-2 text-slate-600 transition-colors hover:bg-slate-200"
+                                aria-label="Partilhar artigo"
+                            >
+                                <FiShare2 className="h-4 w-4" />
+                            </button>
                         </div>
+                        <motion.span
+                            animate={{ x: isHovered ? 4 : 0 }}
+                            className="inline-flex items-center text-sm font-bold text-sky-700 underline decoration-sky-300 underline-offset-4"
+                        >
+                            Ler artigo
+                            <FiArrowRight className="ml-1 h-4 w-4" />
+                        </motion.span>
                     </div>
                 </div>
-
-                <div className="px-6 pb-4 flex justify-between items-center">
-                    <button
-                        onClick={handleLike}
-                        className={`p-2 rounded-full transition-colors ${isLiked ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
-                            } hover:bg-gray-200`}
-                    >
-                        <FiHeart className="w-4 h-4" />
-                    </button>
-                    <button
-                        onClick={handleShare}
-                        className="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors"
-                    >
-                        <FiShare2 className="w-4 h-4" />
-                    </button>
-
-                    <motion.div
-                        animate={{ x: isHovered ? 5 : 0 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        <Link
-                            href={route('blog.posts.show', { slug: post.slug })}
-                            className="text-blue-600 hover:text-blue-700 font-medium flex items-center text-sm"
-                        >
-                            Ler mais
-                            <FiArrowRight className="ml-1 w-4 h-4" />
-                        </Link>
-                    </motion.div>
-                </div>
-            </div>
+            </Link>
         </motion.article>
     );
 };
@@ -253,20 +266,22 @@ const BlogHero = ({ featuredPost }: { featuredPost?: Post }) => {
 
     if (!featuredPost) {
         return (
-            <section className="relative bg-gradient-to-br from-blue-900 to-indigo-900 text-white py-20 overflow-hidden">
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section className="relative overflow-hidden bg-[radial-gradient(circle_at_20%_20%,#1d4f91_0%,transparent_45%),radial-gradient(circle_at_80%_0%,#0ea5e9_0%,transparent_35%),linear-gradient(160deg,#0b2748_0%,#123a66_55%,#0f766e_120%)] py-24 text-white">
+                <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <motion.div
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="text-center"
+                        transition={{ duration: 0.7 }}
+                        className="max-w-3xl"
                     >
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                            Blog <span className="text-blue-400">SIGESC</span>
+                        <p className="blog-body mb-4 text-xs font-bold uppercase tracking-[0.22em] text-sky-200">
+                            Conteúdo SIGESC
+                        </p>
+                        <h1 className="blog-display text-5xl font-semibold leading-[1.05] tracking-tight md:text-6xl lg:text-7xl">
+                            Blog SIGESC
                         </h1>
-                        <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-                            Descubra insights valiosos, dicas exclusivas e as melhores práticas
-                            para transformar a gestão do seu negócio
+                        <p className="blog-body mt-6 max-w-2xl text-lg leading-relaxed text-sky-50/90 md:text-xl">
+                            Insights práticos de gestão, fiscalidade e operação para PME em Angola.
                         </p>
                     </motion.div>
                 </div>
@@ -275,76 +290,76 @@ const BlogHero = ({ featuredPost }: { featuredPost?: Post }) => {
     }
 
     return (
-        <section className="relative bg-gradient-to-br from-blue-900 to-indigo-900 text-white py-20 overflow-hidden">
-            <div className="absolute inset-0 bg-black/20"></div>
-            <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-blue-500 rounded-full filter blur-3xl opacity-20"></div>
-            <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-indigo-500 rounded-full filter blur-3xl opacity-20"></div>
-
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden bg-[radial-gradient(circle_at_15%_10%,#1d4f91_0%,transparent_42%),radial-gradient(circle_at_90%_20%,#0891b2_0%,transparent_40%),linear-gradient(165deg,#0b2748_0%,#134e6f_60%,#115e59_130%)] py-20 text-white md:py-24">
+            <div className="absolute inset-0 bg-[url('/img/sigesc%20capa.png')] bg-cover bg-center opacity-[0.07]" />
+            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="text-center mb-12"
+                    transition={{ duration: 0.7 }}
+                    className="mb-10 max-w-3xl"
                 >
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                        Blog <span className="text-blue-400">SIGESC</span>
+                    <p className="blog-body mb-3 text-xs font-bold uppercase tracking-[0.22em] text-sky-200">
+                        Blog SIGESC
+                    </p>
+                    <h1 className="blog-display text-5xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
+                        Ideias que fazem a gestão andar
                     </h1>
-                    <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-                        Descubra insights valiosos, dicas exclusivas e as melhores práticas
-                        para transformar a gestão do seu negócio
+                    <p className="blog-body mt-5 max-w-2xl text-lg text-sky-50/90">
+                        Artigos claros sobre AGT, stock, PDV, finanças e crescimento comercial.
                     </p>
                 </motion.div>
 
                 <motion.div
-                    initial={{ opacity: 0, y: 40 }}
+                    initial={{ opacity: 0, y: 32 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-12 border border-white/20"
+                    transition={{ duration: 0.75, delay: 0.12 }}
                 >
-                    <div className="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold mb-4 inline-block">
-                                {featuredPost.category}
+                    <Link
+                        href={route('blog.posts.show', { slug: featuredPost.slug })}
+                        className="group grid items-stretch overflow-hidden rounded-3xl border border-white/20 bg-white/[0.08] shadow-2xl backdrop-blur-md transition hover:border-sky-300/50 md:grid-cols-2"
+                    >
+                        <div className="flex flex-col justify-center p-8 md:p-10">
+                            <span className="blog-body mb-4 inline-flex w-fit rounded-md bg-sky-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                                Em destaque · {featuredPost.category}
                             </span>
-                            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                            <h2 className="blog-display text-3xl font-semibold leading-tight tracking-tight text-white md:text-4xl">
                                 {featuredPost.title}
                             </h2>
-                            <p className="text-blue-100 mb-6">
+                            <p className="blog-body mt-4 text-base leading-relaxed text-sky-50/90 md:text-lg">
                                 {featuredPost.excerpt}
                             </p>
-                            <div className="flex items-center text-blue-200 mb-6">
-                                <FiClock className="w-4 h-4 mr-2" />
-                                <span className="text-sm">{featuredPost.read_time} min de leitura</span>
-                                <span className="mx-3">•</span>
-                                <FiCalendar className="w-4 h-4 mr-2" />
-                                <span className="text-sm">{formatDate(featuredPost.publish_date)}</span>
-                                <span className="mx-3">•</span>
-                                <FiEye className="w-4 h-4 mr-2" />
-                                <span className="text-sm">{featuredPost.views} visualizações</span>
+                            <div className="blog-body mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-sky-100/80">
+                                <span className="inline-flex items-center gap-1.5">
+                                    <FiClock className="h-4 w-4" />
+                                    {featuredPost.read_time} min
+                                </span>
+                                <span className="inline-flex items-center gap-1.5">
+                                    <FiCalendar className="h-4 w-4" />
+                                    {formatDate(featuredPost.publish_date)}
+                                </span>
+                                <span className="inline-flex items-center gap-1.5">
+                                    <FiEye className="h-4 w-4" />
+                                    {featuredPost.views} views
+                                </span>
                             </div>
-                            <Link
-                                href={route('blog.posts.show', { slug: featuredPost.slug })}
-                                className="inline-flex items-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-                            >
-                                Ler Artigo Completo
-                                <FiArrowRight className="ml-2 w-5 h-5" />
-                            </Link>
+                            <span className="blog-body mt-8 inline-flex items-center text-sm font-bold text-sky-200 underline decoration-sky-400/70 underline-offset-4 transition group-hover:text-white">
+                                Ler artigo completo
+                                <FiArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-1" />
+                            </span>
                         </div>
-                        <div className="relative">
-                            <motion.img
+                        <div className="relative min-h-[240px] md:min-h-full">
+                            <img
                                 src={featuredPost.image || '/img/placeholder-blog.jpg'}
                                 alt={featuredPost.title}
-                                className="rounded-xl shadow-2xl w-full h-64 object-cover"
-                                whileHover={{ scale: 1.02 }}
-                                transition={{ duration: 0.3 }}
+                                className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                                 onError={(e) => {
                                     e.currentTarget.src = '/img/placeholder-blog.jpg';
                                 }}
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent rounded-xl"></div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#0b2748]/70 via-transparent to-transparent md:from-[#0b2748]/40" />
                         </div>
-                    </div>
+                    </Link>
                 </motion.div>
             </div>
         </section>
@@ -484,49 +499,52 @@ const BlogSidebar = ({ recentPosts, trendingPosts, categories, onCategorySelect 
 
     return (
         <div className="space-y-8">
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <FiTag className="w-5 h-5 text-blue-500 mr-2" />
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="blog-display mb-4 flex items-center text-xl font-semibold text-slate-900">
+                    <FiTag className="mr-2 h-5 w-5 text-sky-600" />
                     Categorias
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-1">
                     {categories.map((category) => (
                         <button
                             key={category}
+                            type="button"
                             onClick={() => onCategorySelect(category)}
-                            className="flex items-center justify-between w-full p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="blog-body flex w-full items-center justify-between rounded-lg p-2.5 text-left font-medium text-slate-700 transition-colors hover:bg-sky-50 hover:text-sky-800"
                         >
-                            <span className="text-gray-700">{category}</span>
+                            <span className="underline decoration-transparent underline-offset-4 hover:decoration-sky-400">
+                                {category}
+                            </span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <FiClock className="w-5 h-5 text-blue-500 mr-2" />
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="blog-display mb-4 flex items-center text-xl font-semibold text-slate-900">
+                    <FiClock className="mr-2 h-5 w-5 text-sky-600" />
                     Recentes
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {recentPosts.slice(0, 5).map((post) => (
                         <Link
                             key={post.id}
                             href={route('blog.posts.show', { slug: post.slug })}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="group flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-sky-50"
                         >
                             <img
                                 src={post.image || '/img/placeholder-blog.jpg'}
                                 alt={post.title}
-                                className="w-12 h-12 rounded-lg object-cover"
+                                className="h-12 w-12 rounded-lg object-cover"
                                 onError={(e) => {
                                     e.currentTarget.src = '/img/placeholder-blog.jpg';
                                 }}
                             />
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">
+                            <div className="min-w-0 flex-1">
+                                <p className="blog-display text-sm font-semibold leading-snug text-slate-900 underline-offset-2 group-hover:text-sky-800 group-hover:underline line-clamp-2">
                                     {post.title}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="blog-body mt-0.5 text-xs text-slate-500">
                                     {formatDate(post.publish_date)}
                                 </p>
                             </div>
@@ -535,36 +553,36 @@ const BlogSidebar = ({ recentPosts, trendingPosts, categories, onCategorySelect 
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <FiTrendingUp className="w-5 h-5 text-blue-500 mr-2" />
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="blog-display mb-4 flex items-center text-xl font-semibold text-slate-900">
+                    <FiTrendingUp className="mr-2 h-5 w-5 text-sky-600" />
                     Em Alta
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {trendingPosts.slice(0, 5).map((post) => (
                         <Link
                             key={post.id}
                             href={route('blog.posts.show', { slug: post.slug })}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="group flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-sky-50"
                         >
                             <div className="relative">
                                 <img
                                     src={post.image || '/img/placeholder-blog.jpg'}
                                     alt={post.title}
-                                    className="w-12 h-12 rounded-lg object-cover"
+                                    className="h-12 w-12 rounded-lg object-cover"
                                     onError={(e) => {
                                         e.currentTarget.src = '/img/placeholder-blog.jpg';
                                     }}
                                 />
-                                <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs px-1 rounded">
+                                <div className="absolute -right-1 -top-1 rounded bg-sky-600 px-1 text-[10px] font-bold text-white">
                                     {post.views}
                                 </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">
+                            <div className="min-w-0 flex-1">
+                                <p className="blog-display text-sm font-semibold leading-snug text-slate-900 underline-offset-2 group-hover:text-sky-800 group-hover:underline line-clamp-2">
                                     {post.title}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="blog-body mt-0.5 text-xs text-slate-500">
                                     {post.category}
                                 </p>
                             </div>
@@ -742,9 +760,9 @@ export default function BlogPage({ auth, local, posts: initialPosts, categories,
                     onFiltersChange={handleFiltersChange}
                 />
 
-                <section className="py-16 bg-gray-50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <section className="bg-[linear-gradient(180deg,#f8fafc_0%,#eef6fb_45%,#f8fafc_100%)] py-16">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
                             <div className="lg:col-span-1">
                                 <BlogSidebar
                                     recentPosts={recentPosts}
@@ -755,12 +773,17 @@ export default function BlogPage({ auth, local, posts: initialPosts, categories,
                             </div>
 
                             <div className="lg:col-span-3">
-                                <div className="flex items-center justify-between mb-8">
-                                    <p className="text-gray-600">
-                                        Mostrando {posts.length} de {pagination?.total} artigos
-                                        {activeCategory !== 'all' && ` em "${activeCategory}"`}
-                                        {searchTerm && ` para "${searchTerm}"`}
-                                    </p>
+                                <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                                    <div>
+                                        <h2 className="blog-display text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
+                                            Últimos artigos
+                                        </h2>
+                                        <p className="blog-body mt-1 text-slate-600">
+                                            Mostrando {posts.length} de {pagination?.total} artigos
+                                            {activeCategory !== 'all' && ` em "${activeCategory}"`}
+                                            {searchTerm && ` para "${searchTerm}"`}
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <AnimatePresence mode="wait">
