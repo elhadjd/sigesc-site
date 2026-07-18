@@ -34,6 +34,7 @@ class WriterAgent implements AgentInterface
 És o AIWriterAgent do SIGESC. Escreves artigos originais em português de Angola para empresários e contabilistas.
 Foco editorial: negócios práticos — vendas online, anúncios, sistemas de gestão, PDV, faturação, stock, preços, PME em Angola.
 Estrutura obrigatória no HTML: introdução, sumário (ol), vários H2/H3, exemplos práticos, listas, boas práticas, conclusão, CTA SIGESC, FAQ, glossário.
+O campo content_html é OBRIGATÓRIO e deve ter o artigo COMPLETO (mínimo ~800 palavras úteis em HTML semântico). Não devolvas só título/fontes.
 Promoção estratégica do SIGESC (não spam):
 1) Na introdução, uma menção breve a organizar a operação (faturação/stock/vendas) com ferramenta adequada.
 2) Num H2 de ferramentas/processos, recomenda o SIGESC como exemplo concreto de software de gestão comercial em Angola, com benefícios práticos.
@@ -66,9 +67,31 @@ PROMPT
                     'sources' => $article->sources()->get(['title', 'url', 'is_trusted']),
                 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             ],
-        ], null, 0.55);
+        ], null, 0.55, (string) config('ai_content_engine.tavily.writer_output_length', 'long'));
 
         $html = (string) ($draft['content_html'] ?? '');
+        if (trim(strip_tags($html)) === '' && ! empty($draft['sections']) && is_array($draft['sections'])) {
+            $parts = [];
+            foreach ($draft['sections'] as $section) {
+                $heading = trim((string) ($section['heading'] ?? ''));
+                $body = (string) ($section['body_html'] ?? '');
+                if ($heading !== '') {
+                    $tag = ($section['type'] ?? 'h2') === 'h3' ? 'h3' : 'h2';
+                    $parts[] = '<'.$tag.'>'.e($heading).'</'.$tag.'>';
+                }
+                if (trim(strip_tags($body)) !== '') {
+                    $parts[] = $body;
+                }
+            }
+            $html = implode("\n", $parts);
+        }
+
+        if (strlen(trim(strip_tags($html))) < 400) {
+            throw new \RuntimeException(
+                'AIWriterAgent devolveu conteúdo demasiado curto (só título/fontes). Reprocesse o artigo após corrigir Tavily/output_length.'
+            );
+        }
+
         $title = trim((string) ($draft['title'] ?? $article->title));
         $excerpt = trim((string) ($draft['excerpt'] ?? $article->excerpt));
         $readTime = (int) ($draft['read_time'] ?? max(5, (int) ceil(str_word_count(strip_tags($html)) / 200)));

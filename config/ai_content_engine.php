@@ -33,8 +33,10 @@ return [
         'research_model' => env('TAVILY_RESEARCH_MODEL', 'mini'),
         'research_timeout' => (int) env('TAVILY_RESEARCH_TIMEOUT', 240),
         'research_poll_seconds' => (int) env('TAVILY_RESEARCH_POLL_SECONDS', 4),
-        // concise uses fewer Research credits while keeping structure
-        'research_output_length' => env('TAVILY_RESEARCH_OUTPUT_LENGTH', 'concise'),
+        // Tavily accepts only: short | standard | long
+        'research_output_length' => env('TAVILY_RESEARCH_OUTPUT_LENGTH', 'short'),
+        // Writer needs more room for full HTML articles
+        'writer_output_length' => env('TAVILY_WRITER_OUTPUT_LENGTH', 'long'),
     ],
 
     /*

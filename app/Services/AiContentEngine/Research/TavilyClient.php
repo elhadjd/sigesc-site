@@ -192,7 +192,8 @@ class TavilyClient
         string $input,
         array $outputSchema,
         ?string $model = null,
-        array $files = []
+        array $files = [],
+        ?string $outputLength = null
     ): array|string {
         if (! $this->configured()) {
             throw new \RuntimeException('TAVILY_API_KEY is required for Tavily Research.');
@@ -208,7 +209,8 @@ class TavilyClient
             'model' => $this->normalizeResearchModel($model),
             'stream' => false,
             'output_schema' => $outputSchema,
-            'output_length' => config('ai_content_engine.tavily.research_output_length', 'standard'),
+            // Tavily only accepts short|standard|long (not "concise").
+            'output_length' => $this->normalizeOutputLength($outputLength),
         ];
 
         if ($files !== []) {
@@ -301,6 +303,41 @@ class TavilyClient
         $fallback = strtolower(trim((string) config('ai_content_engine.tavily.research_model', 'mini')));
 
         return in_array($fallback, ['mini', 'pro', 'auto'], true) ? $fallback : 'mini';
+    }
+
+    /**
+     * Tavily Research only accepts short|standard|long.
+     * Map legacy/aliases such as "concise" → short.
+     */
+    public function normalizeOutputLength(?string $length = null): string
+    {
+        $candidate = strtolower(trim((string) (
+            $length
+            ?: config('ai_content_engine.tavily.research_output_length', 'short')
+        )));
+
+        $aliases = [
+            'concise' => 'short',
+            'brief' => 'short',
+            'mini' => 'short',
+            'small' => 'short',
+            'medium' => 'standard',
+            'normal' => 'standard',
+            'default' => 'standard',
+            'full' => 'long',
+            'max' => 'long',
+            'detailed' => 'long',
+        ];
+
+        if (isset($aliases[$candidate])) {
+            return $aliases[$candidate];
+        }
+
+        if (in_array($candidate, ['short', 'standard', 'long'], true)) {
+            return $candidate;
+        }
+
+        return 'short';
     }
 
     protected function baseUrl(): string
