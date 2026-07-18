@@ -6,6 +6,7 @@ import { FormStateProvider } from '@/contexts/stateForm';
 import { UserLoggedProvider } from '@/contexts/loggedUser';
 import FooterComponent from '@/Components/home/Footer';
 import SeoHead, { SeoPayload } from '@/Components/seo/SeoHead';
+import { SIGESC_ADMIN_LOGIN_URL } from '@/services/public/domains';
 import {
     FiClock,
     FiCalendar,
@@ -427,12 +428,14 @@ const CommentsSection = ({ post }: { post: Post }) => {
                     <FiMessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-4">Seja o primeiro a comentar!</p>
                     {!user && (
-                        <Link
-                            href="/login"
+                        <a
+                            href={SIGESC_ADMIN_LOGIN_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
-                            Fazer login para comentar
-                        </Link>
+                            Entrar para comentar
+                        </a>
                     )}
                 </div>
             ) : (
