@@ -19,6 +19,8 @@ class AiContentEngineTest extends TestCase
     {
         parent::setUp();
         $this->withoutVite();
+        // Override .env allowlist so tests can open the admin UI.
+        config(['ai_content_engine.admin_emails' => []]);
     }
 
     public function test_seeder_creates_categories_and_trusted_sources(): void
