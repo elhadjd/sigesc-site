@@ -74,4 +74,32 @@ class BlogSeoTest extends TestCase
             ->where('post.slug', 'software-gestao-comercial-angola')
         );
     }
+
+    public function test_xhr_without_json_accept_returns_inertia_blog_page(): void
+    {
+        // Inertia visits send X-Requested-With; they must get a page, not the filter JSON API.
+        $response = $this->withHeaders([
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'text/html, application/xhtml+xml',
+        ])->get('/blog/posts');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('blog/index')
+            ->has('posts')
+            ->has('seo')
+        );
+    }
+
+    public function test_blog_filter_ajax_still_returns_json(): void
+    {
+        $response = $this->withHeaders([
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json',
+        ])->get('/blog/posts');
+
+        $response->assertOk();
+        $response->assertJsonStructure(['posts', 'pagination', 'categories']);
+        $this->assertFalse($response->headers->has('X-Inertia'));
+    }
 }
