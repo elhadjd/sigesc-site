@@ -14,6 +14,8 @@ use App\Services\AiContentEngine\Agents\SocialAgent;
 use App\Services\AiContentEngine\Agents\TrendAgent;
 use App\Services\AiContentEngine\Agents\WriterAgent;
 use App\Services\AiContentEngine\Support\AiLogger;
+use App\Services\AiContentEngine\Support\LlmGateway;
+use RuntimeException;
 use Throwable;
 
 class ContentPipeline
@@ -28,7 +30,8 @@ class ContentPipeline
         protected ImageAgent $image,
         protected SocialAgent $social,
         protected PublisherAgent $publisher,
-        protected AiLogger $logger
+        protected AiLogger $logger,
+        protected LlmGateway $llm
     ) {}
 
     /**
@@ -38,12 +41,19 @@ class ContentPipeline
      */
     public function runDaily(): array
     {
+        if (! $this->llm->configured()) {
+            throw new RuntimeException($this->llm->missingConfigMessage());
+        }
+
         $job = AiJob::create([
             'type' => 'daily_pipeline',
             'status' => 'running',
             'started_at' => now(),
             'progress' => 0,
             'current_agent' => 'AITrendAgent',
+            'input' => [
+                'llm_provider' => $this->llm->provider(),
+            ],
         ]);
 
         try {

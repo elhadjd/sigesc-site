@@ -60,4 +60,17 @@ class TavilyClientTest extends TestCase
         $this->assertSame('https://agt.minfin.gov.ao/iva', $data['results'][0]['url']);
         $this->assertTrue($data['results'][0]['_preferred_domain'] ?? false);
     }
+
+    public function test_normalize_research_model_rejects_openai_names(): void
+    {
+        config(['ai_content_engine.tavily.research_model' => 'mini']);
+
+        $client = app(TavilyClient::class);
+
+        $this->assertSame('mini', $client->normalizeResearchModel('gpt-4o-mini'));
+        $this->assertSame('mini', $client->normalizeResearchModel('OPENAI_REVIEW_MODEL'));
+        $this->assertSame('pro', $client->normalizeResearchModel('pro'));
+        $this->assertSame('auto', $client->normalizeResearchModel('auto'));
+        $this->assertSame('mini', $client->normalizeResearchModel(null));
+    }
 }

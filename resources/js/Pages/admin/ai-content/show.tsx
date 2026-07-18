@@ -1,26 +1,56 @@
 import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import { Api } from '@/axiosConfig';
 import AiContentLayout from './Layout';
 
 export default function AiContentShow({ article }: { article: any }) {
     const [scheduledAt, setScheduledAt] = useState('');
+    const [busy, setBusy] = useState<string | null>(null);
+    const [flash, setFlash] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
+
+    const runAction = async (key: string, request: () => Promise<{ data: any }>) => {
+        if (busy) {
+            return;
+        }
+
+        setBusy(key);
+        setFlash(null);
+
+        try {
+            const { data } = await request();
+            setFlash({ type: 'ok', text: data.message || 'Operação concluída.' });
+        } catch (error: any) {
+            setFlash({
+                type: 'error',
+                text: error?.response?.data?.message || error?.message || 'Falha na operação.',
+            });
+        } finally {
+            setBusy(null);
+        }
+    };
 
     return (
         <AiContentLayout title={article.title}>
             <div className="mb-6 flex flex-wrap gap-3">
                 <button
                     type="button"
-                    onClick={() => router.post(`/admin/ai-content/articles/${article.id}/process`)}
-                    className="rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15"
+                    disabled={!!busy}
+                    onClick={() =>
+                        runAction('process', () => Api.post(`/admin/ai-content/articles/${article.id}/process`))
+                    }
+                    className="rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15 disabled:opacity-50"
                 >
-                    Reprocessar pipeline
+                    {busy === 'process' ? 'A enviar…' : 'Reprocessar pipeline'}
                 </button>
                 <button
                     type="button"
-                    onClick={() => router.post(`/admin/ai-content/articles/${article.id}/approve`)}
-                    className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-black"
+                    disabled={!!busy}
+                    onClick={() =>
+                        runAction('approve', () => Api.post(`/admin/ai-content/articles/${article.id}/approve`))
+                    }
+                    className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
                 >
-                    Aprovar e publicar
+                    {busy === 'approve' ? 'A publicar…' : 'Aprovar e publicar'}
                 </button>
                 <input
                     type="datetime-local"
@@ -30,15 +60,17 @@ export default function AiContentShow({ article }: { article: any }) {
                 />
                 <button
                     type="button"
-                    disabled={!scheduledAt}
+                    disabled={!scheduledAt || !!busy}
                     onClick={() =>
-                        router.post(`/admin/ai-content/articles/${article.id}/schedule`, {
-                            scheduled_at: scheduledAt,
-                        })
+                        runAction('schedule', () =>
+                            Api.post(`/admin/ai-content/articles/${article.id}/schedule`, {
+                                scheduled_at: scheduledAt,
+                            })
+                        )
                     }
                     className="rounded-lg bg-sky-500/80 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
                 >
-                    Agendar
+                    {busy === 'schedule' ? 'A agendar…' : 'Agendar'}
                 </button>
                 {article.post_id && (
                     <Link
@@ -49,6 +81,18 @@ export default function AiContentShow({ article }: { article: any }) {
                     </Link>
                 )}
             </div>
+
+            {flash && (
+                <div
+                    className={`mb-4 rounded-xl px-4 py-3 text-sm ${
+                        flash.type === 'ok'
+                            ? 'bg-emerald-500/15 text-emerald-200'
+                            : 'bg-rose-500/15 text-rose-200'
+                    }`}
+                >
+                    {flash.text}
+                </div>
+            )}
 
             <div className="grid gap-6 lg:grid-cols-3">
                 <section className="lg:col-span-2 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
@@ -94,7 +138,7 @@ function MetaCard({ title, value }: { title: string; value: string | number }) {
     return (
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <p className="text-xs uppercase tracking-wider text-slate-500">{title}</p>
-            <p className="mt-1 text-white">{value}</p>
+            <p className="mt-1 text-sm text-white">{value}</p>
         </div>
     );
 }

@@ -15,6 +15,8 @@ use App\Models\AiContent\ResearchSetting;
 use App\Models\AiContent\ResearchSource;
 use App\Services\AiContentEngine\Agents\FactCheckerAgent;
 use App\Services\AiContentEngine\Agents\PublisherAgent;
+use App\Services\AiContentEngine\Research\TavilyClient;
+use App\Services\AiContentEngine\Support\LlmGateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +24,7 @@ use Inertia\Inertia;
 
 class AiContentEngineController extends Controller
 {
-    public function dashboard()
+    public function dashboard(LlmGateway $llm, TavilyClient $tavily)
     {
         $stats = Cache::remember('ai_content_dashboard_stats', 60, function () {
             return [
@@ -65,6 +67,10 @@ class AiContentEngineController extends Controller
                 'auto_publish' => config('ai_content_engine.pipeline.auto_publish'),
                 'topics_per_day' => config('ai_content_engine.pipeline.topics_per_day'),
                 'enabled' => config('ai_content_engine.enabled'),
+                'llm_provider' => $llm->provider(),
+                'llm_ready' => $llm->configured(),
+                'tavily_ready' => $tavily->configured(),
+                'openai_ready' => filled(config('ai_content_engine.openai.api_key')),
             ],
         ]);
     }
@@ -111,21 +117,31 @@ class AiContentEngineController extends Controller
         ]);
     }
 
-    public function runDaily()
+    public function runDaily(Request $request, LlmGateway $llm)
     {
-        RunDailyContentPipeline::dispatch();
+        if (! $llm->configured()) {
+            return $this->actionResponse($request, false, $llm->missingConfigMessage(), 422);
+        }
 
-        return back()->with('success', 'Pipeline diário enviado para a fila.');
+        // afterResponse: even with QUEUE_CONNECTION=sync, axios gets JSON before the long pipeline runs
+        RunDailyContentPipeline::dispatch()->afterResponse();
+
+        $provider = $llm->provider();
+        $message = 'Pipeline diário enviado para a fila (LLM: '.($provider ?? 'n/d').').';
+
+        return $this->actionResponse($request, true, $message, 200, [
+            'provider' => $provider,
+        ]);
     }
 
-    public function processArticle(Article $article)
+    public function processArticle(Request $request, Article $article)
     {
-        ProcessArticlePipeline::dispatch($article->id);
+        ProcessArticlePipeline::dispatch($article->id)->afterResponse();
 
-        return back()->with('success', 'Pipeline do artigo enviado para a fila.');
+        return $this->actionResponse($request, true, 'Pipeline do artigo enviado para a fila.');
     }
 
-    public function approve(Article $article, PublisherAgent $publisher)
+    public function approve(Request $request, Article $article, PublisherAgent $publisher)
     {
         $article->update([
             'needs_human_review' => false,
@@ -136,7 +152,10 @@ class AiContentEngineController extends Controller
         $publisher->publishNow($article);
         Cache::forget('ai_content_dashboard_stats');
 
-        return back()->with('success', 'Artigo aprovado e publicado.');
+        return $this->actionResponse($request, true, 'Artigo aprovado e publicado.', 200, [
+            'article_id' => $article->id,
+            'status' => $article->fresh()->status,
+        ]);
     }
 
     public function schedule(Request $request, Article $article)
@@ -154,7 +173,29 @@ class AiContentEngineController extends Controller
 
         Cache::forget('ai_content_dashboard_stats');
 
-        return back()->with('success', 'Artigo agendado.');
+        return $this->actionResponse($request, true, 'Artigo agendado.', 200, [
+            'article_id' => $article->id,
+            'scheduled_at' => $article->fresh()->scheduled_at,
+        ]);
+    }
+
+    /**
+     * Prefer JSON for axios admin actions; keep Inertia redirect fallback.
+     *
+     * @param  array<string, mixed>  $extra
+     */
+    protected function actionResponse(Request $request, bool $ok, string $message, int $status = 200, array $extra = [])
+    {
+        if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+            return response()->json(array_merge([
+                'ok' => $ok,
+                'message' => $message,
+            ], $extra), $status);
+        }
+
+        $flash = $ok ? 'success' : 'error';
+
+        return back()->with($flash, $message);
     }
 
     public function jobs()
@@ -226,7 +267,7 @@ class AiContentEngineController extends Controller
             ResearchSetting::setValue($key, $value);
         }
 
-        return back()->with('success', 'Research Engine Settings atualizadas.');
+        return $this->actionResponse($request, true, 'Research Engine Settings atualizadas.');
     }
 
     public function toggleResearchSource(Request $request, ResearchSource $source)
@@ -237,6 +278,9 @@ class AiContentEngineController extends Controller
 
         $source->update(['is_active' => $data['is_active']]);
 
-        return back()->with('success', 'Fonte atualizada: '.$source->name);
+        return $this->actionResponse($request, true, 'Fonte atualizada: '.$source->name, 200, [
+            'source_id' => $source->id,
+            'is_active' => (bool) $source->is_active,
+        ]);
     }
 }
