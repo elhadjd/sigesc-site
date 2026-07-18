@@ -99,15 +99,19 @@ class AiContentEngineTest extends TestCase
         $this->assertContains('AGT', config('ai_content_engine.categories'));
         $this->assertContains('agt.minfin.gov.ao', config('ai_content_engine.trusted_domains'));
         $this->assertSame('auto', config('ai_content_engine.llm.provider'));
+        $this->assertArrayHasKey('fiscal', config('ai_content_engine.topic_buckets'));
+        $this->assertTrue(config('ai_content_engine.topic_rotation.enabled'));
     }
 
-    public function test_run_daily_blocks_without_tavily_or_openai(): void
+    public function test_run_daily_blocks_without_llm_keys(): void
     {
         config([
+            'ai_content_engine.deepseek.api_key' => null,
             'ai_content_engine.tavily.enabled' => true,
             'ai_content_engine.tavily.api_key' => null,
             'ai_content_engine.openai.api_key' => null,
             'ai_content_engine.llm.provider' => 'auto',
+            'ai_content_engine.admin_emails' => [],
         ]);
 
         $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
@@ -124,10 +128,12 @@ class AiContentEngineTest extends TestCase
         Bus::fake();
 
         config([
+            'ai_content_engine.deepseek.api_key' => null,
             'ai_content_engine.tavily.enabled' => true,
             'ai_content_engine.tavily.api_key' => 'tvly-test',
             'ai_content_engine.openai.api_key' => null,
             'ai_content_engine.llm.provider' => 'auto',
+            'ai_content_engine.admin_emails' => [],
         ]);
 
         $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
@@ -139,7 +145,7 @@ class AiContentEngineTest extends TestCase
                 'ok' => true,
                 'provider' => 'tavily',
             ])
-            ->assertJsonPath('message', fn ($m) => str_contains((string) $m, 'Pipeline'));
+            ->assertJsonPath('message', fn ($m) => str_contains((string) $m, 'Processamento diário'));
 
         Bus::assertDispatched(RunDailyContentPipeline::class);
     }
@@ -147,10 +153,12 @@ class AiContentEngineTest extends TestCase
     public function test_run_daily_json_error_without_keys(): void
     {
         config([
+            'ai_content_engine.deepseek.api_key' => null,
             'ai_content_engine.tavily.enabled' => true,
             'ai_content_engine.tavily.api_key' => null,
             'ai_content_engine.openai.api_key' => null,
             'ai_content_engine.llm.provider' => 'auto',
+            'ai_content_engine.admin_emails' => [],
         ]);
 
         $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
@@ -161,16 +169,18 @@ class AiContentEngineTest extends TestCase
             ->assertJson([
                 'ok' => false,
             ])
-            ->assertJsonPath('message', fn ($m) => str_contains((string) $m, 'TAVILY_API_KEY'));
+            ->assertJsonPath('message', fn ($m) => str_contains((string) $m, 'DEEPSEEK_API_KEY'));
     }
 
     public function test_dashboard_shows_tavily_provider_status(): void
     {
         config([
+            'ai_content_engine.deepseek.api_key' => null,
             'ai_content_engine.tavily.enabled' => true,
             'ai_content_engine.tavily.api_key' => 'tvly-test',
             'ai_content_engine.openai.api_key' => null,
             'ai_content_engine.llm.provider' => 'auto',
+            'ai_content_engine.admin_emails' => [],
         ]);
 
         $user = User::factory()->create(['email' => 'admin@sisgesc.net']);
