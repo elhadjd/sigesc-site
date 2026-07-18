@@ -91,6 +91,7 @@ class CalculatorsAndSeoHardeningTest extends TestCase
             ->assertOk()
             ->assertSee('calcular-irt-angola-2026', false)
             ->assertSee('/calculadoras', false)
-            ->assertSee('/feed.xml', false);
+            ->assertSee('/feed.xml', false)
+            ->assertSee('/modules/dropshipping', false);
     }
 }

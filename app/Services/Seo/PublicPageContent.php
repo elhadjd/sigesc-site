@@ -20,6 +20,8 @@ class PublicPageContent
                 'name' => $module['name'],
                 'slug' => $module['slug'],
                 'description' => $module['description'],
+                'keywords' => $module['keywords'] ?? null,
+                'highlights' => $module['highlights'] ?? [],
                 'href' => url('/modules/'.$module['slug']),
             ])
             ->values()
@@ -50,13 +52,14 @@ class PublicPageContent
         return [
             'kicker' => 'Software de gestão Angola',
             'headline' => 'SIGESC — gestão comercial completa para PME',
-            'lead' => 'Gerencie PDV, estoque, finanças, compras e faturação eletrónica AGT numa única plataforma feita para empresas em Angola. Ideal para lojas, farmácias, restaurantes, salões e comércio em geral.',
+            'lead' => 'Gerencie PDV, estoque, finanças, compras, dropshipping e faturação eletrónica AGT numa única plataforma feita para empresas em Angola. Ideal para lojas, farmácias, restaurantes, salões, e-commerce e comércio em geral.',
             'sections' => [
                 [
                     'heading' => 'O que pode fazer com o SIGESC',
                     'items' => [
                         'Ponto de venda (PDV) e faturação eletrónica alinhada à AGT',
                         'Controlo de stock, inventário e alertas de reposição',
+                        'Dropshipping: venda online sem stock próprio, com fornecedores e entregas',
                         'Finanças, fluxo de caixa, contas a pagar e a receber',
                         'Gestão de funcionários, operações e relatórios',
                         'Compras a fornecedores e logística entre armazéns',
@@ -103,20 +106,21 @@ class PublicPageContent
         return [
             'kicker' => 'Soluções SIGESC',
             'headline' => 'Soluções e módulos de gestão comercial para Angola',
-            'lead' => 'O SIGESC reúne PDV, stock, faturação, finanças, RH, compras e logística num só software. Escolha o módulo abaixo — cada página explica funcionalidades para PME angolanas.',
+            'lead' => 'O SIGESC reúne PDV, stock, faturação, finanças, RH, compras, logística, loja virtual e dropshipping num só software. Escolha o módulo abaixo — cada página explica funcionalidades para PME angolanas.',
             'sections' => [
                 [
                     'heading' => 'Submenu de módulos',
                     'body' => 'Links diretos para cada solução (úteis para motores de busca e navegação sem JavaScript):',
-                    'items' => collect($this->modules())->map(fn ($m) => $m['name'])->all(),
+                    'items' => collect($this->modules())->map(fn ($m) => $m['name'].' — '.$m['description'])->all(),
                 ],
                 [
                     'heading' => 'Benefícios para a sua empresa',
                     'items' => [
                         'Dados centralizados: vendas, stock e caixa no mesmo sistema',
                         'Apoio à faturação eletrónica e obrigações junto da AGT',
+                        'Dropshipping e e-commerce sem stock próprio, integrados à loja virtual',
                         'Relatórios para decidir preços, margens e reposição',
-                        'Adequado a lojas, farmácias, restaurantes, salões e serviços',
+                        'Adequado a lojas, farmácias, restaurantes, salões, e-commerce e serviços',
                     ],
                 ],
             ],
@@ -343,24 +347,37 @@ class PublicPageContent
         $description = $catalog['description']
             ?? "O módulo {$moduleName} do SIGESC ajuda empresas em Angola a organizar operações e aumentar produtividade.";
 
+        $highlights = $catalog['highlights'] ?? [];
+        if ($highlights === []) {
+            $highlights = [
+                "Gestão operacional de {$moduleName}",
+                'Integração com faturação e documentos comerciais',
+                'Relatórios e indicadores de desempenho',
+                'Apoio a processos alinhados com boas práticas AGT / gestão',
+            ];
+        }
+
         return [
             'kicker' => 'Módulo SIGESC',
             'headline' => "{$moduleName} — software de gestão SIGESC Angola",
-            'lead' => $description.' Integrado com PDV, stock, faturação e finanças no mesmo sistema.',
+            'lead' => $description.' Integrado com PDV, stock, faturação, loja virtual e finanças no mesmo sistema.',
             'sections' => [
                 [
                     'heading' => "O que inclui o módulo {$moduleName}",
                     'body' => 'Funcionalidades pensadas para PME angolanas, com dados partilhados entre módulos e relatórios para decisão.',
+                    'items' => $highlights,
+                ],
+                [
+                    'heading' => 'Porquê escolher o SIGESC',
                     'items' => [
-                        "Gestão operacional de {$moduleName}",
-                        'Integração com faturação e documentos comerciais',
-                        'Relatórios e indicadores de desempenho',
-                        'Apoio a processos alinhados com boas práticas AGT / gestão',
+                        'Plataforma única: vendas, stock, finanças e e-commerce ligados',
+                        'Feito para o mercado angolano e conformidade AGT',
+                        'Ideal para PME que querem crescer com processos organizados',
                     ],
                 ],
                 [
                     'heading' => 'Outros módulos (submenu)',
-                    'items' => collect($this->modules())->pluck('name')->all(),
+                    'items' => collect($this->modules())->map(fn ($m) => $m['name'].' — '.$m['description'])->all(),
                 ],
             ],
             'links' => array_merge(
