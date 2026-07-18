@@ -142,10 +142,129 @@ class TavilyClient
         return $merged;
     }
 
+    /**
+     * Run Tavily Research and return structured content (JSON schema or report).
+     *
+     * @param  array<string, mixed>  $outputSchema
+     * @param  list<array{name: string, data: string, type?: string}>  $files
+     * @return array<string, mixed>|string
+     */
+    public function researchJson(
+        string $input,
+        array $outputSchema,
+        ?string $model = null,
+        array $files = []
+    ): array|string {
+        if (! $this->configured()) {
+            throw new \RuntimeException('TAVILY_API_KEY is required for Tavily Research.');
+        }
+
+        $input = trim($input);
+        if ($input === '') {
+            throw new \RuntimeException('Tavily Research input cannot be empty.');
+        }
+
+        $payload = [
+            'input' => $input,
+            'model' => $model ?: config('ai_content_engine.tavily.research_model', 'mini'),
+            'stream' => false,
+            'output_schema' => $outputSchema,
+            'output_length' => config('ai_content_engine.tavily.research_output_length', 'standard'),
+        ];
+
+        if ($files !== []) {
+            $payload['files'] = array_slice($files, 0, 5);
+        }
+
+        $create = $this->researchRequest()
+            ->timeout(60)
+            ->post($this->baseUrl().'/research', $payload);
+
+        if (! $create->successful()) {
+            throw new \RuntimeException('Tavily Research create failed: '.$create->status().' '.$create->body());
+        }
+
+        $body = $create->json() ?: [];
+        $requestId = (string) ($body['request_id'] ?? '');
+
+        // Some plans/responses may complete inline.
+        if (($body['status'] ?? null) === 'completed' && array_key_exists('content', $body)) {
+            return $body['content'];
+        }
+
+        if ($requestId === '') {
+            if (array_key_exists('content', $body)) {
+                return $body['content'];
+            }
+
+            throw new \RuntimeException('Tavily Research did not return a request_id.');
+        }
+
+        return $this->pollResearch($requestId);
+    }
+
+    /**
+     * @return array<string, mixed>|string
+     */
+    public function pollResearch(string $requestId): array|string
+    {
+        $timeout = max(30, (int) config('ai_content_engine.tavily.research_timeout', 240));
+        $interval = max(1, (int) config('ai_content_engine.tavily.research_poll_seconds', 4));
+        $deadline = microtime(true) + $timeout;
+
+        do {
+            $response = $this->researchRequest()
+                ->timeout(45)
+                ->get($this->baseUrl().'/research/'.$requestId);
+
+            if (! $response->successful()) {
+                throw new \RuntimeException('Tavily Research poll failed: '.$response->status().' '.$response->body());
+            }
+
+            $body = $response->json() ?: [];
+            $status = (string) ($body['status'] ?? '');
+
+            if ($status === 'completed') {
+                if (! array_key_exists('content', $body)) {
+                    throw new \RuntimeException('Tavily Research completed without content.');
+                }
+
+                return $body['content'];
+            }
+
+            if ($status === 'failed') {
+                $error = data_get($body, 'error') ?? data_get($body, 'detail.error') ?? 'unknown error';
+                throw new \RuntimeException('Tavily Research task failed: '.$error);
+            }
+
+            if (microtime(true) >= $deadline) {
+                break;
+            }
+
+            sleep($interval);
+        } while (microtime(true) < $deadline);
+
+        throw new \RuntimeException("Tavily Research timed out after {$timeout}s (request_id={$requestId}).");
+    }
+
+    protected function baseUrl(): string
+    {
+        return rtrim((string) config('ai_content_engine.tavily.base_url', 'https://api.tavily.com'), '/');
+    }
+
+    protected function researchRequest(): \Illuminate\Http\Client\PendingRequest
+    {
+        return Http::acceptJson()
+            ->withToken((string) config('ai_content_engine.tavily.api_key'))
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+            ]);
+    }
+
     protected function post(array $payload): \Illuminate\Http\Client\Response
     {
         return Http::timeout(45)
             ->acceptJson()
-            ->post(config('ai_content_engine.tavily.base_url').'/search', $payload);
+            ->post($this->baseUrl().'/search', $payload);
     }
 }

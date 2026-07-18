@@ -36,7 +36,15 @@ export default function AiContentDashboard({
     recentJobs: any[];
     recentLogs: any[];
     categories: { name: string; articles_count: number }[];
-    config: { auto_publish: boolean; topics_per_day: number; enabled: boolean };
+    config: {
+        auto_publish: boolean;
+        topics_per_day: number;
+        enabled: boolean;
+        llm_provider?: string | null;
+        llm_ready?: boolean;
+        tavily_ready?: boolean;
+        openai_ready?: boolean;
+    };
 }) {
     const cards = [
         { label: 'Artigos', value: stats.total },
@@ -55,14 +63,30 @@ export default function AiContentDashboard({
                 <button
                     type="button"
                     onClick={() => router.post('/admin/ai-content/run-daily')}
-                    className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-400"
+                    disabled={!config.llm_ready}
+                    className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     Correr pipeline diário
                 </button>
                 <span className="text-sm text-slate-400">
                     Engine {config.enabled ? 'ativa' : 'desligada'} · {config.topics_per_day} temas/dia ·
-                    auto-publish {config.auto_publish ? 'on' : 'off'}
+                    auto-publish {config.auto_publish ? 'on' : 'off'} · LLM{' '}
+                    {config.llm_provider ?? 'não configurado'}
                 </span>
+            </div>
+
+            <div className="mb-6 flex flex-wrap gap-2 text-xs">
+                <span className={`rounded-full px-3 py-1 ${config.tavily_ready ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
+                    Tavily {config.tavily_ready ? 'ok' : 'falta TAVILY_API_KEY'}
+                </span>
+                <span className={`rounded-full px-3 py-1 ${config.openai_ready ? 'bg-slate-500/20 text-slate-300' : 'bg-slate-700/40 text-slate-500'}`}>
+                    OpenAI {config.openai_ready ? 'opcional ativa' : 'opcional (não necessária)'}
+                </span>
+                {!config.llm_ready && (
+                    <span className="rounded-full bg-amber-500/20 px-3 py-1 text-amber-200">
+                        Defina TAVILY_API_KEY no .env para correr o pipeline
+                    </span>
+                )}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

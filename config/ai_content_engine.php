@@ -8,7 +8,14 @@ return [
     |--------------------------------------------------------------------------
     | Providers
     |--------------------------------------------------------------------------
+    | LLM generation defaults to Tavily Research (TAVILY_API_KEY).
+    | OpenAI is an optional fallback for chat/images — not required.
     */
+    'llm' => [
+        // auto | tavily | openai
+        'provider' => env('AI_CONTENT_LLM_PROVIDER', 'auto'),
+    ],
+
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
         'base_url' => rtrim(env('OPENAI_BASE_URL', 'https://api.openai.com/v1'), '/'),
@@ -23,6 +30,10 @@ return [
         'base_url' => rtrim(env('TAVILY_BASE_URL', 'https://api.tavily.com'), '/'),
         'max_results' => (int) env('TAVILY_MAX_RESULTS', 8),
         'enabled' => (bool) env('TAVILY_ENABLED', true),
+        'research_model' => env('TAVILY_RESEARCH_MODEL', 'mini'),
+        'research_timeout' => (int) env('TAVILY_RESEARCH_TIMEOUT', 240),
+        'research_poll_seconds' => (int) env('TAVILY_RESEARCH_POLL_SECONDS', 4),
+        'research_output_length' => env('TAVILY_RESEARCH_OUTPUT_LENGTH', 'standard'),
     ],
 
     /*

@@ -16,7 +16,8 @@ class RunDailyContentPipeline implements ShouldQueue
 
     public int $tries = 1;
 
-    public int $timeout = 900;
+    /** Tavily Research polls can take several minutes per agent step. */
+    public int $timeout = 3600;
 
     public function handle(ContentPipeline $pipeline): void
     {
