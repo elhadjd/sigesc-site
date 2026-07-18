@@ -32,13 +32,13 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 
 import Pusher from 'pusher-js';
-import Echo from "laravel-echo";
+import Echo from 'laravel-echo';
 
-window.Pusher = Pusher
+window.Pusher = Pusher;
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
-    key: '68dc4bf7330d6ae8230b',
-    cluster: 'us2',
-    forceTLS: true
+    key: import.meta.env.VITE_PUSHER_APP_KEY || '68dc4bf7330d6ae8230b',
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'us2',
+    forceTLS: true,
 });

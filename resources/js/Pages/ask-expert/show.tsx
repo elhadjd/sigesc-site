@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, router, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { HeaderComponent } from '@/Components/home/Header';
 import FooterComponent from '@/Components/home/Footer';
 import { FormStateProvider } from '@/contexts/stateForm';
@@ -8,6 +8,19 @@ import SeoHead, { SeoPayload } from '@/Components/seo/SeoHead';
 import { User } from '@/types';
 
 const PENDING = new Set(['queued', 'pending', 'researching']);
+
+type ExpertPayload = {
+    uuid: string;
+    status: string;
+    quality_score?: number | null;
+    answer_html?: string | null;
+    article?: {
+        id: number;
+        title: string;
+        slug: string;
+        status: string;
+    } | null;
+};
 
 export default function AskExpertShow({
     auth,
@@ -19,25 +32,31 @@ export default function AskExpertShow({
     seo?: SeoPayload;
 }) {
     const flash = (usePage().props as any).flash;
-    const [status, setStatus] = useState(question.status);
+    const [live, setLive] = useState<ExpertPayload | null>(null);
+
+    const status = live?.status ?? question.status;
+    const answerHtml = live?.answer_html ?? question.answer_html;
+    const qualityScore = live?.quality_score ?? question.quality_score;
+    const article = live?.article ?? question.article;
+    const processing = PENDING.has(status);
+    const failed = status === 'rejected';
 
     useEffect(() => {
-        setStatus(question.status);
-    }, [question.status]);
-
-    useEffect(() => {
-        if (!PENDING.has(status)) {
+        if (!PENDING.has(question.status) || !window.Echo) {
             return;
         }
 
-        const timer = window.setInterval(() => {
-            router.reload({ only: ['question'], preserveScroll: true });
-        }, 4000);
+        const channelName = `AskExpert.${question.uuid}`;
+        const channel = window.Echo.channel(channelName);
 
-        return () => window.clearInterval(timer);
-    }, [status, question.uuid]);
+        channel.listen('.ask-expert.ready', (payload: ExpertPayload) => {
+            setLive(payload);
+        });
 
-    const processing = PENDING.has(status);
+        return () => {
+            window.Echo.leave(channelName);
+        };
+    }, [question.uuid, question.status]);
 
     return (
         <UserLoggedProvider>
@@ -59,9 +78,9 @@ export default function AskExpertShow({
                         <h1 className="mt-4 font-serif text-3xl text-[#14213d] sm:text-4xl">
                             {question.question}
                         </h1>
-                        {!processing && (
+                        {!processing && !failed && (
                             <p className="mt-2 text-sm text-slate-500">
-                                Qualidade estimada: {question.quality_score ?? '—'}
+                                Qualidade estimada: {qualityScore ?? '—'}
                             </p>
                         )}
 
@@ -69,28 +88,41 @@ export default function AskExpertShow({
                             <div className="mt-8 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5">
                                 <p className="text-lg font-medium text-[#14213d]">A preparar a sua resposta…</p>
                                 <p className="mt-2 text-slate-600">
-                                    Estamos a pesquisar fontes e a organizar a informação. Esta página atualiza
-                                    automaticamente em alguns segundos.
+                                    Estamos a pesquisar fontes e a organizar a informação. Assim que estiver pronta,
+                                    aparece aqui automaticamente.
                                     {question.asker_email
-                                        ? ' Também enviamos o resultado para o seu email quando estiver pronto.'
+                                        ? ' Também enviamos o resultado para o seu email.'
                                         : ''}
                                 </p>
+                            </div>
+                        ) : failed ? (
+                            <div className="mt-8 rounded-3xl bg-rose-50 p-6 text-rose-900 ring-1 ring-rose-100">
+                                <p className="text-lg font-medium">Não foi possível gerar a resposta agora.</p>
+                                <p className="mt-2 text-sm text-rose-800/90">
+                                    Tente novamente dentro de momentos ou reformule a pergunta.
+                                </p>
+                                <Link
+                                    href="/pergunte-ao-especialista"
+                                    className="mt-4 inline-block text-sm font-semibold text-[#0b3d91] underline"
+                                >
+                                    Nova pergunta
+                                </Link>
                             </div>
                         ) : (
                             <div
                                 className="prose blog-prose mt-8 max-w-none rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5"
-                                dangerouslySetInnerHTML={{ __html: question.answer_html || '' }}
+                                dangerouslySetInnerHTML={{ __html: answerHtml || '' }}
                             />
                         )}
 
-                        {question.article && (
+                        {article && (
                             <p className="mt-8 text-slate-700">
                                 Esta resposta gerou um artigo no blog:{' '}
                                 <Link
-                                    href={`/blog/posts/${question.article.slug}`}
+                                    href={`/blog/posts/${article.slug}`}
                                     className="font-semibold text-[#0b3d91] underline"
                                 >
-                                    {question.article.title}
+                                    {article.title}
                                 </Link>
                             </p>
                         )}
