@@ -14,7 +14,9 @@ use App\Http\Controllers\Admin\AiContentEngineController;
 use App\Http\Controllers\public\AskExpertController;
 use App\Http\Controllers\public\Blog\EngagementController;
 use App\Http\Controllers\public\BlogController;
+use App\Http\Controllers\public\CalculatorsController;
 use App\Http\Controllers\public\ChatController;
+use App\Http\Controllers\public\RssFeedController;
 use App\Http\Controllers\public\SitemapController;
 use App\Http\Controllers\public\clientDepoimentsController;
 use App\Http\Controllers\public\CompanyController;
@@ -43,6 +45,14 @@ require __DIR__ . '/auth.php';
 Route::get('/', [DashboardController::class, 'index']);
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/feed.xml', [RssFeedController::class, 'blog'])->name('feed.blog');
+
+Route::prefix('calculadoras')->name('calculators.')->group(function () {
+    Route::get('', [CalculatorsController::class, 'index'])->name('index');
+    Route::post('calcular', [CalculatorsController::class, 'calculate'])
+        ->middleware('throttle:60,1')
+        ->name('calculate');
+});
 
 Route::controller(AuthenticatedSessionController::class)->group(function () {
     Route::get('/auth', 'create')->name('auth');

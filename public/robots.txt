@@ -1,11 +1,15 @@
 User-agent: *
 Allow: /
 Allow: /blog/posts
-Allow: /blog/posts/*
+Allow: /blog/posts/
+Allow: /pergunte-ao-especialista
+Allow: /calculadoras
+Allow: /feed.xml
 
 Disallow: /authenticate
 Disallow: /auth/
 Disallow: /profile
+Disallow: /admin/
 Disallow: /chat-conversation
 Disallow: /new-chat
 

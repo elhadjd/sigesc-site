@@ -18,8 +18,9 @@
     <meta name="generator" content="SIGESC">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="https://admin.sisgesc.net/favicon.ico" type="image/x-icon">
+    <link rel="alternate" type="application/rss+xml" title="Blog SIGESC" href="{{ url('/feed.xml') }}">
 
-    {{-- Server-rendered SEO (available before JS, like SSR head) --}}
+    {{-- Meta/OG/JSON-LD no HTML inicial (antes de qualquer JS) --}}
     @include('partials.seo-meta')
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,9 +35,23 @@
 </head>
 
 <body class="font-sans antialiased">
-    @inertia
+    @php
+        if (! isset($__inertiaSsrDispatched)) {
+            $__inertiaSsrDispatched = true;
+            $__inertiaSsrResponse = app(\Inertia\Ssr\Gateway::class)->dispatch($page);
+        }
+    @endphp
 
-    {{-- Noscript fallback with full article body for non-JS agents --}}
+    @if ($__inertiaSsrResponse)
+        {{-- React SSR real (quando o processo Node está ativo) --}}
+        {!! $__inertiaSsrResponse->body !!}
+    @else
+        {{-- Fallback SSR-like: conteúdo da BD já no HTML para crawlers --}}
+        <div id="app" data-page="{{ json_encode($page) }}">
+            @include('partials.seo-prerender')
+        </div>
+    @endif
+
     <noscript>
         @include('partials.seo-prerender')
     </noscript>
