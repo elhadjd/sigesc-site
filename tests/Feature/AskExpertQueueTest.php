@@ -51,8 +51,11 @@ class AskExpertQueueTest extends TestCase
         app(ExpertResultMailer::class)->notifyAnswer($question);
 
         Mail::assertQueued(ExpertAnswerReadyMail::class, function (ExpertAnswerReadyMail $mail) use ($question) {
+            $expected = rtrim((string) config('sigesc.site_url'), '/').'/pergunte-ao-especialista/'.$question->uuid;
+
             return $mail->hasTo('carlos@example.com')
-                && $mail->answerUrl === route('ask-expert.show', $question->uuid);
+                && $mail->answerUrl === $expected
+                && $mail->expertQuestion->is($question);
         });
 
         $this->assertNotNull($question->fresh()->email_notified_at);
