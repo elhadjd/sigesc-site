@@ -202,6 +202,21 @@ return [
     ],
 
     /*
+    | Cover images for AI articles / blog posts.
+    | auto: OpenAI (if key) → Openverse (free) → Wikimedia → Unsplash/Pexels keys → curated pool
+    */
+    'images' => [
+        'provider' => env('AI_CONTENT_IMAGE_PROVIDER', 'auto'),
+        // Prefer free web search by default; set true to try DALL-E first when OPENAI_API_KEY exists.
+        'prefer_openai' => (bool) env('AI_CONTENT_IMAGE_PREFER_OPENAI', false),
+        'openverse_enabled' => (bool) env('AI_CONTENT_OPENVERSE_ENABLED', true),
+        'wikimedia_enabled' => (bool) env('AI_CONTENT_WIKIMEDIA_ENABLED', true),
+        'unsplash_access_key' => env('UNSPLASH_ACCESS_KEY'),
+        'pexels_api_key' => env('PEXELS_API_KEY'),
+        'store_locally' => (bool) env('AI_CONTENT_STORE_IMAGES', true),
+    ],
+
+    /*
     |--------------------------------------------------------------------------
     | Pipeline behaviour
     |--------------------------------------------------------------------------
