@@ -6,9 +6,12 @@ use App\Models\AiContent\AiJob;
 use App\Models\AiContent\Article;
 use App\Models\AiContent\Category;
 use App\Services\AiContentEngine\Agents\TrendAgent;
+use App\Services\AiContentEngine\Support\AngolaSearchInterest;
 use App\Services\AiContentEngine\Support\LlmGateway;
 use App\Services\AiContentEngine\Support\ResearchGateway;
+use App\Services\AiContentEngine\Support\TopicBucketRotator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Mockery;
 use Tests\TestCase;
 
@@ -16,9 +19,14 @@ class TrendAgentBucketTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_trend_agent_forces_fiscal_bucket_topics(): void
+    protected function setUp(): void
     {
-        // Flood marketing so rotator would pick fiscal if called — we pass bucket explicitly.
+        parent::setUp();
+        Cache::forget(TopicBucketRotator::CACHE_KEY);
+    }
+
+    public function test_trend_agent_forces_fiscal_bucket_topics_and_remembers_rotation(): void
+    {
         $marketing = Category::create(['name' => 'E-commerce', 'slug' => 'e-commerce', 'is_active' => true]);
         Article::create([
             'title' => 'Loja online antiga',
@@ -37,15 +45,25 @@ class TrendAgentBucketTest extends TestCase
         ]);
         $this->app->instance(ResearchGateway::class, $research);
 
+        $interest = Mockery::mock(AngolaSearchInterest::class);
+        $interest->shouldReceive('forBucket')->with('fiscal', Mockery::any())->andReturn([
+            'trends' => ['IVA Angola AGT'],
+            'suggestions' => ['IVA Angola taxa'],
+            'queries' => ['IVA Angola taxa'],
+            'source' => 'test',
+        ]);
+        $this->app->instance(AngolaSearchInterest::class, $interest);
+
         $llm = Mockery::mock(LlmGateway::class);
         $llm->shouldReceive('chatJson')
             ->once()
             ->withArgs(function (array $messages) {
                 $system = $messages[0]['content'] ?? '';
+                $user = $messages[1]['content'] ?? '';
 
-                return str_contains($system, 'BUCKET OBRIGATÓRIO')
+                return str_contains($system, 'ROTAÇÃO EDITORIAL')
                     && str_contains($system, 'fiscal')
-                    && str_contains($system, 'NÃO escrevas sobre loja online');
+                    && str_contains($user, 'angola_search_interest');
             })
             ->andReturn([
                 'topics' => [
@@ -58,13 +76,12 @@ class TrendAgentBucketTest extends TestCase
                         'reason' => 'procura fiscal',
                     ],
                     [
-                        // Wrong bucket category — should be remapped
                         'title' => 'Como vender no Instagram em Angola',
                         'summary' => 'ads',
                         'category' => 'Marketing Digital',
                         'priority' => 2,
                         'keywords' => ['Instagram'],
-                        'reason' => 'should be remapped',
+                        'reason' => 'should be dropped',
                     ],
                 ],
             ]);
@@ -92,6 +109,6 @@ class TrendAgentBucketTest extends TestCase
         $article = $result['topics'][0];
         $this->assertStringContainsString('IVA', $article->title);
         $this->assertSame('fiscal', $article->pipeline_meta['topic_bucket'] ?? null);
-        $this->assertSame('IVA', $article->category?->name);
+        $this->assertSame('fiscal', Cache::get(TopicBucketRotator::CACHE_KEY));
     }
 }
