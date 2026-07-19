@@ -6,6 +6,7 @@ use App\Models\AiContent\AiJob;
 use App\Models\AiContent\Article;
 use App\Services\AiContentEngine\Contracts\AgentInterface;
 use App\Services\AiContentEngine\Support\AiLogger;
+use App\Services\AiContentEngine\Support\CoverImageService;
 use App\Services\AiContentEngine\Support\LlmGateway;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,7 @@ class ImageAgent implements AgentInterface
 {
     public function __construct(
         protected LlmGateway $llm,
+        protected CoverImageService $covers,
         protected AiLogger $logger
     ) {}
 
@@ -32,7 +34,7 @@ class ImageAgent implements AgentInterface
 
         $prompt = 'Editorial cover photo for a business knowledge article about "'
             .$article->title
-            .'" in Angola. Clean corporate photography, no text overlay, professional lighting.';
+            .'" in Angola. Clean corporate photography, African context when possible, no text overlay, professional lighting.';
 
         $roles = [
             'cover' => '1792x1024',
@@ -42,24 +44,17 @@ class ImageAgent implements AgentInterface
             'whatsapp' => '1024x1024',
         ];
 
+        $resolved = $this->covers->resolve($article, $prompt);
+        $coverUrl = (string) $resolved['url'];
+        $source = (string) ($resolved['source'] ?? 'unknown');
+        $attribution = is_array($resolved['attribution'] ?? null) ? $resolved['attribution'] : [];
+
         $images = [];
-        $coverUrl = null;
-        $remote = $this->llm->generateImage($prompt, '1792x1024');
-
-        if ($remote) {
-            $stored = $this->store($remote, $article->slug.'-cover');
-            $coverUrl = $stored ?: $remote;
-        }
-
-        if (! $coverUrl) {
-            $coverUrl = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80';
-        }
-
         $article->images()->delete();
 
         foreach ($roles as $role => $size) {
             $url = $coverUrl;
-            // Optional dedicated generations for social crops when enabled.
+
             if ($role !== 'cover' && ($context['generate_variants'] ?? false)) {
                 $variant = $this->llm->generateImage($prompt.' Format suited for '.$role, $size);
                 if ($variant) {
@@ -71,7 +66,11 @@ class ImageAgent implements AgentInterface
                 'role' => $role,
                 'url' => $url,
                 'alt' => $alt,
-                'meta' => ['size' => $size],
+                'meta' => [
+                    'size' => $size,
+                    'source' => $source,
+                    'attribution' => $attribution,
+                ],
             ]);
 
             $images[$role] = $url;
@@ -82,17 +81,58 @@ class ImageAgent implements AgentInterface
         $twitter = $article->twitter_card ?? [];
         $twitter['image'] = $images['og'] ?? $coverUrl;
 
+        $contentHtml = $this->injectCoverIntoContent(
+            (string) $article->content_html,
+            $coverUrl,
+            (string) $alt
+        );
+
+        $meta = $article->pipeline_meta ?? [];
+        $meta['cover_image'] = [
+            'source' => $source,
+            'attribution' => $attribution,
+            'url' => $coverUrl,
+        ];
+
         $article->update([
             'featured_image' => $coverUrl,
+            'content_html' => $contentHtml,
             'open_graph' => $og,
             'twitter_card' => $twitter,
+            'pipeline_meta' => $meta,
         ]);
 
-        $this->logger->info('Images generated', $job, $article, $this->name(), [
+        $this->logger->info('Images resolved', $job, $article, $this->name(), [
+            'source' => $source,
             'roles' => array_keys($images),
+            'url' => $coverUrl,
         ]);
 
-        return ['images' => $images];
+        return [
+            'images' => $images,
+            'source' => $source,
+            'attribution' => $attribution,
+        ];
+    }
+
+    protected function injectCoverIntoContent(string $html, string $coverUrl, string $alt): string
+    {
+        $html = trim($html);
+        if ($html === '' || $coverUrl === '') {
+            return $html;
+        }
+
+        if (str_contains($html, $coverUrl) || str_contains($html, 'class="ai-cover"')) {
+            return $html;
+        }
+
+        $figure = '<figure class="ai-cover" style="margin:0 0 1.5rem;">'
+            .'<img src="'.e($coverUrl).'" alt="'.e($alt).'" loading="eager" '
+            .'style="width:100%;height:auto;border-radius:14px;display:block;" />'
+            .'</figure>';
+
+        // Keep cover at the top so blog cards and SSR show a real visual immediately.
+        return $figure."\n".$html;
     }
 
     protected function store(string $url, string $name): ?string
