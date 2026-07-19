@@ -34,11 +34,11 @@
                                 <tr>
                                     <td style="padding:18px 20px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;">
                                         <p style="margin:0 0 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#0b3d91;font-weight:700;">
-                                            Resumo da resposta
+                                            Resposta completa
                                         </p>
-                                        <p style="margin:0;font-size:15px;line-height:1.65;color:#334155;">
-                                            {{ $answerExcerpt }}
-                                        </p>
+                                        <div style="margin:0;font-size:15px;line-height:1.65;color:#334155;">
+                                            {!! $answerHtml !!}
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
@@ -47,7 +47,7 @@
                                 <tr>
                                     <td style="border-radius:10px;background:#0b3d91;">
                                         <a href="{{ $answerUrl }}" style="display:inline-block;padding:13px 20px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">
-                                            Ver resposta completa
+                                            Abrir no site SIGESC
                                         </a>
                                     </td>
                                 </tr>
@@ -71,7 +71,7 @@
                                                 @endif
                                             </p>
                                             <a href="{{ $postUrl }}" style="font-size:14px;font-weight:700;color:#0b3d91;text-decoration:underline;word-break:break-all;">
-                                                Ler no blog SIGESC
+                                                {{ $postUrl }}
                                             </a>
                                         </td>
                                     </tr>

@@ -172,7 +172,13 @@ class PublisherAgent implements AgentInterface
         if ($article->post_id) {
             $post = Post::find($article->post_id);
             if ($post) {
-                $post->update($payload);
+                $update = $payload;
+                // Keep the live public URL stable if the post slug already exists.
+                if (filled($post->slug)) {
+                    $update['slug'] = $post->slug;
+                }
+                $post->update($update);
+                $this->syncArticleSlugFromPost($article, $post->fresh());
 
                 return $post->id;
             }
@@ -181,12 +187,27 @@ class PublisherAgent implements AgentInterface
         $existing = Post::withTrashed()->where('slug', $article->slug)->first();
         if ($existing) {
             $existing->restore();
-            $existing->update($payload);
+            $update = $payload;
+            if (filled($existing->slug)) {
+                $update['slug'] = $existing->slug;
+            }
+            $existing->update($update);
+            $this->syncArticleSlugFromPost($article, $existing->fresh());
 
             return $existing->id;
         }
 
-        return Post::create($payload)->id;
+        $created = Post::create($payload);
+        $this->syncArticleSlugFromPost($article, $created);
+
+        return $created->id;
+    }
+
+    protected function syncArticleSlugFromPost(Article $article, Post $post): void
+    {
+        if (filled($post->slug) && $article->slug !== $post->slug) {
+            $article->forceFill(['slug' => $post->slug])->saveQuietly();
+        }
     }
 
     protected function composePublicHtml(Article $article): string
