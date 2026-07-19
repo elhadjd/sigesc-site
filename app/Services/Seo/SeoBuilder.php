@@ -191,29 +191,46 @@ class SeoBuilder
         $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
         $path = $page['path'] ?? '/';
         $canonical = str_starts_with($path, 'http') ? $path : $base.'/'.ltrim($path, '/');
+        $canonical = rtrim($canonical, '/') ?: $base;
 
-        return $this->defaults([
+        $jsonLd = [
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebPage',
+                'name' => $page['title'],
+                'description' => $page['description'],
+                'url' => $canonical,
+                'isPartOf' => [
+                    '@type' => 'WebSite',
+                    'name' => 'SIGESC',
+                    'url' => $base,
+                ],
+                'inLanguage' => 'pt-AO',
+            ],
+        ];
+
+        if (! empty($page['faq']) && is_array($page['faq'])) {
+            $jsonLd[] = $this->faqPageJsonLd($page['faq']);
+        }
+
+        if (! empty($page['extra_json_ld']) && is_array($page['extra_json_ld'])) {
+            $jsonLd = array_values(array_merge($jsonLd, $page['extra_json_ld']));
+        }
+
+        $payload = [
             'title' => $page['title'],
             'description' => $page['description'],
             'keywords' => $page['keywords'] ?? null,
-            'canonical' => rtrim($canonical, '/') ?: $base,
+            'canonical' => $canonical,
             'og_type' => $page['og_type'] ?? 'website',
-            'json_ld' => [
-                [
-                    '@context' => 'https://schema.org',
-                    '@type' => 'WebPage',
-                    'name' => $page['title'],
-                    'description' => $page['description'],
-                    'url' => rtrim($canonical, '/') ?: $base,
-                    'isPartOf' => [
-                        '@type' => 'WebSite',
-                        'name' => 'SIGESC',
-                        'url' => $base,
-                    ],
-                    'inLanguage' => 'pt-AO',
-                ],
-            ],
-        ]);
+            'json_ld' => $jsonLd,
+        ];
+
+        if (! empty($page['robots'])) {
+            $payload['robots'] = $page['robots'];
+        }
+
+        return $this->defaults($payload);
     }
 
     public function forHome(): array
@@ -278,11 +295,140 @@ class SeoBuilder
 
     public function forAskExpert(): array
     {
+        $url = route('ask-expert.index', absolute: true);
+        $faqs = [
+            [
+                'question' => 'O que é o Pergunte ao Especialista do SIGESC?',
+                'answer' => 'É um serviço gratuito de dúvidas empresariais e fiscais em Angola: pergunta sobre AGT, IVA, IRT, Imposto Industrial, faturação eletrónica, PDV, stock ou abertura de empresa e recebe uma resposta com base em pesquisa de fontes.',
+            ],
+            [
+                'question' => 'Posso tirar dúvidas sobre impostos e AGT em Angola?',
+                'answer' => 'Sim. As perguntas mais comuns são sobre taxas de IVA, tabela de IRT 2026, retenção na fonte, Imposto Industrial, faturação eletrónica AGT e obrigações fiscais de PME em Luanda e no resto do país.',
+            ],
+            [
+                'question' => 'A resposta substitui um contabilista ou a AGT?',
+                'answer' => 'Não. É apoio informativo com pesquisa. Confirme sempre a legislação vigente na AGT, no Quiosque do Contribuinte ou com um profissional certificado.',
+            ],
+            [
+                'question' => 'Que temas de gestão comercial posso perguntar?',
+                'answer' => 'Pode perguntar sobre software de gestão, PDV, controlo de stock, preços, fluxo de caixa, loja virtual, dropshipping e boas práticas para PME em Angola.',
+            ],
+        ];
+
         return $this->forPage([
-            'title' => 'Pergunte ao Especialista | SIGESC',
-            'description' => 'Faça uma pergunta sobre AGT, IVA, gestão comercial ou empreendedorismo em Angola. A IA do SIGESC pesquisa e responde com base em fontes.',
+            'title' => 'Pergunte ao Especialista Angola | Dúvidas Fiscais AGT, IVA e Gestão',
+            'description' => 'Tire dúvidas fiscais e de gestão em Angola: AGT, IVA, IRT 2026, Imposto Industrial, faturação eletrónica, PDV e abertura de empresa. Consultoria online gratuita com pesquisa de fontes — SIGESC.',
             'path' => '/pergunte-ao-especialista',
-            'keywords' => 'pergunte ao especialista, AGT, IVA Angola, SIGESC',
+            'keywords' => implode(', ', [
+                'pergunte ao especialista Angola',
+                'dúvidas fiscais Angola',
+                'consultoria fiscal online Angola',
+                'perguntas AGT',
+                'tirar dúvidas IVA Angola',
+                'especialista impostos Angola',
+                'consultoria empresarial Angola',
+                'dúvidas IRT 2026',
+                'faturação eletrónica AGT ajuda',
+                'contabilidade PME Angola',
+                'abrir empresa Angola dúvidas',
+                'especialista gestão comercial Luanda',
+                'perguntas sobre Imposto Industrial',
+                'ajuda fiscal gratuita Angola',
+                'SIGESC especialista',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'Service',
+                    'name' => 'Pergunte ao Especialista SIGESC',
+                    'serviceType' => 'Consultoria informativa fiscal e de gestão empresarial',
+                    'provider' => [
+                        '@type' => 'Organization',
+                        'name' => 'SIGESC',
+                        'url' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/'),
+                    ],
+                    'areaServed' => [
+                        '@type' => 'Country',
+                        'name' => 'Angola',
+                    ],
+                    'availableChannel' => [
+                        '@type' => 'ServiceChannel',
+                        'serviceUrl' => $url,
+                        'availableLanguage' => 'pt-AO',
+                    ],
+                    'description' => 'Serviço gratuito para tirar dúvidas sobre AGT, impostos e gestão comercial em Angola.',
+                    'url' => $url,
+                ],
+            ],
+        ]);
+    }
+
+    public function forCalculators(): array
+    {
+        $url = route('calculators.index', absolute: true);
+        $faqs = [
+            [
+                'question' => 'Existe calculadora de IVA gratuita para Angola?',
+                'answer' => 'Sim. No SIGESC pode calcular IVA a acrescentar ou a extrair do preço com as taxas do Código do IVA angolano (taxa geral e regimes especiais configurados).',
+            ],
+            [
+                'question' => 'Como calcular o IRT sobre salários em Angola em 2026?',
+                'answer' => 'Use a calculadora de IRT Grupo A com a tabela da Lei n.º 14/25 (OGE 2026): isenção até 150.000 Kz e escalões progressivos de retenção na fonte.',
+            ],
+            [
+                'question' => 'Posso simular Imposto Industrial e retenção na fonte?',
+                'answer' => 'Sim. Há simuladores de Imposto Industrial por sector, retenção na fonte sobre serviços (6,5%) e contribuição especial sobre operações cambiais.',
+            ],
+            [
+                'question' => 'Estas calculadoras substituem o simulador oficial da AGT?',
+                'answer' => 'Não. São ferramentas de apoio com base na legislação configurada. Para declarações oficiais use o Quiosque do Contribuinte / simuladores AGT.',
+            ],
+        ];
+
+        return $this->forPage([
+            'title' => 'Calculadora IVA e IRT Angola 2026 | Impostos AGT Gratuitos',
+            'description' => 'Calculadoras fiscais gratuitas para Angola: IVA, IRT 2026 (Lei n.º 14/25), Imposto Industrial, retenção na fonte 6,5% e contribuição cambial. Simule impostos AGT online — PME e contabilistas.',
+            'path' => '/calculadoras',
+            'keywords' => implode(', ', [
+                'calculadora IVA Angola',
+                'calculadora IRT Angola 2026',
+                'calcular IVA AGT',
+                'simulador impostos Angola',
+                'calculadora Imposto Industrial Angola',
+                'retenção na fonte 6.5% Angola',
+                'tabela IRT 2026',
+                'calcular salário líquido Angola',
+                'imposto sobre o valor acrescentado Angola',
+                'ferramentas fiscais gratuitas Angola',
+                'simulador IRT online',
+                'calculadora salarial Angola',
+                'contribuição cambial OGE 2026',
+                'calculadoras AGT',
+                'SIGESC calculadoras fiscais',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'WebApplication',
+                    'name' => 'Calculadoras Fiscais SIGESC Angola',
+                    'applicationCategory' => 'BusinessApplication',
+                    'operatingSystem' => 'Web',
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'price' => '0',
+                        'priceCurrency' => 'AOA',
+                    ],
+                    'url' => $url,
+                    'inLanguage' => 'pt-AO',
+                    'description' => 'Simuladores online de IVA, IRT, Imposto Industrial e retenção na fonte para empresas em Angola.',
+                    'provider' => [
+                        '@type' => 'Organization',
+                        'name' => 'SIGESC',
+                    ],
+                ],
+            ],
         ]);
     }
 
@@ -347,5 +493,29 @@ class SeoBuilder
         }
 
         return rtrim(config('app.url') ?: config('sigesc.site_url'), '/').'/'.ltrim($url, '/');
+    }
+
+    /**
+     * @param  array<int, array{question: string, answer: string}>  $faqs
+     * @return array<string, mixed>
+     */
+    protected function faqPageJsonLd(array $faqs): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => collect($faqs)
+                ->filter(fn ($faq) => filled($faq['question'] ?? null) && filled($faq['answer'] ?? null))
+                ->map(fn (array $faq) => [
+                    '@type' => 'Question',
+                    'name' => $faq['question'],
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => $faq['answer'],
+                    ],
+                ])
+                ->values()
+                ->all(),
+        ];
     }
 }

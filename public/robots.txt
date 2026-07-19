@@ -12,5 +12,7 @@ Disallow: /profile
 Disallow: /admin/
 Disallow: /chat-conversation
 Disallow: /new-chat
+# Respostas individuais (UUID) — indexar só o hub
+Disallow: /pergunte-ao-especialista/
 
 Sitemap: https://www.sisgesc.net/sitemap.xml

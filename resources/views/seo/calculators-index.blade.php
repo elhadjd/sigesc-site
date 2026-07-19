@@ -28,6 +28,14 @@
                     @endforeach
                 </ul>
             @endif
+            @if (!empty($section['faqs']) && is_array($section['faqs']))
+                <div style="margin-top:1rem;">
+                    @foreach ($section['faqs'] as $faq)
+                        <h3>{{ $faq['question'] ?? '' }}</h3>
+                        <p>{{ $faq['answer'] ?? '' }}</p>
+                    @endforeach
+                </div>
+            @endif
         </section>
     @endforeach
 
