@@ -35,7 +35,7 @@ class ExpertAnswerReadyMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         $questionText = (string) $this->expertQuestion->question;
-        $answerHtml = (string) ($this->expertQuestion->answer_html ?? '');
+        $answerHtml = $this->sanitizeAnswerHtml((string) ($this->expertQuestion->answer_html ?? ''));
         $plainAnswer = trim(preg_replace('/\s+/u', ' ', strip_tags($answerHtml)) ?? '');
 
         return new Content(
@@ -43,12 +43,13 @@ class ExpertAnswerReadyMail extends Mailable implements ShouldQueue
             with: [
                 'askerName' => $this->expertQuestion->asker_name ?: 'Empreendedor',
                 'questionText' => $questionText,
-                'answerExcerpt' => Str::limit($plainAnswer, 380, '…'),
+                'answerExcerpt' => Str::limit($plainAnswer, 220, '…'),
+                'answerHtml' => $answerHtml,
                 'answerUrl' => $this->answerUrl,
                 'postUrl' => $this->postUrl,
                 'postTitle' => $this->postTitle,
                 'postReady' => $this->postReady,
-                'siteUrl' => config('sigesc.site_url'),
+                'siteUrl' => rtrim((string) config('sigesc.site_url'), '/'),
                 'solutionsUrl' => config('sigesc.getting_started_url'),
                 'adminUrl' => config('sigesc.admin_url'),
                 'siteHost' => config('sigesc.site_host'),
@@ -59,5 +60,37 @@ class ExpertAnswerReadyMail extends Mailable implements ShouldQueue
     public function attachments(): array
     {
         return [];
+    }
+
+    protected function sanitizeAnswerHtml(string $html): string
+    {
+        $html = trim($html);
+        if ($html === '') {
+            return '<p>A resposta está disponível no link abaixo.</p>';
+        }
+
+        $allowed = '<p><br><br/><strong><b><em><i><u><ul><ol><li><h2><h3><h4><a><blockquote><table><thead><tbody><tr><th><td>';
+        $clean = strip_tags($html, $allowed);
+
+        // Drop javascript: / data: hrefs from any leftover anchors.
+        $clean = preg_replace_callback(
+            '/<a\s+([^>]*?)>/i',
+            function (array $matches) {
+                $attrs = $matches[1];
+                if (preg_match('/href\s*=\s*([\'"])(.*?)\1/i', $attrs, $href) !== 1) {
+                    return '<a>';
+                }
+
+                $url = trim($href[2]);
+                if ($url === '' || preg_match('#^(https?:|mailto:|/|#)#i', $url) !== 1) {
+                    return '<a>';
+                }
+
+                return '<a href="'.e($url).'" target="_blank" rel="noopener noreferrer">';
+            },
+            $clean
+        ) ?? $clean;
+
+        return $clean;
     }
 }

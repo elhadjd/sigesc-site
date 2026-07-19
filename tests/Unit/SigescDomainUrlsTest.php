@@ -9,7 +9,7 @@ class SigescDomainUrlsTest extends TestCase
     public function test_config_exposes_official_sisgesc_domains(): void
     {
         $this->assertSame('sisgesc.net', config('sigesc.site_host'));
-        $this->assertSame('https://www.sisgesc.net', config('sigesc.site_url'));
+        $this->assertSame('https://sisgesc.net', config('sigesc.site_url'));
         $this->assertSame('https://admin.sisgesc.net', config('sigesc.admin_url'));
         $this->assertSame('https://admin.sisgesc.net/getting-started', config('sigesc.getting_started_url'));
         $this->assertSame('https://admin.sisgesc.net/auth/login', config('sigesc.admin_login_url'));

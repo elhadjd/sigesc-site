@@ -9,7 +9,8 @@ return [
 
     'site_host' => 'sisgesc.net',
 
-    'site_url' => rtrim(env('SIGESC_SITE_URL', 'https://www.sisgesc.net'), '/'),
+    // Canonical público sem www (www.sisgesc.net pode não resolver / redirecionar mal).
+    'site_url' => rtrim(env('SIGESC_SITE_URL', 'https://sisgesc.net'), '/'),
 
     'admin_url' => rtrim(env('SIGESC_ADMIN_URL', 'https://admin.sisgesc.net'), '/'),
 
