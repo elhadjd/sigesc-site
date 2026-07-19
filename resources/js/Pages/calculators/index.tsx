@@ -103,14 +103,15 @@ export default function CalculatorsIndex({
                         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,#c9d7f0,transparent_35%),radial-gradient(circle_at_90%_20%,#e8c9a0,transparent_30%)]" />
                         <div className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6">
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#0b3d91]">
-                                SIGESC · Ferramentas legais
+                                SIGESC · Calculadoras fiscais AGT
                             </p>
                             <h1 className="mt-3 font-serif text-4xl text-[#14213d] sm:text-5xl">
-                                Calculadoras fiscais de Angola
+                                Calculadora IVA e IRT Angola 2026 — impostos AGT gratuitos
                             </h1>
                             <p className="mt-4 max-w-2xl text-lg text-slate-600">
-                                Cálculos feitos no servidor com bcmath, usando taxas da legislação configurada
-                                (vigência {meta.effective_from}). Sem arredondamentos “à mão” no browser.
+                                Simule IVA, IRT 2026 (Lei n.º 14/25), Imposto Industrial, retenção na fonte 6,5% e
+                                contribuição cambial. Cálculos no servidor com a legislação configurada (vigência{' '}
+                                {meta.effective_from}).
                             </p>
                         </div>
                     </section>
@@ -376,6 +377,37 @@ export default function CalculatorsIndex({
                                 </table>
                             </div>
                             <p className="mt-6 text-sm text-slate-600">{meta.disclaimer}</p>
+                        </div>
+
+                        <div className="mt-10 space-y-4 text-slate-700">
+                            <h2 className="font-serif text-2xl text-[#14213d]">
+                                Perguntas frequentes — calculadora de impostos Angola
+                            </h2>
+                            <div>
+                                <h3 className="font-semibold text-[#14213d]">
+                                    Como calcular o IVA numa factura em Angola?
+                                </h3>
+                                <p className="mt-1 text-sm leading-relaxed">
+                                    Use o separador IVA: indique o valor, a taxa e o modo acrescentar ou extrair. Serve
+                                    para estimar o imposto sobre o valor acrescentado antes de faturar na AGT.
+                                </p>
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-[#14213d]">
+                                    Como calcular o IRT sobre salários em 2026?
+                                </h3>
+                                <p className="mt-1 text-sm leading-relaxed">
+                                    No separador IRT Salários, introduza o rendimento bruto mensal. A tabela da Lei n.º
+                                    14/25 (OGE 2026) aplica isenção até 150.000 Kz e escalões progressivos.
+                                </p>
+                            </div>
+                            <p className="text-sm">
+                                Tem dúvidas sobre a lei?{' '}
+                                <a href="/pergunte-ao-especialista" className="font-medium text-[#0b3d91] underline">
+                                    Pergunte ao Especialista
+                                </a>
+                                .
+                            </p>
                         </div>
                     </section>
                 </main>

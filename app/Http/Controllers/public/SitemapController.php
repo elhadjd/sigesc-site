@@ -17,8 +17,8 @@ class SitemapController extends Controller
         $staticUrls = [
             ['loc' => $base.'/', 'changefreq' => 'weekly', 'priority' => '1.0'],
             ['loc' => route('blog.posts', absolute: true), 'changefreq' => 'daily', 'priority' => '0.9'],
-            ['loc' => route('ask-expert.index', absolute: true), 'changefreq' => 'weekly', 'priority' => '0.7'],
-            ['loc' => route('calculators.index', absolute: true), 'changefreq' => 'monthly', 'priority' => '0.8'],
+            ['loc' => route('ask-expert.index', absolute: true), 'changefreq' => 'weekly', 'priority' => '0.9'],
+            ['loc' => route('calculators.index', absolute: true), 'changefreq' => 'weekly', 'priority' => '0.9'],
             ['loc' => url('/feed.xml'), 'changefreq' => 'hourly', 'priority' => '0.5'],
             ['loc' => $base.'/solutions', 'changefreq' => 'monthly', 'priority' => '0.8'],
             ['loc' => $base.'/prices', 'changefreq' => 'monthly', 'priority' => '0.8'],
