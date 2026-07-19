@@ -61,7 +61,7 @@ PROMPT
                     'research' => $article->pipeline_meta['research'] ?? [],
                 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             ],
-        ], config('ai_content_engine.openai.review_model'), 0.3);
+        ], $this->llm->reviewModel(), 0.3);
 
         $html = (string) ($review['content_html'] ?? $article->content_html);
         $flags = $review['hallucination_flags'] ?? [];
