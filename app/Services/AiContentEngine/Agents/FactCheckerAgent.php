@@ -61,7 +61,7 @@ PROMPT
                     'sources' => $article->sources()->get(['title', 'url', 'snippet', 'is_trusted']),
                 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             ],
-        ], config('ai_content_engine.openai.review_model'), 0.1);
+        ], $this->llm->reviewModel(), 0.1);
 
         $confidence = (float) ($check['confidence'] ?? 0);
         $status = $this->resolveStatus($check, $confidence, $article);

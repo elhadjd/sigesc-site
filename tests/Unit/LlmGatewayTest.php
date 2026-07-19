@@ -67,7 +67,8 @@ class LlmGatewayTest extends TestCase
             'ai_content_engine.llm.provider' => 'deepseek',
             'ai_content_engine.deepseek.api_key' => 'sk-deepseek',
             'ai_content_engine.deepseek.base_url' => 'https://api.deepseek.com',
-            'ai_content_engine.deepseek.model' => 'deepseek-chat',
+            'ai_content_engine.deepseek.model' => 'deepseek-v4-flash',
+            'ai_content_engine.deepseek.review_model' => 'deepseek-v4-pro',
             'ai_content_engine.deepseek.timeout' => 30,
             'ai_content_engine.tavily.api_key' => null,
             'ai_content_engine.openai.api_key' => null,
@@ -97,7 +98,7 @@ class LlmGatewayTest extends TestCase
         Http::assertSent(function ($request) {
             return str_contains($request->url(), 'api.deepseek.com')
                 && str_ends_with($request->url(), '/chat/completions')
-                && ($request['model'] ?? null) === 'deepseek-chat'
+                && ($request['model'] ?? null) === 'deepseek-v4-flash'
                 && ($request['response_format']['type'] ?? null) === 'json_object';
         });
         Http::assertNotSent(function ($request) {
@@ -191,6 +192,44 @@ class LlmGatewayTest extends TestCase
             }
 
             return ($request['model'] ?? null) === 'mini';
+        });
+    }
+
+    public function test_deepseek_remaps_gpt_and_legacy_model_names(): void
+    {
+        config([
+            'ai_content_engine.llm.provider' => 'deepseek',
+            'ai_content_engine.deepseek.api_key' => 'sk-deepseek',
+            'ai_content_engine.deepseek.base_url' => 'https://api.deepseek.com',
+            'ai_content_engine.deepseek.model' => 'deepseek-chat',
+            'ai_content_engine.deepseek.review_model' => 'deepseek-v4-pro',
+            'ai_content_engine.openai.api_key' => null,
+            'ai_content_engine.tavily.api_key' => null,
+        ]);
+
+        $gateway = app(LlmGateway::class);
+
+        $this->assertSame('deepseek-v4-flash', $gateway->normalizeDeepSeekModel(null));
+        $this->assertSame('deepseek-v4-flash', $gateway->normalizeDeepSeekModel('deepseek-chat'));
+        $this->assertSame('deepseek-v4-pro', $gateway->normalizeDeepSeekModel('deepseek-reasoner'));
+        $this->assertSame('deepseek-v4-pro', $gateway->normalizeDeepSeekModel('gpt-4o-mini'));
+        $this->assertSame('deepseek-v4-pro', $gateway->reviewModel());
+
+        Http::fake([
+            'api.deepseek.com/*' => Http::response([
+                'choices' => [
+                    ['message' => ['content' => json_encode(['ok' => true])]],
+                ],
+            ], 200),
+        ]);
+
+        $gateway->chatJson([
+            ['role' => 'system', 'content' => 'Fact check'],
+            ['role' => 'user', 'content' => '{}'],
+        ], 'gpt-4o-mini', 0.1, null, 'deepseek');
+
+        Http::assertSent(function ($request) {
+            return ($request['model'] ?? null) === 'deepseek-v4-pro';
         });
     }
 }

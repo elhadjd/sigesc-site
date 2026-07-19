@@ -106,12 +106,14 @@ return [
 
     /*
     | DeepSeek — OpenAI-compatible chat API (https://api.deepseek.com).
-    | Used by Ask Expert by default for grounded answers without Tavily Research spend.
+    | Official model IDs (2026): deepseek-v4-flash | deepseek-v4-pro
+    | Legacy deepseek-chat / deepseek-reasoner are remapped in LlmGateway.
     */
     'deepseek' => [
         'api_key' => env('DEEPSEEK_API_KEY'),
         'base_url' => rtrim(env('DEEPSEEK_BASE_URL', 'https://api.deepseek.com'), '/'),
-        'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
+        'model' => env('DEEPSEEK_MODEL', 'deepseek-v4-flash'),
+        'review_model' => env('DEEPSEEK_REVIEW_MODEL', 'deepseek-v4-pro'),
         'timeout' => (int) env('DEEPSEEK_TIMEOUT', 180),
     ],
 
