@@ -45,7 +45,7 @@ class AskExpertDeepSeekTest extends TestCase
             'ai_content_engine.ask_expert.use_duckduckgo' => true,
             'ai_content_engine.deepseek.api_key' => 'sk-deepseek',
             'ai_content_engine.deepseek.base_url' => 'https://api.deepseek.com',
-            'ai_content_engine.deepseek.model' => 'deepseek-chat',
+            'ai_content_engine.deepseek.model' => 'deepseek-v4-flash',
             'ai_content_engine.tavily.api_key' => 'tvly-should-not-be-used',
             'ai_content_engine.tavily.enabled' => true,
         ]);

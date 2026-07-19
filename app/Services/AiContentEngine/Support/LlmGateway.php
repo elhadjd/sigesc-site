@@ -64,7 +64,7 @@ class LlmGateway
         return match ($provider) {
             'deepseek' => $this->chatJsonViaOpenAiCompatible(
                 $messages,
-                $model ?: (string) config('ai_content_engine.deepseek.model', 'deepseek-chat'),
+                $this->normalizeDeepSeekModel($model),
                 $temperature,
                 (string) config('ai_content_engine.deepseek.base_url'),
                 (string) config('ai_content_engine.deepseek.api_key'),
@@ -83,6 +83,62 @@ class LlmGateway
             ),
             default => throw new RuntimeException('Unsupported LLM provider: '.$provider),
         };
+    }
+
+    /**
+     * Provider-aware model for fact-check / review agents.
+     * Never return OpenAI names when the active provider is DeepSeek.
+     */
+    public function reviewModel(?string $providerOverride = null): string
+    {
+        $provider = $providerOverride
+            ? $this->resolveProvider($providerOverride)
+            : $this->resolveProvider();
+
+        return match ($provider) {
+            'deepseek' => $this->normalizeDeepSeekModel(
+                (string) config('ai_content_engine.deepseek.review_model', 'deepseek-v4-pro')
+            ),
+            'tavily' => (string) config('ai_content_engine.tavily.research_model', 'mini'),
+            'openai' => (string) config('ai_content_engine.openai.review_model', 'gpt-4o-mini'),
+            default => $this->normalizeDeepSeekModel(null),
+        };
+    }
+
+    /**
+     * DeepSeek API currently accepts only deepseek-v4-flash | deepseek-v4-pro.
+     * Remap legacy aliases and accidental OpenAI model names from agents.
+     */
+    public function normalizeDeepSeekModel(?string $model): string
+    {
+        $allowed = ['deepseek-v4-flash', 'deepseek-v4-pro'];
+        $default = strtolower(trim((string) config('ai_content_engine.deepseek.model', 'deepseek-v4-flash')));
+        $review = strtolower(trim((string) config('ai_content_engine.deepseek.review_model', 'deepseek-v4-pro')));
+        $candidate = strtolower(trim((string) ($model ?: $default)));
+
+        if (in_array($candidate, $allowed, true)) {
+            return $candidate;
+        }
+
+        // Legacy DeepSeek aliases (retiring 2026-07-24).
+        if ($candidate === 'deepseek-chat') {
+            return 'deepseek-v4-flash';
+        }
+        if ($candidate === 'deepseek-reasoner') {
+            return 'deepseek-v4-pro';
+        }
+
+        // Agents historically pass openai.review_model (gpt-4o-mini, etc.).
+        if (
+            str_contains($candidate, 'gpt')
+            || str_starts_with($candidate, 'o1')
+            || str_starts_with($candidate, 'o3')
+            || str_contains($candidate, 'chatgpt')
+        ) {
+            return in_array($review, $allowed, true) ? $review : 'deepseek-v4-pro';
+        }
+
+        return in_array($default, $allowed, true) ? $default : 'deepseek-v4-flash';
     }
 
     public function generateImage(string $prompt, string $size = '1792x1024'): ?string
