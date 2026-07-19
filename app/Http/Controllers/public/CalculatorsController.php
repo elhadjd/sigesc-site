@@ -20,13 +20,7 @@ class CalculatorsController extends Controller
 
     public function index(Request $request)
     {
-        $seo = $this->seo->defaults([
-            'title' => 'Calculadoras Fiscais Angola (IVA, IRT 2026, Imposto Industrial) | SIGESC',
-            'description' => 'Simule IRT 2026 (Lei n.º 14/25), IVA, Imposto Industrial, retenção na fonte 6,5% e contribuição cambial. Cálculos no servidor com base na legislação angolana configurada — para PME e gestores.',
-            'canonical' => route('calculators.index', absolute: true),
-            'keywords' => 'calculadora IRT Angola 2026, calculadora IVA Angola, Imposto Industrial, retenção na fonte 6.5%, contribuição cambial, AGT, OGE 2026',
-            'og_type' => 'website',
-        ]);
+        $seo = $this->seo->forCalculators();
 
         $meta = $this->tax->meta();
         $prerender = $this->content->calculators($meta);

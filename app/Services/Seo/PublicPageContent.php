@@ -175,13 +175,23 @@ class PublicPageContent
             ->all();
 
         return [
-            'kicker' => 'Ferramentas fiscais Angola',
-            'headline' => 'Calculadoras fiscais Angola — IRT 2026, IVA, Imposto Industrial',
-            'lead' => 'Simuladores no servidor (sem erro de float) com base na legislação configurada: Lei n.º 14/25 (OGE 2026) para IRT, Código do IVA e Código do Imposto Industrial. Úteis para PME, contabilistas e gestores que usam o SIGESC.',
+            'kicker' => 'Ferramentas fiscais Angola · AGT',
+            'headline' => 'Calculadora IVA e IRT Angola 2026 — impostos AGT gratuitos',
+            'lead' => 'Simule online IVA, IRT 2026 (Lei n.º 14/25 / OGE 2026), Imposto Industrial, retenção na fonte 6,5% e contribuição cambial. Calculadoras fiscais gratuitas para PME, gestores e contabilistas em Angola — cálculos no servidor com a legislação configurada.',
             'sections' => [
                 [
+                    'heading' => 'Para que servem estas calculadoras fiscais?',
+                    'body' => 'Quem pesquisa “calculadora IVA Angola”, “calcular IRT 2026” ou “simulador impostos AGT” encontra aqui ferramentas práticas para estimar obrigações fiscais sem instalar software. Ideal para salários, facturas com IVA, lucro tributável e retenções.',
+                    'items' => [
+                        'Calculadora de IVA Angola (acrescentar ou extrair do preço)',
+                        'Calculadora de IRT salários e IRT Grupo C (empresários)',
+                        'Simulador de Imposto Industrial por sector',
+                        'Retenção na fonte sobre serviços e contribuição cambial',
+                    ],
+                ],
+                [
                     'heading' => 'IRT Grupo A (salários) — Lei n.º 14/25 / OGE 2026',
-                    'body' => 'Tabela progressiva de retenção na fonte para trabalho por conta de outrem. Isenção até 150.000 Kz de rendimento bruto mensal. Fórmula: parcela fixa + taxa × (rendimento − excesso).',
+                    'body' => 'Tabela progressiva de retenção na fonte para trabalho por conta de outrem. Isenção até 150.000 Kz de rendimento bruto mensal. Fórmula: parcela fixa + taxa × (rendimento − excesso). Use para calcular salário líquido em Angola.',
                     'items' => $irtItems !== [] ? $irtItems : [
                         '1.º Escalão isento até 150.000 Kz',
                         'Escalões progressivos até 25% no último escalão',
@@ -197,8 +207,8 @@ class PublicPageContent
                     ],
                 ],
                 [
-                    'heading' => 'IVA — Código do IVA (Lei n.º 14/23)',
-                    'body' => 'Calcule IVA a acrescentar ou a extrair do preço. Taxas configuradas para Angola:',
+                    'heading' => 'Calculadora IVA Angola — Código do IVA',
+                    'body' => 'Calcule o imposto sobre o valor acrescentado a acrescentar ou a extrair do preço. Taxas configuradas para o mercado angolano e conformidade AGT:',
                     'items' => $ivaRates,
                 ],
                 [
@@ -212,7 +222,7 @@ class PublicPageContent
                 ],
                 [
                     'heading' => 'Retenção na fonte sobre serviços (6,5%)',
-                    'body' => 'Cálculo da retenção aplicável a facturas de prestação de serviços, comum em subcontratação e consultoria.',
+                    'body' => 'Cálculo da retenção aplicável a facturas de prestação de serviços, comum em subcontratação e consultoria em Luanda e no resto do país.',
                     'items' => [
                         'Taxa de referência 6,5% sobre o valor da factura',
                         'Útil para empresas que pagam fornecedores de serviços',
@@ -224,6 +234,23 @@ class PublicPageContent
                     'items' => [
                         'Pessoa singular: 2,5%',
                         'Pessoa colectiva: 10%',
+                    ],
+                ],
+                [
+                    'heading' => 'Perguntas frequentes sobre calculadoras de impostos em Angola',
+                    'faqs' => [
+                        [
+                            'question' => 'Como calcular o IVA numa factura em Angola?',
+                            'answer' => 'Indique o valor sem imposto, escolha a taxa (geral ou especial) e o modo “acrescentar”. Para preços com IVA incluído, use o modo “extrair”.',
+                        ],
+                        [
+                            'question' => 'Qual a tabela de IRT 2026 para salários?',
+                            'answer' => 'A Lei n.º 14/25 (OGE 2026) define isenção até 150.000 Kz e escalões progressivos. A calculadora aplica essa tabela automaticamente.',
+                        ],
+                        [
+                            'question' => 'Posso usar isto em vez do simulador AGT?',
+                            'answer' => 'Não para declarações oficiais. Use como estimativa rápida e confirme no Quiosque do Contribuinte / AGT.',
+                        ],
                     ],
                 ],
                 [
@@ -304,31 +331,52 @@ class PublicPageContent
     public function askExpert(): array
     {
         return [
-            'kicker' => 'Assistência inteligente SIGESC',
-            'headline' => 'Pergunte ao Especialista — fiscalidade e gestão em Angola',
-            'lead' => 'Faça perguntas sobre AGT, IVA, IRT, Imposto Industrial, faturação eletrónica, stock, PDV ou abertura de empresa. O motor de pesquisa híbrido do SIGESC consulta fontes oficiais e conteúdo recente, e a IA responde com avisos quando a informação for incerta.',
+            'kicker' => 'Consultoria informativa · Angola',
+            'headline' => 'Pergunte ao Especialista Angola — dúvidas fiscais AGT, IVA e gestão',
+            'lead' => 'Tire dúvidas fiscais e de gestão comercial em Angola de forma gratuita: AGT, IVA, IRT 2026, Imposto Industrial, faturação eletrónica, PDV, stock ou abertura de empresa. Pesquisa de fontes oficiais e resposta clara — complemento ideal às calculadoras fiscais SIGESC.',
             'sections' => [
                 [
-                    'heading' => 'Exemplos de perguntas',
+                    'heading' => 'Dúvidas fiscais e empresariais que pode perguntar',
+                    'body' => 'Ideal se procura “dúvidas fiscais Angola”, “perguntas AGT”, “consultoria empresarial online” ou ajuda sobre impostos sem marcar reunião. Escreva a pergunta em português e receba orientação com base em pesquisa.',
                     'items' => [
-                        'Como funciona o IVA em Angola e quais as taxas?',
-                        'Qual a tabela de IRT 2026 para salários?',
+                        'Como funciona o IVA em Angola e quais as taxas AGT?',
+                        'Qual a tabela de IRT 2026 para calcular salário líquido?',
                         'O que é faturação eletrónica AGT para PME?',
                         'Como controlar stock e PDV numa loja em Luanda?',
                         'Que documentos preciso para abrir empresa (INAPEM)?',
+                        'Quando se aplica retenção na fonte de 6,5% sobre serviços?',
+                        'Qual a taxa de Imposto Industrial para o meu sector?',
                     ],
                 ],
                 [
-                    'heading' => 'Como funciona',
+                    'heading' => 'Como funciona o Pergunte ao Especialista',
                     'items' => [
-                        'Pesquisa híbrida: fontes oficiais (AGT, MinFin, BNA) + Tavily + base interna',
-                        'Resumo estruturado com pontos, leis, números e avisos',
+                        'Pesquisa híbrida: fontes oficiais (AGT, MinFin, BNA) e base de conhecimento SIGESC',
+                        'Resumo estruturado com pontos, leis, números e avisos de incerteza',
+                        'Pode receber a resposta por email e, em alguns casos, virar artigo no blog',
                         'Não substitui consultoria fiscal oficial — confirme sempre na AGT',
+                    ],
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => [
+                        [
+                            'question' => 'É gratuito tirar dúvidas com o especialista SIGESC?',
+                            'answer' => 'Sim. O serviço Pergunte ao Especialista é gratuito para dúvidas sobre fiscalidade e gestão em Angola.',
+                        ],
+                        [
+                            'question' => 'Serve para consultoria sobre IVA e IRT?',
+                            'answer' => 'Sim, para orientação informativa sobre IVA, IRT, Imposto Industrial e AGT. Para declarações e planeamento formal, fale com um contabilista.',
+                        ],
+                        [
+                            'question' => 'Posso perguntar sobre software de gestão e PDV?',
+                            'answer' => 'Sim. Além de impostos, cobre gestão comercial, PDV, stock, preços e empreendedorismo para PME angolanas.',
+                        ],
                     ],
                 ],
             ],
             'links' => [
-                ['href' => url('/calculadoras'), 'label' => 'Calculadoras fiscais', 'description' => 'IRT, IVA, Imposto Industrial'],
+                ['href' => url('/calculadoras'), 'label' => 'Calculadora IVA e IRT Angola', 'description' => 'Simular impostos AGT online'],
                 ['href' => url('/blog/posts'), 'label' => 'Blog SIGESC', 'description' => 'Artigos sobre AGT e gestão'],
                 ['href' => url('/solutions'), 'label' => 'Software SIGESC', 'description' => 'Módulos PDV, stock e faturação'],
                 ['href' => url('/contact'), 'label' => 'Contacto humano', 'description' => 'Equipa comercial e suporte'],

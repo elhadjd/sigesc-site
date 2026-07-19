@@ -41,17 +41,41 @@ class CalculatorsAndSeoHardeningTest extends TestCase
                 ->component('calculators/index')
                 ->has('meta.irt_brackets')
                 ->has('seo')
+                ->where('seo.title', fn ($title) => str_contains((string) $title, 'Calculadora IVA e IRT Angola'))
+                ->where('seo.keywords', fn ($kw) => str_contains((string) $kw, 'calculadora IVA Angola'))
             );
     }
 
     public function test_calculators_ssr_for_crawlers(): void
     {
-        $this->withHeaders([
+        $html = $this->withHeaders([
             'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
         ])->get('/calculadoras')
             ->assertOk()
-            ->assertSee('Calculadoras fiscais', false)
-            ->assertSee('IRT', false);
+            ->assertSee('Calculadora IVA e IRT Angola', false)
+            ->assertSee('IRT', false)
+            ->assertSee('FAQPage', false)
+            ->assertSee('WebApplication', false)
+            ->assertSee('calculadora IVA Angola', false)
+            ->getContent();
+
+        $this->assertStringContainsString('application/ld+json', $html);
+    }
+
+    public function test_ask_expert_hub_has_rich_seo_for_crawlers(): void
+    {
+        $html = $this->withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        ])->get('/pergunte-ao-especialista')
+            ->assertOk()
+            ->assertSee('Pergunte ao Especialista Angola', false)
+            ->assertSee('dúvidas fiscais', false)
+            ->assertSee('FAQPage', false)
+            ->assertSee('Service', false)
+            ->getContent();
+
+        $this->assertStringContainsString('application/ld+json', $html);
+        $this->assertStringContainsString('perguntas AGT', $html);
     }
 
     public function test_irt_calculation_endpoint_is_deterministic(): void

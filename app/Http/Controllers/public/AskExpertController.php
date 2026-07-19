@@ -67,6 +67,8 @@ class AskExpertController extends Controller
             'description' => str($question->question)->limit(150)->toString(),
             'path' => '/pergunte-ao-especialista/'.$question->uuid,
             'og_type' => 'article',
+            // UUID pages are thin/personalized — keep crawl budget on the index hub.
+            'robots' => 'noindex,follow',
         ]);
 
         $prerender = [

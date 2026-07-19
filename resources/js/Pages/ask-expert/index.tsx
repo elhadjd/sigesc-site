@@ -39,21 +39,24 @@ export default function AskExpertIndex({
     return (
         <UserLoggedProvider>
             <FormStateProvider>
-                <SeoHead seo={seo} fallbackTitle="Pergunte ao Especialista | SIGESC" />
+                <SeoHead
+                    seo={seo}
+                    fallbackTitle="Pergunte ao Especialista Angola | Dúvidas Fiscais AGT, IVA e Gestão"
+                />
                 <HeaderComponent auth={auth as any} />
                 <main className="relative overflow-hidden bg-[#f4efe6]">
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,#d9e2f1,transparent_40%),radial-gradient(circle_at_80%_0%,#f0d9b5,transparent_35%)]" />
                     <section className="relative mx-auto max-w-3xl px-4 py-16 sm:px-6">
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0b3d91]">
-                            SIGESC · Conhecimento
+                            SIGESC · Consultoria informativa Angola
                         </p>
                         <h1 className="mt-3 font-serif text-4xl text-[#14213d] sm:text-5xl">
-                            Pergunte ao Especialista
+                            Pergunte ao Especialista Angola — dúvidas fiscais AGT, IVA e gestão
                         </h1>
                         <p className="mt-4 text-lg text-slate-600">
-                            Pergunte sobre vendas online, anúncios, sistemas de gestão, AGT, IVA, faturação ou
-                            empreendedorismo em Angola. A resposta é preparada com pesquisa e pode virar artigo no
-                            blog.
+                            Tire dúvidas sobre AGT, IVA, IRT 2026, Imposto Industrial, faturação eletrónica, PDV,
+                            stock ou abertura de empresa. Resposta com pesquisa de fontes — gratuita para PME em
+                            Angola.
                         </p>
 
                         {flash?.success && (
@@ -108,6 +111,45 @@ export default function AskExpertIndex({
                                 {loading ? 'A enviar a pergunta…' : 'Obter resposta'}
                             </button>
                         </form>
+
+                        <section className="mt-14 space-y-6 text-slate-700">
+                            <h2 className="font-serif text-2xl text-[#14213d]">
+                                Dúvidas fiscais e empresariais em Angola
+                            </h2>
+                            <p>
+                                Use este espaço se procura ajuda sobre impostos AGT, calculadora de IVA/IRT, faturação
+                                eletrónica ou gestão comercial. Exemplos: taxas de IVA, tabela IRT 2026, retenção na
+                                fonte 6,5%, Imposto Industrial, PDV e stock em Luanda.
+                            </p>
+                            <h2 className="font-serif text-2xl text-[#14213d]">Perguntas frequentes</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <h3 className="font-semibold text-[#14213d]">
+                                        É gratuito tirar dúvidas com o especialista SIGESC?
+                                    </h3>
+                                    <p className="mt-1 text-sm leading-relaxed">
+                                        Sim. O Pergunte ao Especialista é gratuito para orientação informativa sobre
+                                        fiscalidade e gestão em Angola.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-[#14213d]">
+                                        Substitui um contabilista ou a AGT?
+                                    </h3>
+                                    <p className="mt-1 text-sm leading-relaxed">
+                                        Não. Confirme sempre a legislação no portal AGT, no Quiosque do Contribuinte ou
+                                        com um profissional certificado.
+                                    </p>
+                                </div>
+                            </div>
+                            <p className="text-sm">
+                                Prefere simular valores? Veja as{' '}
+                                <a href="/calculadoras" className="font-medium text-[#0b3d91] underline">
+                                    calculadoras de IVA e IRT Angola
+                                </a>
+                                .
+                            </p>
+                        </section>
                     </section>
                 </main>
                 <FooterComponent />
