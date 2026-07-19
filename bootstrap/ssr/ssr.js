@@ -12,7 +12,7 @@ async function resolvePageComponent(path, pages) {
   }
   throw new Error(`Page not found: ${path}`);
 }
-const appName = "SIGESC-TECH";
+const appName = "SIGESC-SITE";
 createServer(
   (page) => createInertiaApp({
     page,

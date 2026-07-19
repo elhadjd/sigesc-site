@@ -249,8 +249,58 @@ return [
     */
     'topic_rotation' => [
         'enabled' => (bool) env('AI_CONTENT_TOPIC_ROTATION', true),
+        // round_robin = mistura garantida (fiscal → gestão → marketing → empreendedorismo)
+        // underused = escolhe o bucket com menos artigos recentes
+        'mode' => env('AI_CONTENT_TOPIC_ROTATION_MODE', 'round_robin'),
         'cooldown_days' => (int) env('AI_CONTENT_BUCKET_COOLDOWN_DAYS', 5),
         'prefer_underused' => (bool) env('AI_CONTENT_PREFER_UNDERUSED_BUCKETS', true),
+    ],
+
+    /*
+    | Live Angola search interest (fail-soft). Uses Google Suggest (gl=ao) +
+    | Trends RSS. Sports-only trends are filtered out for business buckets.
+    */
+    'search_interest' => [
+        'enabled' => (bool) env('AI_CONTENT_SEARCH_INTEREST', true),
+        'cache_minutes' => (int) env('AI_CONTENT_SEARCH_INTEREST_CACHE', 180),
+        'trends_rss_url' => env('AI_CONTENT_TRENDS_RSS_URL', 'https://trends.google.com/trending/rss?geo=AO'),
+        'business_keywords' => [
+            'angola', 'negócio', 'negocio', 'empresa', 'pme', 'imposto', 'iva', 'agt',
+            'venda', 'loja', 'marketing', 'anúncio', 'anuncio', 'software', 'gestão', 'gestao',
+        ],
+        'bucket_keywords' => [
+            'fiscal' => ['agt', 'iva', 'irt', 'imposto', 'fatura', 'nif', 'tribut'],
+            'gestao' => ['erp', 'crm', 'pdv', 'stock', 'gestão', 'gestao', 'software', 'caixa'],
+            'marketing' => ['facebook', 'instagram', 'whatsapp', 'anúncio', 'ads', 'loja', 'e-commerce', 'marketing'],
+            'empreendedorismo' => ['empresa', 'licen', 'inapem', 'crédito', 'credito', 'import', 'export'],
+        ],
+        'bucket_stems' => [
+            'fiscal' => [
+                'IVA Angola',
+                'AGT Angola',
+                'faturação eletrónica Angola',
+                'IRT Angola',
+                'NIF empresa Angola',
+            ],
+            'gestao' => [
+                'software gestão comercial Angola',
+                'ERP Angola PME',
+                'PDV stock Angola',
+                'fluxo de caixa PME Angola',
+            ],
+            'marketing' => [
+                'loja online Angola',
+                'Facebook Ads Angola',
+                'WhatsApp Business Angola',
+                'marketing digital Angola',
+            ],
+            'empreendedorismo' => [
+                'abrir empresa Angola',
+                'INAPEM Angola',
+                'licenciamento comercial Luanda',
+                'crédito PME Angola',
+            ],
+        ],
     ],
 
     'topic_buckets' => $topicBuckets,

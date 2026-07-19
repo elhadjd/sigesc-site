@@ -7,6 +7,7 @@ use App\Models\AiContent\Article;
 use App\Models\AiContent\Category;
 use App\Services\AiContentEngine\Contracts\AgentInterface;
 use App\Services\AiContentEngine\Support\AiLogger;
+use App\Services\AiContentEngine\Support\AngolaSearchInterest;
 use App\Services\AiContentEngine\Support\CreditSaver;
 use App\Services\AiContentEngine\Support\LlmGateway;
 use App\Services\AiContentEngine\Support\ResearchGateway;
@@ -20,6 +21,7 @@ class TrendAgent implements AgentInterface
         protected LlmGateway $llm,
         protected AiLogger $logger,
         protected TopicBucketRotator $buckets,
+        protected AngolaSearchInterest $interest,
     ) {}
 
     public function name(): string
@@ -36,10 +38,31 @@ class TrendAgent implements AgentInterface
             $picked = $this->buckets->pick(now(), CreditSaver::trendSeedLimit());
         }
 
+        $bucketKey = (string) ($picked['key'] ?? 'gestao');
+        $bucketLabel = (string) ($picked['label'] ?? $bucketKey);
+        $allowedCategories = $picked['categories'] ?? [];
+
+        $interest = ['trends' => [], 'suggestions' => [], 'queries' => [], 'source' => 'disabled'];
+        try {
+            $interest = $this->interest->forBucket($bucketKey, 6);
+        } catch (\Throwable) {
+            // Fail-soft: editorial rotation must continue without live interest data.
+        }
+
         $seedQueries = $context['queries'] ?? $picked['queries'];
         if (! is_array($seedQueries) || $seedQueries === []) {
             $seedQueries = $picked['queries'] ?? [];
         }
+
+        // Mix curated seeds with live Angola search suggestions (same bucket).
+        $seedQueries = collect($seedQueries)
+            ->merge(array_slice($interest['queries'] ?? [], 0, 2))
+            ->map(fn ($q) => trim((string) $q))
+            ->filter()
+            ->unique()
+            ->take(max(2, CreditSaver::trendSeedLimit() + 1))
+            ->values()
+            ->all();
 
         $bundle = [];
         foreach ($seedQueries as $query) {
@@ -51,11 +74,13 @@ class TrendAgent implements AgentInterface
             ];
         }
 
-        $bucketKey = (string) ($picked['key'] ?? 'gestao');
-        $bucketLabel = (string) ($picked['label'] ?? $bucketKey);
-        $allowedCategories = $picked['categories'] ?? [];
         $categoryList = implode(', ', $allowedCategories !== [] ? $allowedCategories : config('ai_content_engine.categories', []));
         $allCategories = implode(', ', config('ai_content_engine.categories', []));
+        $interestJson = json_encode([
+            'suggestions' => array_slice($interest['suggestions'] ?? [], 0, 8),
+            'filtered_trends' => array_slice($interest['trends'] ?? [], 0, 5),
+            'source' => $interest['source'] ?? null,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         $ideas = $this->llm->chatJson([
             [
@@ -63,22 +88,23 @@ class TrendAgent implements AgentInterface
                 'content' => <<<PROMPT
 És o AITrendAgent do SIGESC (Angola).
 
-BUCKET OBRIGATÓRIO DE HOJE: "{$bucketKey}" — {$bucketLabel}
-TODOS os topics DEVEM ser sobre este bucket. Não inventes temas de outros buckets
-(ex.: se o bucket for fiscal, NÃO escrevas sobre loja online / Facebook Ads / WhatsApp Business).
+ROTAÇÃO EDITORIAL (mistura obrigatória):
+Hoje o bucket é "{$bucketKey}" — {$bucketLabel}.
+Mantemos TODOS os temas no mix ao longo dos dias (fiscal/AGT, gestão, marketing/vendas online, empreendedorismo).
+Mas NESTA execução TODOS os topics DEVEM ser deste bucket.
+Se o bucket for fiscal → AGT, IVA, IRT, faturação eletrónica, NIF, certidões.
+Se for marketing → anúncios, loja online, WhatsApp, e-commerce (sim, continua importante).
+Se for gestão → ERP/CRM/PDV, stock, fluxo de caixa.
+Se for empreendedorismo → abrir empresa, licenças, setores.
 
-Categorias permitidas para este bucket: {$categoryList}
-(lista geral só para referência: {$allCategories})
+Categorias permitidas: {$categoryList}
+(lista geral: {$allCategories})
 
-Regras:
-- Temas práticos e acionáveis para PME em Angola.
-- Nunca inventes leis/datas/números — usa só a pesquisa anexada.
-- Quando fizer sentido, o ângulo pode ligar a gestão comercial / faturação (SIGESC) sem spam.
-- Se o bucket for fiscal, prioriza AGT, IVA, IRT, Imposto Industrial, faturação eletrónica, NIF, certidões.
-- Se a pesquisa for fraca, ainda assim propõe um guia prático do bucket com ângulo conservador.
+Usa a pesquisa web + sugestões de pesquisa Angola quando forem relevantes ao bucket.
+Nunca inventes leis/datas/números. Temas práticos para PME. CTA SIGESC só se natural.
 
 JSON: {"topics":[{"title":"","summary":"","category":"","priority":1,"keywords":[],"reason":""}]}
-priority: 1=alta, 5=baixa. Máximo 5 topics. category DEVE ser uma das categorias do bucket.
+priority: 1=alta, 5=baixa. Máximo 5 topics.
 PROMPT
             ],
             [
@@ -87,6 +113,7 @@ PROMPT
                     'bucket' => $bucketKey,
                     'bucket_label' => $bucketLabel,
                     'allowed_categories' => $allowedCategories,
+                    'angola_search_interest' => json_decode($interestJson, true),
                     'research' => $bundle,
                 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             ],
@@ -95,8 +122,9 @@ PROMPT
         $topics = collect($ideas['topics'] ?? [])
             ->filter(fn ($t) => filled($t['title'] ?? null))
             ->filter(function (array $topic) use ($bucketKey) {
-                $mapped = $this->buckets->bucketForCategory($topic['category'] ?? null);
-                // Drop off-bucket ideas (e.g. "loja online" while today is fiscal).
+                $mapped = $this->buckets->bucketForCategory($topic['category'] ?? null)
+                    ?? $this->buckets->bucketForTitle($topic['title'] ?? null);
+
                 return $mapped === null || $mapped === $bucketKey;
             })
             ->map(function (array $topic) use ($allowedCategories) {
@@ -141,6 +169,11 @@ PROMPT
                     'topic_bucket' => $bucketKey,
                     'topic_bucket_label' => $bucketLabel,
                     'topic_bucket_reason' => $picked['reason'] ?? null,
+                    'angola_search_interest' => [
+                        'suggestions' => array_slice($interest['suggestions'] ?? [], 0, 8),
+                        'trends' => array_slice($interest['trends'] ?? [], 0, 5),
+                        'source' => $interest['source'] ?? null,
+                    ],
                     'discovery_bundle' => $bundle,
                 ],
             ]);
@@ -154,6 +187,7 @@ PROMPT
             }
 
             $created[] = $new;
+            $this->buckets->remember($bucketKey);
             $this->logger->info('Topic discovered', $job, $new, $this->name(), [
                 'title' => $new->title,
                 'bucket' => $bucketKey,
@@ -161,7 +195,6 @@ PROMPT
             ]);
         }
 
-        // If LLM returned only duplicates / empty, create a safe seed title from the bucket.
         if ($created === [] && $seedQueries !== []) {
             $fallbackTitle = $this->fallbackTitle($bucketKey, $bucketLabel, (string) $seedQueries[0]);
             if (! $this->isDuplicateTitle($fallbackTitle)) {
@@ -189,6 +222,7 @@ PROMPT
                     ],
                 ]);
                 $created[] = $new;
+                $this->buckets->remember($bucketKey);
             }
         }
 
