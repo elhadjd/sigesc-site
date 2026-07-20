@@ -6,6 +6,7 @@ Allow: /pergunte-ao-especialista
 Allow: /calculadoras
 Allow: /modelos-de-fatura
 Allow: /gerador-de-fatura
+Allow: /gerador-de-codigo-barras
 Allow: /feed.xml
 
 Disallow: /authenticate
