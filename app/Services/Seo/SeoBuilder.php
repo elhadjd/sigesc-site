@@ -432,6 +432,74 @@ class SeoBuilder
         ]);
     }
 
+    public function forBarcodeQrGenerator(): array
+    {
+        $url = route('barcode-qr-generator.index', absolute: true);
+        $faqs = [
+            [
+                'question' => 'Como criar um QR Code grátis online?',
+                'answer' => 'Abra o gerador SIGESC, escolha QR Code, seleccione o tipo de conteúdo (URL, texto, Wi‑Fi, contacto…), personalize cores e logotipo e descarregue em PNG ou SVG. Não precisa de conta.',
+            ],
+            [
+                'question' => 'Posso colocar o logotipo no centro do QR Code?',
+                'answer' => 'Sim. Carregue uma imagem (PNG/JPG/SVG) e o gerador coloca-a no centro com fundo branco. Use correção de erro Q ou H para o código continuar legível.',
+            ],
+            [
+                'question' => 'Que códigos de barras posso gerar?',
+                'answer' => 'CODE128, CODE39, EAN-13, EAN-8, UPC-A, ITF-14, MSI e Pharmacode — úteis para produtos, inventário e logística.',
+            ],
+            [
+                'question' => 'Os códigos ficam guardados no site?',
+                'answer' => 'Não. Nada é armazenado nos servidores. O conteúdo e o logotipo existem só no seu navegador até descarregar ou fechar a página.',
+            ],
+        ];
+
+        return $this->forPage([
+            'title' => 'Gerador de Código de Barras e QR Code Grátis | Com Logotipo',
+            'description' => 'Crie QR Code e código de barras online grátis: URL, texto, Wi‑Fi, email, telefone, vCard. Coloque logotipo no centro, escolha cores e descarregue PNG/SVG. Sem conta — nada é guardado no servidor.',
+            'path' => '/gerador-de-codigo-barras',
+            'keywords' => implode(', ', [
+                'gerador de código de barras grátis',
+                'gerador qr code online',
+                'criar qr code com logo',
+                'gerar código de barras online',
+                'qr code grátis',
+                'criar código de barras EAN',
+                'gerador qr code com imagem',
+                'código de barras CODE128',
+                'qr code wifi grátis',
+                'gerar barcode online',
+                'qr code para empresa',
+                'gerador código de barras Angola',
+                'criar qr code URL',
+                'download qr code png',
+                'SIGESC gerador qr code',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'WebApplication',
+                    'name' => 'Gerador de Código de Barras e QR Code SIGESC',
+                    'applicationCategory' => 'BusinessApplication',
+                    'operatingSystem' => 'Web',
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'price' => '0',
+                        'priceCurrency' => 'AOA',
+                    ],
+                    'url' => $url,
+                    'inLanguage' => 'pt-AO',
+                    'description' => 'Gere QR Codes e códigos de barras online grátis, com logotipo no centro, sem criar conta e sem guardar dados no servidor.',
+                    'provider' => [
+                        '@type' => 'Organization',
+                        'name' => 'SIGESC',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function forInvoiceGenerator(): array
     {
         $url = route('invoice-generator.index', absolute: true);

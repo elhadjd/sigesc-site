@@ -55,6 +55,11 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
             text: 'Criar fatura',
         },
         {
+            href: '/gerador-de-codigo-barras',
+            icon: <BsFileEarmarkText className="text-base" />,
+            text: 'QR / Código barras',
+        },
+        {
             href: '/modelos-de-fatura',
             icon: <BsFileEarmarkText className="text-base" />,
             text: 'Modelos de fatura',
