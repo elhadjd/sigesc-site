@@ -16,6 +16,7 @@ use App\Http\Controllers\public\Blog\EngagementController;
 use App\Http\Controllers\public\BlogController;
 use App\Http\Controllers\public\CalculatorsController;
 use App\Http\Controllers\public\ChatController;
+use App\Http\Controllers\public\InvoiceTemplatesController;
 use App\Http\Controllers\public\RssFeedController;
 use App\Http\Controllers\public\SitemapController;
 use App\Http\Controllers\public\clientDepoimentsController;
@@ -53,6 +54,16 @@ Route::prefix('calculadoras')->name('calculators.')->group(function () {
     Route::post('calcular', [CalculatorsController::class, 'calculate'])
         ->middleware('throttle:60,1')
         ->name('calculate');
+});
+
+Route::prefix('modelos-de-fatura')->name('invoice-templates.')->group(function () {
+    Route::get('', [InvoiceTemplatesController::class, 'index'])->name('index');
+    Route::get('{slug}/download', [InvoiceTemplatesController::class, 'download'])
+        ->where('slug', '[a-z0-9\-]+')
+        ->name('download');
+    Route::get('{slug}', [InvoiceTemplatesController::class, 'show'])
+        ->where('slug', '[a-z0-9\-]+')
+        ->name('show');
 });
 
 Route::controller(AuthenticatedSessionController::class)->group(function () {

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nota de crédito — Modelo gratuito SIGESC</title>
+<style>
+  :root {
+    --ink: #14213d;
+    --accent: #0b3d91;
+    --accent-soft: #2563eb;
+    --line: #e2e8f0;
+    --muted: #64748b;
+    --paper: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #e8edf3; color: var(--ink);
+    font-family: "Segoe UI", system-ui, sans-serif; line-height: 1.45;
+  }
+  .sheet {
+    width: 210mm; min-height: 297mm; margin: 18px auto; padding: 16mm 16mm 14mm;
+    background: var(--paper); box-shadow: 0 12px 40px rgba(15,23,42,.12);
+    position: relative;
+  }
+  .topbar { height: 6px; background: linear-gradient(90deg, var(--accent), var(--accent-soft)); margin: -16mm -16mm 10mm; }
+  header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; }
+  .brand h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
+  .brand p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+  .doc-meta { text-align: right; }
+  .doc-meta .type {
+    display: inline-block; padding: 6px 12px; border-radius: 999px;
+    background: var(--accent); color: #fff; font-size: 12px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+  }
+  .doc-meta .num { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .badge {
+    margin-top: 10px; display: inline-block; border: 2px solid var(--accent);
+    color: var(--accent); font-weight: 800; letter-spacing: .12em; padding: 4px 10px;
+    transform: rotate(-6deg);
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 22px 0 18px; }
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fff; }
+  .card h2 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); }
+  .card p { margin: 0; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12.5px; }
+  th { text-align: left; background: var(--accent); color: #fff; padding: 9px 10px; font-weight: 600; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  .totals { margin-top: 16px; margin-left: auto; width: 280px; }
+  .tot-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+  .tot-row:last-child { border-bottom: 0; font-size: 16px; color: var(--accent); }
+  .notes { margin-top: 22px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+  .bank { margin-top: 14px; padding: 12px; border-radius: 10px; background: #f8fafc; border: 1px solid var(--line); font-size: 12px; }
+  .agt { margin-top: 18px; padding: 12px; border: 1px dashed var(--accent); border-radius: 10px; font-size: 12px; }
+  .agt h3 { margin: 0 0 8px; font-size: 12px; color: var(--accent); }
+  .qr {
+    width: 64px; height: 64px; margin-top: 8px; border: 2px solid var(--ink);
+    display: grid; place-items: center; font-size: 10px; font-weight: 700;
+  }
+  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 36px; }
+  .sign .line { border-top: 1px solid var(--ink); padding-top: 6px; font-size: 12px; color: var(--muted); }
+  footer.sheet-foot {
+    margin-top: 28px; font-size: 10px; color: var(--muted); text-align: center;
+  }
+  .toolbar {
+    position: sticky; top: 0; z-index: 5; background: #0b3d91; color: #fff;
+    display: flex; justify-content: space-between; gap: 12px; align-items: center;
+    padding: 10px 16px; font-size: 13px;
+  }
+  .toolbar a, .toolbar button {
+    color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.45);
+    border-radius: 8px; padding: 7px 12px; text-decoration: none; cursor: pointer; font-weight: 600;
+  }
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none !important; }
+    .sheet { margin: 0; box-shadow: none; width: auto; min-height: auto; }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <span>Modelo gratuito SIGESC · Nota de Crédito · Imprima ou guarde como PDF</span>
+    <span>
+      <button onclick="window.print()">Imprimir / PDF</button>
+      <a href="/modelos-de-fatura">Voltar à biblioteca</a>
+    </span>
+  </div>
+  <article class="sheet">
+    <div class="topbar"></div>
+    <header>
+      <div class="brand">
+        <h1>Empresa Exemplo, Lda.</h1>
+        <p>Luanda, Angola · comercial@empresa.ao · +244 900 000 000</p>
+      </div>
+      <div class="doc-meta">
+        <div class="type">Nota de Crédito</div>
+        
+        <div class="num">N.º FR 2026/0001<br>Data: 20/07/2026<br>Vencimento: 05/08/2026</div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Emitente</h2>
+        <p>Empresa Exemplo, Lda.<br>NIF: 5000000000<br>Rua Exemplo, Ingombota, Luanda<br>Tel: +244 900 000 000</p>
+      </div>
+      <div class="card">
+        <h2>Cliente</h2>
+        <p>Cliente Exemplo, Lda.<br>NIF: 5000000001<br>Talatona, Luanda<br>compras@cliente.ao</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th class="num">Qtd</th>
+          <th class="num">Preço</th>
+          
+          <th class="num">Total</th>
+        </tr>
+      </thead>
+      <tbody><tr><td>Prestação de serviços de gestão comercial</td><td class="num">1</td><td class="num">150.000,00 Kz</td><td class="num">171.000,00 Kz</td></tr><tr><td>Licença software / suporte mensal</td><td class="num">1</td><td class="num">45.000,00 Kz</td><td class="num">51.300,00 Kz</td></tr><tr><td>Material de escritório (exemplo)</td><td class="num">5</td><td class="num">3.500,00 Kz</td><td class="num">19.950,00 Kz</td></tr></tbody>
+    </table>
+
+    <div class="totals"><div class="tot-row"><span>Subtotal</span><strong>195.000,00 Kz</strong></div><div class="tot-row"><span>Total</span><strong>195.000,00 Kz</strong></div></div>
+
+    
+    
+
+    <div class="sign">
+      <div class="line">O emitente</div>
+      <div class="line">O cliente</div>
+    </div>
+
+    <div class="notes">
+      <p><strong>Notas:</strong> Este é um modelo editável. Substitua os dados de exemplo pelos da sua empresa. Pagamento por transferência ou TPA.</p>
+      <p>Modelo gratuito editável da biblioteca SIGESC (sisgesc.net). Personalize com os dados da sua empresa. Confirme sempre os requisitos legais na AGT.</p>
+    </div>
+    <footer class="sheet-foot">SIGESC · Modelos de fatura Angola · Documento modelo para edição</footer>
+  </article>
+</body>
+</html>
