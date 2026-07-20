@@ -432,6 +432,83 @@ class SeoBuilder
         ]);
     }
 
+    public function forInvoiceTemplates(): array
+    {
+        $url = route('invoice-templates.index', absolute: true);
+        $faqs = [
+            [
+                'question' => 'Onde descarregar modelos de fatura gratuitos em Angola?',
+                'answer' => 'Na biblioteca SIGESC em /modelos-de-fatura encontra mais de 20 modelos de factura, factura-recibo, proforma, recibo e orçamento em HTML print-ready, gratuitos para PME.',
+            ],
+            [
+                'question' => 'Os modelos servem para faturação eletrónica AGT?',
+                'answer' => 'São modelos editáveis de apoio. Os layouts avançados incluem campos AGT (NIF, série, número, QR). Para emitir documentos fiscais válidos use software certificado como o SIGESC.',
+            ],
+            [
+                'question' => 'Posso guardar os modelos em PDF?',
+                'answer' => 'Sim. Abra o modelo, clique em Imprimir / PDF no navegador e guarde como PDF. Também pode descarregar o ficheiro HTML editável.',
+            ],
+            [
+                'question' => 'Há modelos com IVA e retenção na fonte?',
+                'answer' => 'Sim. Existem facturas com IVA 14%, taxa reduzida, retenção na fonte 6,5%, descontos e layouts para retalho, serviços, restauração e logística.',
+            ],
+        ];
+
+        $itemList = [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => 'Modelos de fatura gratuitos Angola',
+            'url' => $url,
+            'description' => 'Biblioteca gratuita de modelos de factura e factura-recibo para empresas em Angola.',
+            'isPartOf' => [
+                '@type' => 'WebSite',
+                'name' => 'SIGESC',
+                'url' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/'),
+            ],
+            'mainEntity' => [
+                '@type' => 'ItemList',
+                'numberOfItems' => count(config('invoice_templates.templates', [])),
+                'itemListElement' => collect(config('invoice_templates.templates', []))
+                    ->values()
+                    ->map(function (array $template, int $index) use ($url) {
+                        return [
+                            '@type' => 'ListItem',
+                            'position' => $index + 1,
+                            'url' => $url.'/'.$template['slug'],
+                            'name' => $template['title'],
+                        ];
+                    })
+                    ->all(),
+            ],
+        ];
+
+        return $this->forPage([
+            'title' => 'Modelos de Fatura Gratuitos Angola | Factura, Recibo e Proforma',
+            'description' => 'Descarregue gratis +20 modelos de fatura para Angola: factura, factura-recibo, proforma, orçamento e nota de crédito. Layouts AGT, IVA 14% e design profissional para PME.',
+            'path' => '/modelos-de-fatura',
+            'keywords' => implode(', ', [
+                'modelo de fatura gratuito Angola',
+                'modelo de factura Angola',
+                'factura recibo gratuito',
+                'modelo factura AGT',
+                'template fatura Kwanzas',
+                'modelo proforma Angola',
+                'baixar modelo de fatura',
+                'factura eletrónica modelo',
+                'recibo pagamento Angola',
+                'orçamento modelo empresa',
+                'nota de crédito modelo',
+                'factura com IVA 14%',
+                'modelo fatura PME Luanda',
+                'documento fiscal modelo Angola',
+                'faturação AGT templates',
+                'SIGESC modelos de fatura',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [$itemList],
+        ]);
+    }
+
     public function forDownloads(): array
     {
         return $this->forPage([
