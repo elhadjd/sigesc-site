@@ -326,6 +326,78 @@ class PublicPageContent
     }
 
     /**
+     * @param  list<array<string, mixed>>  $templates
+     * @return array<string, mixed>
+     */
+    public function invoiceTemplates(array $templates = []): array
+    {
+        $templates = $templates !== [] ? $templates : config('invoice_templates.templates', []);
+        $byLevel = collect($templates)->groupBy('level');
+
+        $sections = [
+            [
+                'heading' => 'Biblioteca gratuita de modelos de fatura para Angola',
+                'body' => 'Empresários e contabilistas podem descarregar modelos de factura, factura-recibo, proforma, recibo, orçamento e notas de crédito — do básico ao avançado, com campos em Kwanzas e alinhados à prática AGT.',
+                'items' => [
+                    'Mais de 20 modelos HTML print-ready (imprimir ou guardar PDF)',
+                    'Níveis: básico, intermédio e avançado',
+                    'Factura com IVA 14%, retenção 6,5% e layouts AGT',
+                    'Design profissional inspirado no mercado angolano',
+                ],
+            ],
+        ];
+
+        foreach (['basico', 'intermedio', 'avancado'] as $level) {
+            $items = $byLevel->get($level, collect());
+            if ($items->isEmpty()) {
+                continue;
+            }
+            $label = config('invoice_templates.levels.'.$level.'.label', $level);
+            $sections[] = [
+                'heading' => "Modelos {$label}",
+                'body' => (string) config('invoice_templates.levels.'.$level.'.description', ''),
+                'items' => $items->map(function (array $t) {
+                    $href = $t['download_url'] ?? url('/modelos-de-fatura/'.($t['slug'] ?? '').'/download');
+
+                    return ($t['title'] ?? $t['slug']).' — '.$href;
+                })->all(),
+            ];
+        }
+
+        $sections[] = [
+            'heading' => 'Perguntas frequentes',
+            'faqs' => [
+                [
+                    'question' => 'Como descarregar um modelo de fatura?',
+                    'answer' => 'Escolha o modelo, clique em Descarregar ou abra a pré-visualização e use Imprimir / PDF no navegador.',
+                ],
+                [
+                    'question' => 'Os modelos substituem o software AGT?',
+                    'answer' => 'Não. São templates editáveis. Para documentos fiscais oficiais use faturação eletrónica certificada (ex.: SIGESC).',
+                ],
+            ],
+        ];
+
+        $links = collect($templates)->map(fn (array $t) => [
+            'href' => $t['download_url'] ?? url('/modelos-de-fatura/'.$t['slug'].'/download'),
+            'label' => $t['title'] ?? $t['slug'],
+            'description' => ($t['level_label'] ?? $t['level'] ?? '').' · '.($t['category_label'] ?? $t['category'] ?? ''),
+        ])->all();
+
+        $links[] = ['href' => url('/calculadoras'), 'label' => 'Calculadoras fiscais', 'description' => 'IVA, IRT e Imposto Industrial'];
+        $links[] = ['href' => url('/pergunte-ao-especialista'), 'label' => 'Pergunte ao Especialista', 'description' => 'Dúvidas sobre faturação AGT'];
+        $links[] = ['href' => url('/solutions'), 'label' => 'Software SIGESC', 'description' => 'Emita facturas no sistema'];
+
+        return [
+            'kicker' => 'Recursos gratuitos · Angola',
+            'headline' => 'Modelos de fatura gratuitos Angola — factura, recibo e proforma',
+            'lead' => 'Biblioteca organizada com +20 modelos de fatura para descarregar: do layout básico à factura avançada AGT. Ideal para PME, freelancers e contabilistas em Luanda e em todo o país.',
+            'sections' => $sections,
+            'links' => $links,
+        ];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function askExpert(): array

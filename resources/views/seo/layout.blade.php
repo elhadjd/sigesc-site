@@ -62,6 +62,7 @@
                 <a href="{{ $base }}/prices">Preços</a>
                 <a href="{{ $base }}/blog/posts">Blog</a>
                 <a href="{{ $base }}/calculadoras">Calculadoras</a>
+                <a href="{{ $base }}/modelos-de-fatura">Modelos de fatura</a>
                 <a href="{{ $base }}/pergunte-ao-especialista">Especialista</a>
                 <a href="{{ $base }}/shop">Loja</a>
                 <a href="{{ $base }}/downloads">Downloads</a>

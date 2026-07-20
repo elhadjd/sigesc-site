@@ -30,6 +30,7 @@ class CrawlerHtmlAllPagesTest extends TestCase
             ['/contact', 'Contacto'],
             ['/blog/posts', 'Blog'],
             ['/calculadoras', 'Calculadoras'],
+            ['/modelos-de-fatura', 'Modelos'],
             ['/pergunte-ao-especialista', 'Especialista'],
             ['/downloads', 'Download'],
             ['/shop', 'Loja'],

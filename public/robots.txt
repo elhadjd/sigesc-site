@@ -4,6 +4,7 @@ Allow: /blog/posts
 Allow: /blog/posts/
 Allow: /pergunte-ao-especialista
 Allow: /calculadoras
+Allow: /modelos-de-fatura
 Allow: /feed.xml
 
 Disallow: /authenticate
