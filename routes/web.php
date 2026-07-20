@@ -16,6 +16,7 @@ use App\Http\Controllers\public\Blog\EngagementController;
 use App\Http\Controllers\public\BlogController;
 use App\Http\Controllers\public\CalculatorsController;
 use App\Http\Controllers\public\ChatController;
+use App\Http\Controllers\public\BarcodeQrGeneratorController;
 use App\Http\Controllers\public\InvoiceGeneratorController;
 use App\Http\Controllers\public\InvoiceTemplatesController;
 use App\Http\Controllers\public\RssFeedController;
@@ -59,6 +60,9 @@ Route::prefix('calculadoras')->name('calculators.')->group(function () {
 
 Route::get('/gerador-de-fatura', [InvoiceGeneratorController::class, 'index'])
     ->name('invoice-generator.index');
+
+Route::get('/gerador-de-codigo-barras', [BarcodeQrGeneratorController::class, 'index'])
+    ->name('barcode-qr-generator.index');
 
 Route::prefix('modelos-de-fatura')->name('invoice-templates.')->group(function () {
     Route::get('', [InvoiceTemplatesController::class, 'index'])->name('index');

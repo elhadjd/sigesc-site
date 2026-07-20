@@ -329,6 +329,64 @@ class PublicPageContent
     /**
      * @return array<string, mixed>
      */
+    public function barcodeQrGenerator(): array
+    {
+        return [
+            'kicker' => 'Ferramenta gratuita · Sem conta · Nada é guardado',
+            'headline' => 'Gerador de código de barras e QR Code grátis — com logotipo',
+            'lead' => 'Crie QR Codes e códigos de barras no browser: URL, texto, Wi‑Fi, email, telefone, SMS ou contacto (vCard). Coloque o logotipo no centro, escolha cores e formato (EAN, CODE128…). Uso 100% gratuito. Atenção: os códigos NÃO são guardados em nenhum servidor — descarregue PNG/SVG antes de sair.',
+            'sections' => [
+                [
+                    'heading' => 'O que pode fazer neste gerador',
+                    'items' => [
+                        'QR Code para URL, texto, email, telefone, SMS, Wi‑Fi e vCard',
+                        'Código de barras 1D: CODE128, CODE39, EAN-13, EAN-8, UPC, ITF-14, MSI, Pharmacode',
+                        'Inserir logotipo ou imagem no centro do QR Code',
+                        'Personalizar cores, tamanho, margem e nível de correção de erro',
+                        'Mostrar ou ocultar o texto sob o código de barras',
+                        'Descarregar PNG ou SVG e imprimir',
+                    ],
+                ],
+                [
+                    'heading' => 'Privacidade',
+                    'body' => 'Este gerador funciona só no seu dispositivo. Não criamos conta e não arquivamos o código, o logotipo nem o conteúdo (URL, Wi‑Fi, contactos).',
+                    'items' => [
+                        'Sem registo e sem login',
+                        'Sem armazenamento no servidor SIGESC',
+                        'Descarregue o ficheiro antes de fechar a página',
+                    ],
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => [
+                        [
+                            'question' => 'Preciso de conta para gerar QR Code?',
+                            'answer' => 'Não. A ferramenta é gratuita e aberta — basta preencher e descarregar.',
+                        ],
+                        [
+                            'question' => 'O logotipo impede a leitura do QR?',
+                            'answer' => 'Com correção de erro Q ou H e um logo moderado (cerca de 20% da área), a maioria dos telemóveis continua a ler bem.',
+                        ],
+                        [
+                            'question' => 'Posso gerar EAN-13 para produtos?',
+                            'answer' => 'Sim. Escolha código de barras EAN-13 e introduza 12 ou 13 dígitos (o dígito de controlo pode ser calculado pelo formato).',
+                        ],
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => url('/gerador-de-codigo-barras'), 'label' => 'Abrir gerador de códigos', 'description' => 'Criar QR e barcode agora'],
+                ['href' => url('/gerador-de-fatura'), 'label' => 'Criar fatura online grátis', 'description' => 'Gerador sem conta'],
+                ['href' => url('/modelos-de-fatura'), 'label' => 'Modelos de fatura', 'description' => 'Templates HTML para descarregar'],
+                ['href' => url('/calculadoras'), 'label' => 'Calculadoras fiscais', 'description' => 'IVA, IRT, Imposto Industrial'],
+                ['href' => url('/solutions'), 'label' => 'Software SIGESC', 'description' => 'Gestão e faturação'],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function invoiceGenerator(): array
     {
         return [
@@ -376,6 +434,7 @@ class PublicPageContent
             ],
             'links' => [
                 ['href' => url('/gerador-de-fatura'), 'label' => 'Abrir gerador de fatura', 'description' => 'Criar factura online agora'],
+                ['href' => url('/gerador-de-codigo-barras'), 'label' => 'Gerador de QR e código de barras', 'description' => 'Com logotipo, grátis'],
                 ['href' => url('/modelos-de-fatura'), 'label' => 'Modelos de fatura para descarregar', 'description' => '24 templates HTML'],
                 ['href' => url('/calculadoras'), 'label' => 'Calculadoras fiscais', 'description' => 'IVA, IRT, Imposto Industrial'],
                 ['href' => url('/pergunte-ao-especialista'), 'label' => 'Pergunte ao Especialista', 'description' => 'Dúvidas AGT e faturação'],

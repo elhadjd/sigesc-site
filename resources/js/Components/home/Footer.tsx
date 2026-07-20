@@ -82,6 +82,11 @@ export default function FooterComponent() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/gerador-de-codigo-barras" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                    <span className="text-sm">QR e código de barras</span>
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/modelos-de-fatura" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <span className="text-sm">Modelos de fatura</span>
                                 </Link>
