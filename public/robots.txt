@@ -5,6 +5,7 @@ Allow: /blog/posts/
 Allow: /pergunte-ao-especialista
 Allow: /calculadoras
 Allow: /modelos-de-fatura
+Allow: /gerador-de-fatura
 Allow: /feed.xml
 
 Disallow: /authenticate

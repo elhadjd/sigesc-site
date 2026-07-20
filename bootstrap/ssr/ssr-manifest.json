@@ -1,7 +1,7 @@
 {
   "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
   "node_modules/react-toastify/dist/ReactToastify.css": [
-    "/build/assets/Company-D8dG4ZVy.js",
+    "/build/assets/Company-CpALKyC8.js",
     "/build/assets/Company-Xq8_jZ79.css"
   ],
   "node_modules/swiper/modules/effect-creative/effect-creative.min.css": [
@@ -25,39 +25,39 @@
     "/build/assets/index-BCjvVrdY.css"
   ],
   "resources/assets/home/Demonstration.module.scss": [
-    "/build/assets/dashboard-6DwjXdGf.js",
+    "/build/assets/dashboard-K83M0rs4.js",
     "/build/assets/dashboard-BqSlDWsd.css"
   ],
   "resources/assets/listPrices/payment.module.scss": [
-    "/build/assets/index-DLjo6tY1.js",
+    "/build/assets/index-K8V6XYfo.js",
     "/build/assets/index-B7asJZ37.css"
   ],
   "resources/css/index.module.scss": [
-    "/build/assets/dashboard-6DwjXdGf.js",
+    "/build/assets/dashboard-K83M0rs4.js",
     "/build/assets/dashboard-BqSlDWsd.css"
   ],
   "resources/js/Components/auth/LogIn.tsx": [
-    "/build/assets/index-C8bY9ZbE.js"
+    "/build/assets/index-HNP2WSSH.js"
   ],
   "resources/js/Components/auth/RegisterComponent.tsx": [
-    "/build/assets/Register-DnaMPa0v.js"
+    "/build/assets/Register-C0k8LpYw.js"
   ],
   "resources/js/Components/contact/index.tsx": [
     "/build/assets/index-BUg1uR8k.js",
     "/build/assets/index-BCjvVrdY.css"
   ],
   "resources/js/Components/home/Cards.jsx": [
-    "/build/assets/Cards-CNGn9hEI.js"
+    "/build/assets/Cards-BReil0rn.js"
   ],
   "resources/js/Components/home/Demonstration.tsx": [
-    "/build/assets/dashboard-6DwjXdGf.js",
+    "/build/assets/dashboard-K83M0rs4.js",
     "/build/assets/dashboard-BqSlDWsd.css"
   ],
   "resources/js/Components/home/Footer.tsx": [
-    "/build/assets/Header-CFHV1WkI.js"
+    "/build/assets/Header-D07wN13G.js"
   ],
   "resources/js/Components/home/Header.tsx": [
-    "/build/assets/Header-CFHV1WkI.js"
+    "/build/assets/Header-D07wN13G.js"
   ],
   "resources/js/Components/home/PartnerSection.tsx": [
     "/build/assets/PartnerSection-Brhs6g69.js"
@@ -66,7 +66,7 @@
     "/build/assets/Why-Cyg_ZaiJ.js"
   ],
   "resources/js/Components/home/apps.jsx": [
-    "/build/assets/apps-FMFQL6bU.js"
+    "/build/assets/apps-CvvpWOQj.js"
   ],
   "resources/js/Components/home/ceo.tsx": [
     "/build/assets/ceo-CJiNBsxc.js"
@@ -76,20 +76,20 @@
     "/build/assets/sliderImg-C9IaPOT0.css"
   ],
   "resources/js/Components/listPrices/Payment.tsx": [
-    "/build/assets/index-DLjo6tY1.js",
+    "/build/assets/index-K8V6XYfo.js",
     "/build/assets/index-B7asJZ37.css"
   ],
   "resources/js/Components/policies/faqComponent.tsx": [
-    "/build/assets/faq-wHE4v5Qc.js"
+    "/build/assets/faq-Drg9tRmI.js"
   ],
   "resources/js/Components/policies/helpComponent.tsx": [
-    "/build/assets/help-DRC9OI-H.js"
+    "/build/assets/help-CUYR-1Up.js"
   ],
   "resources/js/Components/policies/privacyComponent.tsx": [
-    "/build/assets/privacy-DcKgGgOJ.js"
+    "/build/assets/privacy-DaoFJCBo.js"
   ],
   "resources/js/Components/policies/termsComponent.tsx": [
-    "/build/assets/terms-BjYnPGmi.js"
+    "/build/assets/terms-DUT2AHrr.js"
   ],
   "resources/js/Components/public/whatsApp.jsx": [
     "/build/assets/index-BUg1uR8k.js",
@@ -99,28 +99,28 @@
     "/build/assets/SeoHead-DDdyn2J1.js"
   ],
   "resources/js/Components/user/editProfile.tsx": [
-    "/build/assets/index-CO2e7mW3.js"
+    "/build/assets/index-Dc8880lW.js"
   ],
   "resources/js/Components/user/profile.tsx": [
-    "/build/assets/index-CO2e7mW3.js"
+    "/build/assets/index-Dc8880lW.js"
   ],
   "resources/js/Components/user/services.ts": [
-    "/build/assets/index-CO2e7mW3.js"
+    "/build/assets/index-Dc8880lW.js"
   ],
   "resources/js/Pages/Auth/ForgotPassword.tsx": [
-    "/build/assets/ForgotPassword-DkdPI6_N.js"
+    "/build/assets/ForgotPassword-oCA4oFf4.js"
   ],
   "resources/js/Pages/Auth/Register.tsx": [
-    "/build/assets/Register-DnaMPa0v.js"
+    "/build/assets/Register-C0k8LpYw.js"
   ],
   "resources/js/Pages/Auth/ResetPassword.tsx": [
-    "/build/assets/ResetPassword-C3yDI-x6.js"
+    "/build/assets/ResetPassword-xW95sVYt.js"
   ],
   "resources/js/Pages/Auth/VerifyEmail.tsx": [
-    "/build/assets/VerifyEmail-aaPIdsmm.js"
+    "/build/assets/VerifyEmail-Dt37gorG.js"
   ],
   "resources/js/Pages/Auth/index.tsx": [
-    "/build/assets/index-C8bY9ZbE.js"
+    "/build/assets/index-HNP2WSSH.js"
   ],
   "resources/js/Pages/admin/ai-content/Layout.tsx": [
     "/build/assets/Layout-Bj0mdkdN.js"
@@ -147,88 +147,91 @@
     "/build/assets/show-C0Ey-8rs.js"
   ],
   "resources/js/Pages/ask-expert/index.tsx": [
-    "/build/assets/index-DUnBnxz3.js"
+    "/build/assets/index-Bds2OJ6Y.js"
   ],
   "resources/js/Pages/ask-expert/show.tsx": [
-    "/build/assets/show-B3K-0XuD.js"
+    "/build/assets/show-DwCt_6PS.js"
   ],
   "resources/js/Pages/blog/index.tsx": [
-    "/build/assets/index-BqcDRTmh.js"
+    "/build/assets/index-BiPyHKLH.js"
   ],
   "resources/js/Pages/blog/post.tsx": [
-    "/build/assets/post-BzVWkGIo.js"
+    "/build/assets/post-rF3f4EF6.js"
   ],
   "resources/js/Pages/calculators/index.tsx": [
-    "/build/assets/index-DuodRadE.js"
+    "/build/assets/index-CFjrwbGb.js"
   ],
   "resources/js/Pages/clients/depoiments.tsx": [
-    "/build/assets/depoiments-Cj9RtruA.js"
+    "/build/assets/depoiments-CkKKeeKG.js"
   ],
   "resources/js/Pages/contact/index.tsx": [
-    "/build/assets/index-BTabqPvc.js"
+    "/build/assets/index-B0N2uI9U.js"
   ],
   "resources/js/Pages/dashboard.tsx": [
-    "/build/assets/dashboard-6DwjXdGf.js",
+    "/build/assets/dashboard-K83M0rs4.js",
     "/build/assets/dashboard-BqSlDWsd.css"
   ],
   "resources/js/Pages/downloads/sigesc-admin.tsx": [
-    "/build/assets/sigesc-admin-BPg8x5ra.js"
+    "/build/assets/sigesc-admin-C3HI9bBE.js"
   ],
   "resources/js/Pages/downloads/thanks.tsx": [
-    "/build/assets/thanks-BZMoySue.js"
+    "/build/assets/thanks-B4ioX2fj.js"
+  ],
+  "resources/js/Pages/invoice-generator/index.tsx": [
+    "/build/assets/index-BrJFAFbz.js"
   ],
   "resources/js/Pages/invoice-templates/index.tsx": [
-    "/build/assets/index-DngNva4G.js"
+    "/build/assets/index-BJNK7JRQ.js"
   ],
   "resources/js/Pages/modules/index.tsx": [
-    "/build/assets/index-DrMFjUoU.js"
+    "/build/assets/index-4tazRkiZ.js"
   ],
   "resources/js/Pages/modules/sigesc-modules.tsx": [
-    "/build/assets/sigesc-modules-Dlkz4yno.js"
+    "/build/assets/sigesc-modules-Dqe4cZLA.js"
   ],
   "resources/js/Pages/payments/index.tsx": [
-    "/build/assets/index-DLjo6tY1.js",
+    "/build/assets/index-K8V6XYfo.js",
     "/build/assets/index-B7asJZ37.css"
   ],
   "resources/js/Pages/prices/Company.tsx": [
-    "/build/assets/Company-D8dG4ZVy.js",
+    "/build/assets/Company-CpALKyC8.js",
     "/build/assets/Company-Xq8_jZ79.css"
   ],
   "resources/js/Pages/prices/index.tsx": [
-    "/build/assets/index-CZoBwpY2.js"
+    "/build/assets/index-lr0yHXzE.js"
   ],
   "resources/js/Pages/profile/UpdatePasswordForm.tsx": [
-    "/build/assets/UpdatePasswordForm-DL1XAeDc.js"
+    "/build/assets/UpdatePasswordForm-DG5d7PDD.js"
   ],
   "resources/js/Pages/profile/index.tsx": [
-    "/build/assets/index-CO2e7mW3.js"
+    "/build/assets/index-Dc8880lW.js"
   ],
   "resources/js/Pages/resources/faq.tsx": [
-    "/build/assets/faq-wHE4v5Qc.js"
+    "/build/assets/faq-Drg9tRmI.js"
   ],
   "resources/js/Pages/resources/help.tsx": [
-    "/build/assets/help-DRC9OI-H.js"
+    "/build/assets/help-CUYR-1Up.js"
   ],
   "resources/js/Pages/resources/learningCenter.tsx": [
-    "/build/assets/learningCenter-D1Dbqu0_.js"
+    "/build/assets/learningCenter-gsbvenqP.js"
   ],
   "resources/js/Pages/resources/privacy.tsx": [
-    "/build/assets/privacy-DcKgGgOJ.js"
+    "/build/assets/privacy-DaoFJCBo.js"
   ],
   "resources/js/Pages/resources/terms.tsx": [
-    "/build/assets/terms-BjYnPGmi.js"
+    "/build/assets/terms-DUT2AHrr.js"
   ],
   "resources/js/Pages/shop/index.tsx": [
-    "/build/assets/index-YAhGwMM8.js"
+    "/build/assets/index-ds_Ak9xS.js"
   ],
   "resources/js/axiosConfig/index.ts": [
     "/build/assets/index-DJUNAe3r.js"
   ],
   "resources/js/contexts/loggedUser.tsx": [
-    "/build/assets/loggedUser-Dauubd9z.js"
+    "/build/assets/loggedUser-DyDIPP3j.js"
   ],
   "resources/js/contexts/stateChatToggleContext.tsx": [
-    "/build/assets/loggedUser-Dauubd9z.js"
+    "/build/assets/loggedUser-DyDIPP3j.js"
   ],
   "resources/js/contexts/stateForm.tsx": [
     "/build/assets/stateForm-DYypFJ1f.js"
@@ -238,34 +241,34 @@
     "/build/assets/index-BCjvVrdY.css"
   ],
   "resources/js/services/login.ts": [
-    "/build/assets/index-C8bY9ZbE.js"
+    "/build/assets/index-HNP2WSSH.js"
   ],
   "resources/js/services/newCompanyService.ts": [
-    "/build/assets/Company-D8dG4ZVy.js",
+    "/build/assets/Company-CpALKyC8.js",
     "/build/assets/Company-Xq8_jZ79.css"
   ],
   "resources/js/services/paymantLicense.ts": [
-    "/build/assets/index-DLjo6tY1.js",
+    "/build/assets/index-K8V6XYfo.js",
     "/build/assets/index-B7asJZ37.css"
   ],
   "resources/js/services/public/domains.ts": [
-    "/build/assets/Header-CFHV1WkI.js"
+    "/build/assets/Header-D07wN13G.js"
   ],
   "resources/js/services/public/previewImage.ts": [
     "/build/assets/previewImage-DUYGizu3.js"
   ],
   "resources/js/services/public/veriables.ts": [
-    "/build/assets/Header-CFHV1WkI.js"
+    "/build/assets/Header-D07wN13G.js"
   ],
   "resources/js/services/register.ts": [
-    "/build/assets/Register-DnaMPa0v.js"
+    "/build/assets/Register-C0k8LpYw.js"
   ],
   "resources/js/ssr.tsx": [],
   "resources/js/ui/InputLabel.tsx": [
     "/build/assets/InputLabel-Czj3fUl0.js"
   ],
   "resources/js/ui/chat.tsx": [
-    "/build/assets/Header-CFHV1WkI.js"
+    "/build/assets/Header-D07wN13G.js"
   ],
   "resources/js/ui/loadingButtons.tsx": [
     "/build/assets/loadingButtons-CO2cJ9-s.js"
