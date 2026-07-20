@@ -191,6 +191,10 @@ export default function InvoiceTemplatesIndex({
                             </p>
                             <p className="text-sm">
                                 Relacionado:{' '}
+                                <a href="/gerador-de-fatura" className="font-medium text-[#0b3d91] underline">
+                                    criar fatura online grátis
+                                </a>{' '}
+                                ·{' '}
                                 <a href="/calculadoras" className="font-medium text-[#0b3d91] underline">
                                     calculadoras de IVA
                                 </a>{' '}

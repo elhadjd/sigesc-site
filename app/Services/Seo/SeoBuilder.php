@@ -432,6 +432,74 @@ class SeoBuilder
         ]);
     }
 
+    public function forInvoiceGenerator(): array
+    {
+        $url = route('invoice-generator.index', absolute: true);
+        $faqs = [
+            [
+                'question' => 'Como criar uma fatura online grátis em Angola?',
+                'answer' => 'Use o gerador gratuito SIGESC: preencha emitente e cliente, adicione artigos com preço e quantidade, escolha o IVA (14%, 7%, 5% ou isento) e imprima ou guarde em PDF. Não precisa de criar conta.',
+            ],
+            [
+                'question' => 'As facturas ficam guardadas no site?',
+                'answer' => 'Não. Nada é armazenado nos servidores. Os dados existem só no seu navegador. Se fechar a página sem imprimir/guardar PDF, perde o conteúdo.',
+            ],
+            [
+                'question' => 'Posso calcular IVA e retenção na fonte?',
+                'answer' => 'Sim. Por linha pode aplicar IVA geral 14%, taxas reduzidas ou personalizada, descontos e retenção na fonte 6,5% sobre o total.',
+            ],
+            [
+                'question' => 'Isto substitui a faturação eletrónica AGT?',
+                'answer' => 'Não. É uma ferramenta gratuita de apoio para rascunhos e documentos internos. Para documentos fiscais oficiais use software certificado (ex.: SIGESC).',
+            ],
+        ];
+
+        return $this->forPage([
+            'title' => 'Criar Fatura Online Grátis Angola | Gerador de Factura com IVA',
+            'description' => 'Crie facturas online grátis sem conta: artigos, preços, quantidades, IVA 14%/7%/5%, descontos e retenção. Nada é guardado no servidor — imprima ou PDF. Gerador de fatura Angola para PME.',
+            'path' => '/gerador-de-fatura',
+            'keywords' => implode(', ', [
+                'criar fatura online grátis',
+                'gerador de fatura Angola',
+                'fazer factura online',
+                'emitir fatura gratuita',
+                'criar factura com IVA',
+                'gerador factura recibo',
+                'fatura online sem registo',
+                'calcular fatura IVA 14%',
+                'modelo fatura editável online',
+                'fazer fatura PME Angola',
+                'gerador de factura Luanda',
+                'criar proforma online',
+                'recibo online grátis',
+                'faturação gratuita Angola',
+                'SIGESC gerador de fatura',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'WebApplication',
+                    'name' => 'Gerador de Fatura Gratuito SIGESC',
+                    'applicationCategory' => 'BusinessApplication',
+                    'operatingSystem' => 'Web',
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'price' => '0',
+                        'priceCurrency' => 'AOA',
+                    ],
+                    'url' => $url,
+                    'inLanguage' => 'pt-AO',
+                    'description' => 'Crie facturas online grátis em Angola com IVA, sem criar conta e sem guardar dados no servidor.',
+                    'provider' => [
+                        '@type' => 'Organization',
+                        'name' => 'SIGESC',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function forInvoiceTemplates(): array
     {
         $url = route('invoice-templates.index', absolute: true);

@@ -264,6 +264,7 @@ class PublicPageContent
                 ],
             ],
             'links' => [
+                ['href' => url('/gerador-de-fatura'), 'label' => 'Criar fatura online grátis', 'description' => 'Gerador sem conta — nada é guardado'],
                 ['href' => url('/blog/posts'), 'label' => 'Artigos sobre IVA, IRT e AGT', 'description' => 'Conteúdo editorial SIGESC'],
                 ['href' => url('/pergunte-ao-especialista'), 'label' => 'Pergunte ao Especialista', 'description' => 'Dúvidas fiscais com pesquisa de fontes'],
                 ['href' => url('/solutions'), 'label' => 'Software de gestão SIGESC', 'description' => 'PDV, stock e faturação'],
@@ -326,6 +327,64 @@ class PublicPageContent
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function invoiceGenerator(): array
+    {
+        return [
+            'kicker' => 'Ferramenta gratuita · Sem conta · Nada é guardado',
+            'headline' => 'Criar fatura online grátis Angola — gerador de factura com IVA',
+            'lead' => 'Faça facturas, factura-recibos, proformas e orçamentos no browser: adicione artigos, preços, quantidades, IVA (14%, 7%, 5%), descontos e retenção. Uso 100% gratuito. Atenção: as facturas NÃO são guardadas em nenhum servidor — imprima ou guarde PDF antes de sair.',
+            'sections' => [
+                [
+                    'heading' => 'O que pode fazer neste gerador de fatura',
+                    'items' => [
+                        'Escolher tipo: Factura, Factura-Recibo, Proforma, Recibo, Orçamento, Nota de Crédito/Débito',
+                        'Dados do emitente e do cliente (NIF, morada, contacto, IBAN)',
+                        'Artigos ilimitados com quantidade, preço unitário e desconto por linha',
+                        'Impostos: IVA 14%, 7%, 5%, Cabinda 1%, isento ou taxa personalizada',
+                        'Desconto global e retenção na fonte 6,5%',
+                        'Pré-visualização em tempo real e impressão / guardar PDF',
+                    ],
+                ],
+                [
+                    'heading' => 'Privacidade e limites legais',
+                    'body' => 'Este gerador funciona só no seu dispositivo. Não criamos conta, não enviamos a factura por email automático e não arquivamos o documento. Para faturação eletrónica oficial AGT use software certificado.',
+                    'items' => [
+                        'Sem registo e sem login',
+                        'Sem armazenamento no servidor SIGESC',
+                        'Documento de apoio — confirme requisitos na AGT',
+                    ],
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => [
+                        [
+                            'question' => 'Preciso de conta para criar fatura?',
+                            'answer' => 'Não. O gerador é gratuito e aberto — basta preencher e imprimir.',
+                        ],
+                        [
+                            'question' => 'Os meus dados comerciais ficam guardados?',
+                            'answer' => 'Não. Ficam apenas temporariamente no navegador até limpar ou fechar a página.',
+                        ],
+                        [
+                            'question' => 'Posso usar Kwanzas e IVA de Angola?',
+                            'answer' => 'Sim. O total é em Kz e as taxas de IVA seguem as opções do Código do IVA configuradas no SIGESC.',
+                        ],
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => url('/gerador-de-fatura'), 'label' => 'Abrir gerador de fatura', 'description' => 'Criar factura online agora'],
+                ['href' => url('/modelos-de-fatura'), 'label' => 'Modelos de fatura para descarregar', 'description' => '24 templates HTML'],
+                ['href' => url('/calculadoras'), 'label' => 'Calculadoras fiscais', 'description' => 'IVA, IRT, Imposto Industrial'],
+                ['href' => url('/pergunte-ao-especialista'), 'label' => 'Pergunte ao Especialista', 'description' => 'Dúvidas AGT e faturação'],
+                ['href' => url('/solutions'), 'label' => 'Software SIGESC', 'description' => 'Faturação eletrónica completa'],
+            ],
+        ];
+    }
+
+    /**
      * @param  list<array<string, mixed>>  $templates
      * @return array<string, mixed>
      */
@@ -384,6 +443,7 @@ class PublicPageContent
             'description' => ($t['level_label'] ?? $t['level'] ?? '').' · '.($t['category_label'] ?? $t['category'] ?? ''),
         ])->all();
 
+        $links[] = ['href' => url('/gerador-de-fatura'), 'label' => 'Criar fatura online grátis', 'description' => 'Gerador sem conta — nada é guardado'];
         $links[] = ['href' => url('/calculadoras'), 'label' => 'Calculadoras fiscais', 'description' => 'IVA, IRT e Imposto Industrial'];
         $links[] = ['href' => url('/pergunte-ao-especialista'), 'label' => 'Pergunte ao Especialista', 'description' => 'Dúvidas sobre faturação AGT'];
         $links[] = ['href' => url('/solutions'), 'label' => 'Software SIGESC', 'description' => 'Emita facturas no sistema'];
