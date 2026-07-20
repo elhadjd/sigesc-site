@@ -50,6 +50,11 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
         { href: '/blog/posts', icon: <FaRegNewspaper className="text-base" />, text: 'Blog' },
         { href: '/calculadoras', icon: <BsCalculator className="text-base" />, text: 'Calculadoras' },
         {
+            href: '/gerador-de-fatura',
+            icon: <BsFileEarmarkText className="text-base" />,
+            text: 'Criar fatura',
+        },
+        {
             href: '/modelos-de-fatura',
             icon: <BsFileEarmarkText className="text-base" />,
             text: 'Modelos de fatura',

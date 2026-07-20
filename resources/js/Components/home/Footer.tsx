@@ -77,6 +77,11 @@ export default function FooterComponent() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/gerador-de-fatura" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                    <span className="text-sm">Criar fatura online</span>
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/modelos-de-fatura" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <span className="text-sm">Modelos de fatura</span>
                                 </Link>
