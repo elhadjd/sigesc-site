@@ -138,8 +138,18 @@ PROMPT
         }
 
         $article->tags()->delete();
+        $seenSlugs = [];
         foreach ($seo['tags'] ?? [] as $tag) {
-            $article->tags()->create(['tag' => $tag, 'slug' => Str::slug($tag)]);
+            $label = trim((string) $tag);
+            if ($label === '') {
+                continue;
+            }
+            $slug = Str::slug($label);
+            if ($slug === '' || isset($seenSlugs[$slug])) {
+                continue;
+            }
+            $seenSlugs[$slug] = true;
+            $article->tags()->create(['tag' => $label, 'slug' => $slug]);
         }
 
         $meta = $article->pipeline_meta ?? [];
