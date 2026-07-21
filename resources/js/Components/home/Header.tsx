@@ -192,7 +192,7 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
                             <Link href="/profile" className="flex items-center space-x-2 group">
                                 <div className="relative">
                                     <img
-                                        src={user.user_profile?.image || '/img/avatar-placeholder.png'}
+                                        src={user.user_profile?.image || '/img/avatar-placeholder.svg'}
                                         alt="Profile"
                                         className="w-8 h-8 rounded-full border-2 border-white shadow-sm group-hover:border-blue-300 transition-colors duration-300"
                                     />

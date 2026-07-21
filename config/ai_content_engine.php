@@ -245,6 +245,17 @@ return [
         'unsplash_access_key' => env('UNSPLASH_ACCESS_KEY'),
         'pexels_api_key' => env('PEXELS_API_KEY'),
         'store_locally' => (bool) env('AI_CONTENT_STORE_IMAGES', true),
+        // HEAD/GET probe before accepting a remote cover URL.
+        'verify_url' => (bool) env('AI_CONTENT_IMAGE_VERIFY_URL', true),
+        // Skip logo / trademark / wordmark style results from stock APIs.
+        'reject_brand_terms' => (bool) env('AI_CONTENT_IMAGE_REJECT_BRANDS', true),
+        'brand_denylist' => [
+            'coca-cola', 'pepsi', 'nike', 'adidas', 'apple', 'google', 'microsoft', 'amazon',
+            'meta', 'facebook', 'instagram', 'whatsapp', 'twitter', 'x corp', 'samsung',
+            'mcdonald', 'starbucks', 'visa', 'mastercard', 'paypal', 'netflix', 'spotify',
+            'toyota', 'bmw', 'mercedes', 'shell', 'bp', 'totalenergies',
+        ],
+        'local_fallback' => env('AI_CONTENT_IMAGE_LOCAL_FALLBACK', '/img/placeholder-blog.svg'),
     ],
 
     /*

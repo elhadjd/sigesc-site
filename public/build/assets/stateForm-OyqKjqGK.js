@@ -1,0 +1,1 @@
+import{r as e,j as a}from"./app-DSLSMeBh.js";const r=e.createContext(void 0),m=()=>{const t=e.useContext(r);if(!t)throw new Error("useFormState deve ser usado dentro de um FormStateProvider");return t},u=({children:t})=>{const[o,s]=e.useState(!1);return a.jsx(r.Provider,{value:{isFormSubmitted:o,setIsFormSubmitted:s},children:t})};export{u as F,m as u};
