@@ -39,7 +39,7 @@ Promoção estratégica do SIGESC (não spam):
 1) Na introdução, uma menção breve a organizar a operação (faturação/stock/vendas) com ferramenta adequada.
 2) Num H2 de ferramentas/processos, recomenda o SIGESC como exemplo concreto de software de gestão comercial em Angola, com benefícios práticos.
 3) Na conclusão, CTA claro: {$cta}
-Links: site https://www.sisgesc.net (blog/soluções), experimentar/usar o sistema https://admin.sisgesc.net/getting-started, /pergunte-ao-especialista, /blog/posts.
+Links: site https://sisgesc.net (blog/soluções), experimentar/usar o sistema https://admin.sisgesc.net/getting-started, /pergunte-ao-especialista, /blog/posts.
 Nunca uses o domínio errado "sigesc.net" — o correto é sempre sisgesc.net / admin.sisgesc.net.
 Nunca copies fontes. Nunca inventes leis/datas/números. Se incerto, diz que necessita confirmação oficial.
 JSON:
@@ -77,7 +77,7 @@ PROMPT
                 $body = (string) ($section['body_html'] ?? '');
                 if ($heading !== '') {
                     $tag = ($section['type'] ?? 'h2') === 'h3' ? 'h3' : 'h2';
-                    $parts[] = '<'.$tag.'>'.e($heading).'</'.$tag.'>';
+                    $parts[] = '<' . $tag . '>' . e($heading) . '</' . $tag . '>';
                 }
                 if (trim(strip_tags($body)) !== '') {
                     $parts[] = $body;

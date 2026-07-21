@@ -28,7 +28,7 @@ class ExpertAnswerReadyMailTest extends TestCase
 
         $mailable = new ExpertAnswerReadyMail(
             expertQuestion: $question,
-            answerUrl: 'https://sisgesc.net/pergunte-ao-especialista/'.$question->uuid,
+            answerUrl: 'https://sisgesc.net/pergunte-ao-especialista/' . $question->uuid,
             postUrl: 'https://sisgesc.net/blog/posts/loja-virtual-angola',
             postTitle: 'Guia loja virtual',
             postReady: false,
@@ -47,7 +47,7 @@ class ExpertAnswerReadyMailTest extends TestCase
     public function test_mailer_uses_published_post_slug_and_apex_host(): void
     {
         Mail::fake();
-        config(['sigesc.site_url' => 'https://www.sisgesc.net']);
+        config(['sigesc.site_url' => 'https://sisgesc.net']);
 
         $post = Post::create([
             'title' => 'Como calcular o IVA em Angola — guia passo a passo',
@@ -86,7 +86,7 @@ class ExpertAnswerReadyMailTest extends TestCase
 
         Mail::assertQueued(ExpertAnswerReadyMail::class, function (ExpertAnswerReadyMail $mail) use ($question) {
             return $mail->hasTo('leo@example.com')
-                && $mail->answerUrl === 'https://sisgesc.net/pergunte-ao-especialista/'.$question->uuid
+                && $mail->answerUrl === 'https://sisgesc.net/pergunte-ao-especialista/' . $question->uuid
                 && $mail->postUrl === 'https://sisgesc.net/blog/posts/como-calcular-iva-angola-guia-passo-a-passo'
                 && ! str_contains((string) $mail->postUrl, 'www.')
                 && ! str_contains((string) $mail->postUrl, 'como-calcular-o-iva-em-angola')
