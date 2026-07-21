@@ -7,6 +7,7 @@ import { FormStateProvider } from '@/contexts/stateForm';
 import { UserLoggedProvider } from '@/contexts/loggedUser';
 import FooterComponent from '@/Components/home/Footer';
 import SeoHead, { SeoPayload } from '@/Components/seo/SeoHead';
+import SafeCoverImage from '@/Components/blog/SafeCoverImage';
 import {
     FiSearch,
     FiFilter,
@@ -165,16 +166,9 @@ const BlogPostCard = ({ post, index }: { post: Post; index: number }) => {
                 className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_12px_40px_-24px_rgba(15,23,42,0.45)] transition-all duration-300 hover:-translate-y-1 hover:border-sky-300 hover:shadow-[0_22px_50px_-28px_rgba(11,92,171,0.45)] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
                 <div className="relative overflow-hidden">
-                    <motion.img
-                        src={post.image || '/img/placeholder-blog.jpg'}
-                        alt={post.title}
-                        className="h-52 w-full object-cover"
-                        whileHover={{ scale: 1.04 }}
-                        transition={{ duration: 0.45 }}
-                        onError={(e) => {
-                            e.currentTarget.src = '/img/placeholder-blog.jpg';
-                        }}
-                    />
+                    <motion.div whileHover={{ scale: 1.04 }} transition={{ duration: 0.45 }}>
+                        <SafeCoverImage src={post.image} alt={post.title} className="h-52 w-full object-cover" />
+                    </motion.div>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
                     <div className="absolute left-4 top-4">
                         <span className="blog-body rounded-md bg-sky-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
@@ -349,13 +343,10 @@ const BlogHero = ({ featuredPost }: { featuredPost?: Post }) => {
                             </span>
                         </div>
                         <div className="relative min-h-[240px] md:min-h-full">
-                            <img
-                                src={featuredPost.image || '/img/placeholder-blog.jpg'}
+                            <SafeCoverImage
+                                src={featuredPost.image}
                                 alt={featuredPost.title}
                                 className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                                onError={(e) => {
-                                    e.currentTarget.src = '/img/placeholder-blog.jpg';
-                                }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-r from-[#0b2748]/70 via-transparent to-transparent md:from-[#0b2748]/40" />
                         </div>
@@ -532,13 +523,10 @@ const BlogSidebar = ({ recentPosts, trendingPosts, categories, onCategorySelect 
                             href={route('blog.posts.show', { slug: post.slug })}
                             className="group flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-sky-50"
                         >
-                            <img
-                                src={post.image || '/img/placeholder-blog.jpg'}
+                            <SafeCoverImage
+                                src={post.image}
                                 alt={post.title}
                                 className="h-12 w-12 rounded-lg object-cover"
-                                onError={(e) => {
-                                    e.currentTarget.src = '/img/placeholder-blog.jpg';
-                                }}
                             />
                             <div className="min-w-0 flex-1">
                                 <p className="blog-display text-sm font-semibold leading-snug text-slate-900 underline-offset-2 group-hover:text-sky-800 group-hover:underline line-clamp-2">
@@ -566,13 +554,10 @@ const BlogSidebar = ({ recentPosts, trendingPosts, categories, onCategorySelect 
                             className="group flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-sky-50"
                         >
                             <div className="relative">
-                                <img
-                                    src={post.image || '/img/placeholder-blog.jpg'}
+                                <SafeCoverImage
+                                    src={post.image}
                                     alt={post.title}
                                     className="h-12 w-12 rounded-lg object-cover"
-                                    onError={(e) => {
-                                        e.currentTarget.src = '/img/placeholder-blog.jpg';
-                                    }}
                                 />
                                 <div className="absolute -right-1 -top-1 rounded bg-sky-600 px-1 text-[10px] font-bold text-white">
                                     {post.views}

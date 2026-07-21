@@ -81,7 +81,7 @@ class MediaEnrichmentService
         }
 
         return [
-            'image' => $cover ?: '/img/sigesc capa.png',
+            'image' => $cover ?: config('ai_content_engine.images.local_fallback', '/img/placeholder-blog.svg'),
             'media' => $media,
         ];
     }
