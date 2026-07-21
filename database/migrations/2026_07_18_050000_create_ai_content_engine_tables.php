@@ -197,7 +197,7 @@ return new class extends Migration
             $table->foreignId('article_id')->nullable()->constrained('ai_articles')->nullOnDelete();
             $table->string('agent', 60)->nullable()->index();
             $table->string('level', 20)->default('info')->index();
-            $table->string('message');
+            $table->text('message');
             $table->json('context')->nullable();
             $table->timestamps();
 
