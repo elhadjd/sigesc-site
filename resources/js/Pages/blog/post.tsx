@@ -6,6 +6,7 @@ import { FormStateProvider } from '@/contexts/stateForm';
 import { UserLoggedProvider } from '@/contexts/loggedUser';
 import FooterComponent from '@/Components/home/Footer';
 import SeoHead, { SeoPayload } from '@/Components/seo/SeoHead';
+import SafeCoverImage from '@/Components/blog/SafeCoverImage';
 import { SIGESC_ADMIN_LOGIN_URL } from '@/services/public/domains';
 import {
     FiClock,
@@ -147,7 +148,7 @@ const CommentItem = ({ comment, onReply, onLike, onEdit, onDelete, level = 0 }: 
             <div className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-100">
                 <div className="flex items-start space-x-3">
                     <img
-                        src={comment.author_avatar || '/img/avatar-placeholder.png'}
+                        src={comment.author_avatar || '/img/avatar-placeholder.svg'}
                         alt={comment.author_name}
                         className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                     />
@@ -664,13 +665,11 @@ const BlogShowPage = ({ auth, local, post, relatedPosts, popularPosts, seo }: Bl
 
                         {/* Imagem Destacada */}
                         <div className="relative mb-12 rounded-3xl overflow-hidden">
-                            <img
-                                src={post.image || '/img/placeholder-blog.jpg'}
+                            <SafeCoverImage
+                                src={post.image}
                                 alt={post.title}
                                 className="w-full h-96 object-cover"
-                                onError={(e) => {
-                                    e.currentTarget.src = '/img/placeholder-blog.jpg';
-                                }}
+                                loading="eager"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         </div>
@@ -723,13 +722,10 @@ const BlogShowPage = ({ auth, local, post, relatedPosts, popularPosts, seo }: Bl
                                                     className="group block"
                                                 >
                                                     <div className="flex items-center space-x-3 rounded-lg p-2 transition-colors hover:bg-white">
-                                                        <img
-                                                            src={relatedPost.image || '/img/placeholder-blog.jpg'}
+                                                        <SafeCoverImage
+                                                            src={relatedPost.image}
                                                             alt={relatedPost.title}
                                                             className="h-16 w-16 rounded-lg object-cover"
-                                                            onError={(e) => {
-                                                                e.currentTarget.src = '/img/placeholder-blog.jpg';
-                                                            }}
                                                         />
                                                         <div className="min-w-0 flex-1">
                                                             <p className="blog-display text-sm font-semibold leading-snug text-slate-900 underline-offset-2 transition-colors group-hover:text-sky-800 group-hover:underline line-clamp-2">

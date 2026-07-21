@@ -148,7 +148,8 @@ class PublisherAgent implements AgentInterface
             'excerpt' => $article->excerpt ?: Str::limit($article->title, 160, ''),
             'meta_description' => $article->meta_description,
             'content' => $this->composePublicHtml($article),
-            'image' => $article->featured_image ?: '/img/sigesc capa.png',
+            'image' => $article->featured_image
+                ?: config('ai_content_engine.images.local_fallback', '/img/placeholder-blog.svg'),
             'media' => $article->images()->get(['role', 'url', 'alt'])->map(fn ($img) => [
                 'type' => 'image',
                 'url' => $img->url,

@@ -26,7 +26,7 @@ class ExpertAnswerReadyMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $subject = $this->postReady && $this->postTitle
-            ? 'Resposta SIGESC + artigo: '.Str::limit((string) $this->postTitle, 60, '…')
+            ? 'Resposta SIGESC + artigo: ' . Str::limit((string) $this->postTitle, 60, '…')
             : 'A sua resposta do Especialista SIGESC está pronta';
 
         return new Envelope(subject: $subject);
@@ -77,16 +77,19 @@ class ExpertAnswerReadyMail extends Mailable implements ShouldQueue
             '/<a\s+([^>]*?)>/i',
             function (array $matches) {
                 $attrs = $matches[1];
-                if (preg_match('/href\s*=\s*([\'"])(.*?)\1/i', $attrs, $href) !== 1) {
+
+                if (preg_match('/\bhref\s*=\s*(["\'])(.*?)\1/i', $attrs, $href) !== 1) {
                     return '<a>';
                 }
 
                 $url = trim($href[2]);
-                if ($url === '' || preg_match('#^(https?:|mailto:|/|#)#i', $url) !== 1) {
+
+                // CORRIGIDO: Use ~ como delimitador em vez de #
+                if ($url === '' || !preg_match('~^(https?://|mailto:|/|#)~i', $url)) {
                     return '<a>';
                 }
 
-                return '<a href="'.e($url).'" target="_blank" rel="noopener noreferrer">';
+                return '<a href="' . e($url) . '" target="_blank" rel="noopener noreferrer">';
             },
             $clean
         ) ?? $clean;

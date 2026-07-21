@@ -96,22 +96,22 @@ export default function BarcodeQrGeneratorIndex({
     const [logoScale, setLogoScale] = useState(22);
     const [error, setError] = useState<string | null>(null);
     const [fields, setFields] = useState<Record<string, string>>({
-        url: 'https://www.sisgesc.net',
+        url: 'https://sisgesc.net',
         text: 'SIGESC — gestão comercial Angola',
-        email: 'contacto@empresa.ao',
+        email: 'comercial.sigesc@gmail.com',
         emailSubject: 'Pedido de informação',
         emailBody: '',
-        phone: '+244900000000',
-        smsPhone: '+244900000000',
+        phone: '+244929147445',
+        smsPhone: '+244929147445',
         smsBody: 'Olá!',
         wifiSsid: 'MinhaRede',
         wifiPassword: '',
         wifiHidden: '0',
         vcardName: 'Nome da Empresa',
         vcardOrg: 'SIGESC',
-        vcardPhone: '+244900000000',
-        vcardEmail: 'contacto@empresa.ao',
-        vcardUrl: 'https://www.sisgesc.net',
+        vcardPhone: '+244929147445',
+        vcardEmail: 'comercial.sigesc@gmail.com',
+        vcardUrl: 'https://sisgesc.net',
     });
 
     const payload = useMemo(() => {
@@ -339,11 +339,10 @@ export default function BarcodeQrGeneratorIndex({
                                             key={k.key}
                                             type="button"
                                             onClick={() => setKind(k.key as 'qr' | 'barcode')}
-                                            className={`rounded-2xl border px-4 py-3 text-left transition ${
-                                                kind === k.key
-                                                    ? 'border-[#0b3d91] bg-[#0b3d91]/5 text-[#0b3d91]'
-                                                    : 'border-slate-200 bg-white hover:border-slate-300'
-                                            }`}
+                                            className={`rounded-2xl border px-4 py-3 text-left transition ${kind === k.key
+                                                ? 'border-[#0b3d91] bg-[#0b3d91]/5 text-[#0b3d91]'
+                                                : 'border-slate-200 bg-white hover:border-slate-300'
+                                                }`}
                                         >
                                             <span className="block font-semibold">{k.label}</span>
                                             <span className="mt-1 block text-xs text-slate-500">

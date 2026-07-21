@@ -1,6 +1,6 @@
 /** Domínios oficiais — site marketing vs painel/admin do produto. */
 export const SIGESC_SITE_HOST = 'sisgesc.net';
-export const SIGESC_SITE_URL = 'https://www.sisgesc.net';
+export const SIGESC_SITE_URL = 'https://sisgesc.net';
 export const SIGESC_ADMIN_URL = 'https://admin.sisgesc.net';
 export const SIGESC_GETTING_STARTED_URL = `${SIGESC_ADMIN_URL}/getting-started`;
 /** Login dos clientes — feito no painel, não neste site. */
