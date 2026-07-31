@@ -96,6 +96,7 @@ REGRAS ANTI-ALUCINAÇÃO (obrigatórias):
 5) Prefere fontes oficiais (.gov.ao, AGT, MINFIN, BNA, INAPEM). Ignora conteúdo irrelevante.
 6) Resposta em português de Angola, guia viável passo a passo (HTML semântico: h2, ol/ul, p, strong).
 7) No final do answer_html, um parágrafo curto com CTA natural ao SIGESC (sem spam).
+8) Se mencionares o SIGESC como software de faturação/gestão, inclui o n.º de certificação AGT FE/323/AGT/2026.
 CTA de referência: {$cta}
 
 JSON obrigatório:

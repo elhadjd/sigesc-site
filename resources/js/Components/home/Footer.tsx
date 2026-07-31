@@ -6,7 +6,13 @@ import { FaDownload, FaUsers } from 'react-icons/fa';
 import { Link } from '@inertiajs/react';
 import { useLoggedUser } from '@/contexts/loggedUser';
 import ChatComponent from '@/ui/chat';
-import { SIGESC_ADMIN_LOGIN_URL, SIGESC_ADMIN_URL, SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
+import {
+    SIGESC_ADMIN_LOGIN_URL,
+    SIGESC_ADMIN_URL,
+    SIGESC_AGT_CERT_LABEL,
+    SIGESC_AGT_CERT_NUMBER,
+    SIGESC_GETTING_STARTED_URL,
+} from '@/services/public/domains';
 
 export default function FooterComponent() {
     const { local } = useLoggedUser();
@@ -30,6 +36,15 @@ export default function FooterComponent() {
                         <p className="text-gray-600 mb-6 leading-relaxed text-sm">
                             Transformando a gestão comercial com tecnologia inovadora e soluções inteligentes para o seu negócio.
                         </p>
+
+                        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-800">
+                                {SIGESC_AGT_CERT_LABEL}
+                            </p>
+                            <p className="mt-0.5 font-mono text-sm font-bold tracking-wider text-[#0b3d91]">
+                                {SIGESC_AGT_CERT_NUMBER}
+                            </p>
+                        </div>
 
                         <div className="space-y-2 mb-6">
                             <div className="flex items-center space-x-3 text-gray-600">
@@ -218,10 +233,14 @@ export default function FooterComponent() {
                         <p className="text-center md:text-left text-gray-500 text-xs mb-3 md:mb-0">
                             &copy; {new Date().getFullYear()} SIGESC. Todos os direitos reservados.
                         </p>
-                        <div className="flex items-center space-x-4 text-gray-500 text-xs">
+                        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-gray-500 text-xs md:justify-end">
                             <span>NIF: 5000659738</span>
-                            <span>•</span>
-                            <span>Feito com ❤️ para o seu negócio</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="font-mono font-semibold text-[#0b3d91]">
+                                {SIGESC_AGT_CERT_NUMBER}
+                            </span>
+                            <span className="hidden sm:inline">•</span>
+                            <span>Feito para o seu negócio</span>
                         </div>
                     </div>
                 </div>
