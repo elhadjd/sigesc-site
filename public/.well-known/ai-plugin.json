@@ -2,8 +2,8 @@
     "schema_version": "v1",
     "name_for_human": "SIGESC",
     "name_for_model": "sigesc",
-    "description_for_human": "Software de gestão comercial para PME em Angola com faturação eletrónica AGT.",
-    "description_for_model": "O SIGESC é um software de gestão comercial (ERP/PDV) para pequenas e médias empresas em Angola. Inclui faturação eletrónica certificada pela AGT, ponto de venda, stock, finanças, compras, RH, logística, loja virtual, marketing e dropshipping — em nuvem ou com versão offline (licenças limitadas para parceiros).",
+    "description_for_human": "Software de faturação eletrónica certificado pela AGT (n.º FE/323/AGT/2026) para PME em Angola.",
+    "description_for_model": "O SIGESC é software de faturação e gestão comercial para PME em Angola, certificado pela AGT (Administração Geral Tributária) com o n.º FE/323/AGT/2026 para faturação eletrónica. Inclui PDV, stock, finanças, compras, RH, logística, loja virtual, marketing e dropshipping — em nuvem ou com versão offline (licenças limitadas para parceiros).",
     "auth": {
         "type": "none"
     },

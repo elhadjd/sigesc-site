@@ -28,13 +28,14 @@ class SeoBuilder
             'site_name' => $siteName,
             'title' => 'SIGESC - Software de Gestão Integrado para Empresas',
             'description' => (string) (config('geo.brand.description') ?: 'O SIGESC é o software de gestão comercial completo para pequenas e médias empresas. Gerencie PDV, estoque, finanças e compras em uma única plataforma.'),
-            'keywords' => 'software de gestão, ERP Angola, faturação eletrónica AGT, PDV, gestão comercial, SIGESC, parceria SIGESC, software offline Angola',
+            'keywords' => $geo->keywordsCsv(),
             'canonical' => $url,
             'og_type' => 'website',
             'og_image' => config('sigesc.logo_url'),
             'robots' => 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
             'twitter_card' => 'summary_large_image',
             'locale' => 'pt_AO',
+            'agt_certification_number' => config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026')),
             'geo_links' => $geo->headLinks(),
             'json_ld' => $coreLd,
         ];
@@ -244,11 +245,13 @@ class SeoBuilder
 
     public function forHome(): array
     {
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+
         return $this->forPage([
-            'title' => 'SIGESC - Software de Gestão Integrado para Empresas em Angola',
-            'description' => 'Software de gestão comercial completo para PME em Angola: PDV, estoque, finanças, dropshipping, faturação eletrónica AGT e mais — numa só plataforma.',
+            'title' => "SIGESC — Software de Faturação Certificado AGT {$agt} em Angola",
+            'description' => "Software de faturação certificado pela AGT em Angola (n.º {$agt}). PDV, stock, finanças, dropshipping e faturação eletrónica para PME — numa só plataforma.",
             'path' => '/',
-            'keywords' => 'SIGESC, software gestão Angola, ERP, PDV, dropshipping Angola, faturação eletrónica AGT, PME, parceria SIGESC',
+            'keywords' => app(GeoManifest::class)->keywordsCsv(),
             'faq' => config('geo.faqs', []),
         ]);
     }
@@ -259,31 +262,24 @@ class SeoBuilder
         $price = config('geo.partnership.price_formatted', '30.000 Kz');
 
         return $this->forPage([
-            'title' => 'Sobre o SIGESC | Software de Gestão Comercial Certificado AGT',
-            'description' => "Conheça o SIGESC: ERP/PDV para PME em Angola, faturação eletrónica AGT {$agt}, módulos de stock, finanças e e-commerce. Parceria {$price}/mês com licenças offline limitadas.",
+            'title' => "Sobre o SIGESC | Software de Faturação Certificado AGT {$agt}",
+            'description' => "Conheça o SIGESC: software de faturação certificado pela AGT em Angola (n.º {$agt}). ERP/PDV, stock, finanças e e-commerce. Parceria {$price}/mês com licenças offline limitadas.",
             'path' => '/sobre',
-            'keywords' => implode(', ', [
-                'sobre SIGESC',
-                'o que é SIGESC',
-                'software gestão Angola',
-                'ERP certificado AGT',
-                'faturação eletrónica Angola',
-                'PDV Angola',
-                'parceria SIGESC',
-                'software offline Angola',
-            ]),
+            'keywords' => app(GeoManifest::class)->keywordsCsv(),
             'faq' => config('geo.faqs', []),
         ]);
     }
 
     public function forSolutions(): array
     {
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+
         return $this->forPage([
-            'title' => 'Soluções SIGESC | Módulos de Gestão Comercial',
-            'description' => 'Conheça as soluções SIGESC: ponto de venda, estoque, RH, finanças, logística, loja virtual, dropshipping e módulos feitos para empresas angolanas.',
+            'title' => "Soluções SIGESC | Faturação Certificada AGT {$agt} e Módulos",
+            'description' => "Soluções SIGESC com faturação eletrónica certificada AGT ({$agt}): PDV, stock, RH, finanças, logística, loja virtual e dropshipping para empresas em Angola.",
             'path' => '/solutions',
-            'keywords' => 'soluções SIGESC, módulos ERP, PDV Angola, gestão de estoque, dropshipping Angola, loja virtual',
-            'faq' => array_slice(config('geo.faqs', []), 0, 3),
+            'keywords' => app(GeoManifest::class)->keywordsCsv(),
+            'faq' => array_slice(config('geo.faqs', []), 0, 4),
         ]);
     }
 
