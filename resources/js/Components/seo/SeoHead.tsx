@@ -10,6 +10,7 @@ export type SeoPayload = {
     og_image?: string;
     robots?: string;
     twitter_card?: string;
+    agt_certification_number?: string;
     geo_links?: Array<{ rel?: string; href?: string; type?: string; title?: string }>;
     json_ld?: Array<Record<string, unknown>>;
     article?: {
@@ -62,6 +63,10 @@ export default function SeoHead({ seo, fallbackTitle, fallbackDescription }: Pro
             {seo?.og_image && <meta name="twitter:image" content={seo.og_image} />}
             <meta name="geo.region" content="AO" />
             <meta name="language" content="pt-AO" />
+            <meta
+                name="agt:certification"
+                content={seo?.agt_certification_number || 'FE/323/AGT/2026'}
+            />
             {(seo?.geo_links || []).map((link) => (
                 <link
                     key={`${link.rel}-${link.href}`}
