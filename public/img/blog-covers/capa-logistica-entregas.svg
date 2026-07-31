@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="Logística e Entregas em Luanda">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3A2415"/>
+      <stop offset="55%" stop-color="#A65B2A"/>
+      <stop offset="100%" stop-color="#3A2415"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="78%" cy="28%" r="45%">
+      <stop offset="0%" stop-color="#F6E3CF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#3A2415" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <circle cx="1280" cy="220" r="198" fill="url(#glow)"/>
+  <rect x="80" y="72" width="120" height="8" rx="4" fill="#F6E3CF"/>
+  <text x="80" y="130" fill="#F6E3CF" font-family="Arial, Helvetica, sans-serif" font-size="28" letter-spacing="4" font-weight="700">SIGESC</text>
+  <text x="80" y="178" fill="#FFFFFF" fill-opacity="0.78" font-family="Arial, Helvetica, sans-serif" font-size="22" letter-spacing="1">logística entregas</text>
+  <text x="80" y="236" fill="#FFFFFF" font-family="Georgia, 'Times New Roman', serif" font-size="46" font-weight="700">Logística e Entregas em Luanda</text>
+  
+  
+  <rect x="138" y="760" width="220" height="6" rx="3" fill="#F6E3CF"/>
+  <text x="80" y="820" fill="#FFFFFF" fill-opacity="0.7" font-family="Arial, Helvetica, sans-serif" font-size="20">sisgesc.net · Gestão comercial para Angola</text>
+</svg>
