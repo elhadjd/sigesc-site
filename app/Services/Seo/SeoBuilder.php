@@ -34,6 +34,14 @@ class SeoBuilder
                     'name' => $siteName,
                     'url' => $url,
                     'logo' => config('sigesc.logo_url'),
+                    'identifier' => [
+                        '@type' => 'PropertyValue',
+                        'name' => 'Certificação AGT',
+                        'value' => config('sigesc.agt_certification.number', 'FE/323/AGT/2026'),
+                    ],
+                    'description' => 'Software de gestão comercial certificado pela AGT (n.º '
+                        .config('sigesc.agt_certification.number', 'FE/323/AGT/2026')
+                        .') para faturação eletrónica em Angola.',
                 ],
             ],
         ], $overrides);

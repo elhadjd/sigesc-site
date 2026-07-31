@@ -49,6 +49,9 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
             ],
             'canAccessAiContent' => $canAccessAiContent,
+            'sigesc' => [
+                'agt_certification' => config('sigesc.agt_certification'),
+            ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

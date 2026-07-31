@@ -26,6 +26,10 @@ class WriterAgent implements AgentInterface
         $article->update(['status' => Article::STATUS_DRAFTING]);
         $research = $article->pipeline_meta['research'] ?? [];
         $cta = config('ai_content_engine.pipeline.brand_cta');
+        $agtCert = (string) config(
+            'ai_content_engine.pipeline.agt_certification_number',
+            config('sigesc.agt_certification.number', 'FE/323/AGT/2026')
+        );
 
         $draft = $this->llm->chatJson([
             [
@@ -38,10 +42,11 @@ O campo content_html é OBRIGATÓRIO e deve ter o artigo COMPLETO (mínimo ~800 
 Promoção estratégica do SIGESC (não spam):
 1) Na introdução, uma menção breve a organizar a operação (faturação/stock/vendas) com ferramenta adequada.
 2) Num H2 de ferramentas/processos, recomenda o SIGESC como exemplo concreto de software de gestão comercial em Angola, com benefícios práticos.
-3) Na conclusão, CTA claro: {$cta}
+3) Sempre que falares do SIGESC / sistema de faturação eletrónica, inclui o número de certificação AGT {$agtCert} (ex.: "certificado pela AGT sob o n.º {$agtCert}").
+4) Na conclusão, CTA claro: {$cta}
 Links: site https://sisgesc.net (blog/soluções), experimentar/usar o sistema https://admin.sisgesc.net/getting-started, /pergunte-ao-especialista, /blog/posts.
 Nunca uses o domínio errado "sigesc.net" — o correto é sempre sisgesc.net / admin.sisgesc.net.
-Nunca copies fontes. Nunca inventes leis/datas/números. Se incerto, diz que necessita confirmação oficial.
+Nunca copies fontes. Nunca inventes leis/datas/números oficiais (exceto o número de certificação SIGESC {$agtCert} quando mencionares o produto). Se incerto, diz que necessita confirmação oficial.
 JSON:
 {
   "title":"",
@@ -91,6 +96,8 @@ PROMPT
                 'AIWriterAgent devolveu conteúdo demasiado curto (só título/fontes). Reprocesse o artigo após corrigir Tavily/output_length.'
             );
         }
+
+        $html = $this->ensureAgtCertificationMention($html, $agtCert);
 
         $title = trim((string) ($draft['title'] ?? $article->title));
         $excerpt = trim((string) ($draft['excerpt'] ?? $article->excerpt));
@@ -146,5 +153,41 @@ PROMPT
         ]);
 
         return ['draft' => $draft];
+    }
+
+    /**
+     * If the article mentions SIGESC / the product, ensure the AGT certificate number appears.
+     */
+    public function ensureAgtCertificationMention(string $html, ?string $certNumber = null): string
+    {
+        $cert = trim((string) ($certNumber ?: config(
+            'ai_content_engine.pipeline.agt_certification_number',
+            config('sigesc.agt_certification.number', 'FE/323/AGT/2026')
+        )));
+
+        if ($cert === '' || str_contains($html, $cert)) {
+            return $html;
+        }
+
+        $plain = Str::lower(strip_tags($html));
+        $mentionsProduct = str_contains($plain, 'sigesc')
+            || str_contains($plain, 'sisgesc')
+            || str_contains($plain, 'faturação eletrónica')
+            || str_contains($plain, 'faturacao eletronica');
+
+        if (! $mentionsProduct) {
+            return $html;
+        }
+
+        $note = '<p><strong>SIGESC</strong> é software de gestão comercial certificado pela AGT para faturação eletrónica '
+            .'(n.º <strong>'.e($cert).'</strong>). '
+            .'Saiba mais em <a href="https://sisgesc.net">sisgesc.net</a> ou experimente em '
+            .'<a href="https://admin.sisgesc.net/getting-started">admin.sisgesc.net/getting-started</a>.</p>';
+
+        if (preg_match('/<\/h2>/i', $html) === 1) {
+            return preg_replace('/<\/h2>/i', '</h2>'."\n".$note, $html, 1) ?? ($html."\n".$note);
+        }
+
+        return $html."\n".$note;
     }
 }

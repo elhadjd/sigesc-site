@@ -273,7 +273,8 @@ return [
         'sync_to_blog_posts' => (bool) env('AI_CONTENT_SYNC_TO_POSTS', true),
         'locale' => 'pt_AO',
         'language' => 'Português de Angola',
-        'brand_cta' => 'Conheça o SIGESC — software de gestão comercial (faturação, stock, PDV e vendas) feito para empresas em Angola. Para experimentar ou aceder ao painel: https://admin.sisgesc.net/getting-started. Site: https://sisgesc.net',
+        'brand_cta' => 'Conheça o SIGESC — software de gestão comercial certificado pela AGT (n.º FE/323/AGT/2026) para faturação eletrónica, com stock, PDV e vendas para empresas em Angola. Experimente: https://admin.sisgesc.net/getting-started · Site: https://sisgesc.net',
+        'agt_certification_number' => env('SIGESC_AGT_CERT_NUMBER', 'FE/323/AGT/2026'),
     ],
 
     'author' => [
