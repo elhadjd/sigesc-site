@@ -19,6 +19,7 @@ use App\Http\Controllers\public\ChatController;
 use App\Http\Controllers\public\BarcodeQrGeneratorController;
 use App\Http\Controllers\public\InvoiceGeneratorController;
 use App\Http\Controllers\public\InvoiceTemplatesController;
+use App\Http\Controllers\public\PartnershipController;
 use App\Http\Controllers\public\RssFeedController;
 use App\Http\Controllers\public\SitemapController;
 use App\Http\Controllers\public\clientDepoimentsController;
@@ -63,6 +64,29 @@ Route::get('/gerador-de-fatura', [InvoiceGeneratorController::class, 'index'])
 
 Route::get('/gerador-de-codigo-barras', [BarcodeQrGeneratorController::class, 'index'])
     ->name('barcode-qr-generator.index');
+
+Route::get('/parceria', [PartnershipController::class, 'index'])
+    ->name('partnership.index');
+
+Route::get('/llms.txt', function () {
+    $path = public_path('llms.txt');
+    abort_unless(is_file($path), 404);
+
+    return response((string) file_get_contents($path), 200, [
+        'Content-Type' => 'text/plain; charset=UTF-8',
+        'Cache-Control' => 'public, max-age=3600',
+    ]);
+})->name('llms.txt');
+
+Route::get('/ai.txt', function () {
+    $path = public_path('ai.txt');
+    abort_unless(is_file($path), 404);
+
+    return response((string) file_get_contents($path), 200, [
+        'Content-Type' => 'text/plain; charset=UTF-8',
+        'Cache-Control' => 'public, max-age=3600',
+    ]);
+})->name('ai.txt');
 
 Route::prefix('modelos-de-fatura')->name('invoice-templates.')->group(function () {
     Route::get('', [InvoiceTemplatesController::class, 'index'])->name('index');
