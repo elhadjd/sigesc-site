@@ -291,6 +291,115 @@ class SeoBuilder
         ]);
     }
 
+    public function forPartnership(): array
+    {
+        $url = route('partnership.index', absolute: true);
+        $cfg = config('sigesc.partnership', []);
+        $price = (int) ($cfg['monthly_price'] ?? 30000);
+        $priceLabel = number_format($price, 0, ',', '.').' '.($cfg['currency_label'] ?? 'Kz');
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+
+        $faqs = [
+            [
+                'question' => 'Quanto custa a parceria SIGESC?',
+                'answer' => "O plano de parceria com o sistema SIGESC custa {$priceLabel} por mês. Inclui acesso ao programa de parceiros e suporte comercial para revenda e implantação junto de PME em Angola.",
+            ],
+            [
+                'question' => 'A versão offline tem licenças limitadas?',
+                'answer' => 'Sim. As licenças da versão offline do SIGESC são limitadas. Os parceiros aprovados recebem cupos conforme disponibilidade e território — contacte a equipa para reservar a sua licença offline.',
+            ],
+            [
+                'question' => 'O que um parceiro SIGESC pode oferecer aos clientes?',
+                'answer' => 'Pode apresentar, implementar e acompanhar o software de gestão comercial SIGESC: faturação eletrónica certificada AGT ('.$agt.'), PDV, stock, finanças, RH e módulos relacionados para empresas angolanas.',
+            ],
+            [
+                'question' => 'Como me candidatar a parceiro SIGESC?',
+                'answer' => 'Aceda a sisgesc.net/parceria, reveja o plano mensal e envie o pedido por contacto ou registo de conta Parceiro. A equipa comercial valida disponibilidade de licenças offline e território.',
+            ],
+            [
+                'question' => 'A parceria cobre Luanda e outras províncias?',
+                'answer' => 'Sim. O programa de parceria SIGESC está aberto a consultores, contabilistas e revendedores em Luanda e no resto de Angola, sujeito a licenças offline disponíveis.',
+            ],
+        ];
+
+        return $this->forPage([
+            'title' => 'Parceria SIGESC | '.$priceLabel.'/mês · Licenças Offline Limitadas',
+            'description' => "Torne-se parceiro SIGESC por {$priceLabel}/mês. Revenda e implemente software de gestão comercial certificado AGT ({$agt}) em Angola. Licenças limitadas para a versão offline — candidate-se já.",
+            'path' => '/parceria',
+            'keywords' => implode(', ', [
+                'parceria SIGESC',
+                'parceiro SIGESC Angola',
+                'revenda software gestão Angola',
+                'licença offline SIGESC',
+                'software gestão offline Angola',
+                'programa de parceiros ERP Angola',
+                'revendedor faturação eletrónica AGT',
+                'parceiro PDV Angola',
+                'licença SIGESC mensal 30000',
+                'implementador SIGESC Luanda',
+                'franchise software gestão Angola',
+                'distribuidor ERP Angola',
+                'SIGESC versão offline',
+                'parceria software PME Angola',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'Product',
+                    'name' => 'Programa de Parceria SIGESC',
+                    'description' => "Parceria mensal com o sistema SIGESC para revenda e implantação em Angola, incluindo acesso a licenças limitadas da versão offline. Certificação AGT {$agt}.",
+                    'brand' => [
+                        '@type' => 'Brand',
+                        'name' => 'SIGESC',
+                    ],
+                    'category' => 'Business partnership / software licensing',
+                    'areaServed' => [
+                        '@type' => 'Country',
+                        'name' => 'Angola',
+                    ],
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'url' => $url,
+                        'price' => (string) $price,
+                        'priceCurrency' => $cfg['currency'] ?? 'AOA',
+                        'availability' => 'https://schema.org/LimitedAvailability',
+                        'priceValidUntil' => now()->addYear()->format('Y-m-d'),
+                        'eligibleRegion' => 'AO',
+                        'description' => 'Mensalidade de parceria com licenças limitadas para versão offline',
+                        'priceSpecification' => [
+                            '@type' => 'UnitPriceSpecification',
+                            'price' => (string) $price,
+                            'priceCurrency' => $cfg['currency'] ?? 'AOA',
+                            'billingDuration' => $cfg['billing_period'] ?? 'P1M',
+                            'unitText' => 'MONTH',
+                        ],
+                    ],
+                ],
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'SoftwareApplication',
+                    'name' => 'SIGESC Offline — Licença de Parceiro',
+                    'applicationCategory' => 'BusinessApplication',
+                    'operatingSystem' => 'Windows, Linux',
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'price' => (string) $price,
+                        'priceCurrency' => $cfg['currency'] ?? 'AOA',
+                        'availability' => 'https://schema.org/LimitedAvailability',
+                        'url' => $url,
+                    ],
+                    'provider' => [
+                        '@type' => 'Organization',
+                        'name' => 'SIGESC',
+                        'url' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/'),
+                    ],
+                    'inLanguage' => 'pt-AO',
+                ],
+            ],
+        ]);
+    }
+
     public function forContact(): array
     {
         return $this->forPage([

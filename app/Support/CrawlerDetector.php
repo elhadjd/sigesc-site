@@ -45,6 +45,21 @@ class CrawlerDetector
             'mj12bot',
             'petalbot',
             'bytespider',
+            // Generative Engine Optimization (GEO) — AI answer engines
+            'gptbot',
+            'chatgpt-user',
+            'oai-searchbot',
+            'claudebot',
+            'anthropic-ai',
+            'perplexitybot',
+            'google-extended',
+            'googleother',
+            'amazonbot',
+            'cohere-ai',
+            'meta-externalagent',
+            'youbot',
+            'diffbot',
+            'ccbot',
         ];
 
         foreach ($signatures as $signature) {

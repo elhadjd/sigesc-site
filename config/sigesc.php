@@ -34,4 +34,20 @@ return [
         'year' => 2026,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Programa de Parceria (revenda / instalação offline)
+    |--------------------------------------------------------------------------
+    */
+    'partnership' => [
+        'monthly_price' => (int) env('SIGESC_PARTNER_MONTHLY_PRICE', 30000),
+        'currency' => 'AOA',
+        'currency_label' => 'Kz',
+        'billing_period' => 'P1M',
+        'offline_licenses_limited' => true,
+        'offline_licenses_note' => 'Licenças limitadas para a versão offline do SIGESC',
+        'contact_path' => '/contact',
+        'register_path' => '/auth/register',
+    ],
+
 ];
