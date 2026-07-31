@@ -1,0 +1,6 @@
+Contact: mailto:security@sisgesc.net
+Contact: https://sisgesc.net/contact
+Expires: 2027-07-31T00:00:00Z
+Preferred-Languages: pt, en
+Canonical: https://sisgesc.net/.well-known/security.txt
+Policy: https://sisgesc.net/resources/privacy

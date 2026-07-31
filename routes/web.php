@@ -19,6 +19,7 @@ use App\Http\Controllers\public\ChatController;
 use App\Http\Controllers\public\BarcodeQrGeneratorController;
 use App\Http\Controllers\public\InvoiceGeneratorController;
 use App\Http\Controllers\public\InvoiceTemplatesController;
+use App\Http\Controllers\public\GeoDiscoveryController;
 use App\Http\Controllers\public\PartnershipController;
 use App\Http\Controllers\public\RssFeedController;
 use App\Http\Controllers\public\SitemapController;
@@ -68,25 +69,16 @@ Route::get('/gerador-de-codigo-barras', [BarcodeQrGeneratorController::class, 'i
 Route::get('/parceria', [PartnershipController::class, 'index'])
     ->name('partnership.index');
 
-Route::get('/llms.txt', function () {
-    $path = public_path('llms.txt');
-    abort_unless(is_file($path), 404);
+Route::get('/sobre', [GeoDiscoveryController::class, 'about'])
+    ->name('about.index');
 
-    return response((string) file_get_contents($path), 200, [
-        'Content-Type' => 'text/plain; charset=UTF-8',
-        'Cache-Control' => 'public, max-age=3600',
-    ]);
-})->name('llms.txt');
-
-Route::get('/ai.txt', function () {
-    $path = public_path('ai.txt');
-    abort_unless(is_file($path), 404);
-
-    return response((string) file_get_contents($path), 200, [
-        'Content-Type' => 'text/plain; charset=UTF-8',
-        'Cache-Control' => 'public, max-age=3600',
-    ]);
-})->name('ai.txt');
+Route::get('/llms.txt', [GeoDiscoveryController::class, 'file'])->defaults('name', 'llms.txt')->name('llms.txt');
+Route::get('/llms-full.txt', [GeoDiscoveryController::class, 'file'])->defaults('name', 'llms-full.txt')->name('llms-full.txt');
+Route::get('/ai.txt', [GeoDiscoveryController::class, 'file'])->defaults('name', 'ai.txt')->name('ai.txt');
+Route::get('/agents.md', [GeoDiscoveryController::class, 'file'])->defaults('name', 'agents.md')->name('agents.md');
+Route::get('/humans.txt', [GeoDiscoveryController::class, 'file'])->defaults('name', 'humans.txt')->name('humans.txt');
+Route::get('/.well-known/security.txt', [GeoDiscoveryController::class, 'wellKnown'])->defaults('file', 'security.txt')->name('well-known.security');
+Route::get('/.well-known/ai-plugin.json', [GeoDiscoveryController::class, 'wellKnown'])->defaults('file', 'ai-plugin.json')->name('well-known.ai-plugin');
 
 Route::prefix('modelos-de-fatura')->name('invoice-templates.')->group(function () {
     Route::get('', [InvoiceTemplatesController::class, 'index'])->name('index');

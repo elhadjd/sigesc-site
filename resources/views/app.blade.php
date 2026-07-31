@@ -20,6 +20,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="{{ config('sigesc.favicon_url') }}" type="image/x-icon">
     <link rel="alternate" type="application/rss+xml" title="Blog SIGESC" href="{{ url('/feed.xml') }}">
+    <link rel="alternate" type="text/plain" title="LLMs" href="{{ url('/llms.txt') }}">
+    <link rel="alternate" type="text/plain" title="LLMs full" href="{{ url('/llms-full.txt') }}">
+    <link rel="alternate" type="text/plain" title="AI policy" href="{{ url('/ai.txt') }}">
+    <link rel="alternate" type="text/markdown" title="Agents" href="{{ url('/agents.md') }}">
+    <link rel="describedby" href="{{ url('/llms.txt') }}">
+    <meta name="ai-purpose" content="business-software-angola-agt-certified">
+    <meta name="geo.region" content="AO">
+    <meta name="geo.placename" content="Luanda, Angola">
+    <meta name="language" content="pt-AO">
 
     {{-- Meta/OG/JSON-LD no HTML inicial (antes de qualquer JS) --}}
     @include('partials.seo-meta')

@@ -107,8 +107,12 @@ workbox-*.js
 # Arquivos específicos
 *.txt
 !public/llms.txt
+!public/llms-full.txt
 !public/ai.txt
+!public/humans.txt
 !public/robots.txt
+!public/agents.md
+!public/.well-known/
 *.ico
 *.webmanifest
 public/hot

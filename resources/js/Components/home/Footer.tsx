@@ -142,6 +142,11 @@ export default function FooterComponent() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/sobre" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                    <span className="text-sm">Sobre o SIGESC</span>
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/payments" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <BsCash className="text-blue-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm">Pagamentos</span>

@@ -39,6 +39,9 @@ class SeoBuilderTest extends TestCase
         $this->assertStringContainsString('AGT', $seo['title']);
         $this->assertSame('article', $seo['og_type']);
         $this->assertNotEmpty($seo['json_ld']);
-        $this->assertSame('BlogPosting', $seo['json_ld'][0]['@type']);
+        $types = collect($seo['json_ld'])->pluck('@type')->all();
+        $this->assertContains('BlogPosting', $types);
+        $this->assertContains('Organization', $types);
+        $this->assertContains('SoftwareApplication', $types);
     }
 }

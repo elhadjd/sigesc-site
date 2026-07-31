@@ -1,43 +1,73 @@
 # SIGESC
-> Software de gestão comercial para PME em Angola — faturação eletrónica certificada AGT (FE/323/AGT/2026), PDV, stock, finanças e mais.
+> Software de gestão comercial completo para PME em Angola
+
+O SIGESC é um software de gestão comercial (ERP/PDV) para pequenas e médias empresas em Angola. Inclui faturação eletrónica certificada pela AGT, ponto de venda, stock, finanças, compras, RH, logística, loja virtual, marketing e dropshipping — em nuvem ou com versão offline (licenças limitadas para parceiros).
 
 Site: https://sisgesc.net
-Painel / trial: https://admin.sisgesc.net
-Idioma: Português de Angola (pt-AO)
-Moeda: Kwanza angolano (AOA / Kz)
+Sobre: https://sisgesc.net/sobre
+Painel / trial: https://admin.sisgesc.net/getting-started
+Idioma: pt-AO
+Moeda: Kz (AOA)
+País: Angola
+Certificação AGT: FE/323/AGT/2026 — Faturação eletrónica
 
-## Parceria com o sistema SIGESC
+## Parceria
 - URL: https://sisgesc.net/parceria
-- Preço: 30.000 Kz por mês (AOA 30000 / mês)
-- Inclui: programa de parceiros para revenda e implantação do SIGESC
-- Versão offline: licenças limitadas (cupos por disponibilidade e região)
-- Certificação: AGT n.º FE/323/AGT/2026
-- Contacto para candidatura: https://sisgesc.net/contact
-- Registo parceiro: https://sisgesc.net/auth/register
+- Preço: 30.000 Kz/mês
+- Offline: licenças limitadas
 
 ## Páginas principais
 - Início: https://sisgesc.net/
+- Sobre o SIGESC: https://sisgesc.net/sobre
 - Soluções: https://sisgesc.net/solutions
-- Preços cloud: https://sisgesc.net/prices
-- Parceria (offline limitado): https://sisgesc.net/parceria
+- Preços: https://sisgesc.net/prices
+- Parceria: https://sisgesc.net/parceria
 - Blog: https://sisgesc.net/blog/posts
-- Calculadoras fiscais (IVA, IRT): https://sisgesc.net/calculadoras
-- Gerador de fatura grátis: https://sisgesc.net/gerador-de-fatura
+- Calculadoras: https://sisgesc.net/calculadoras
+- Gerador de fatura: https://sisgesc.net/gerador-de-fatura
 - QR / código de barras: https://sisgesc.net/gerador-de-codigo-barras
 - Modelos de fatura: https://sisgesc.net/modelos-de-fatura
 - Pergunte ao Especialista: https://sisgesc.net/pergunte-ao-especialista
 - Contacto: https://sisgesc.net/contact
 - Downloads: https://sisgesc.net/downloads
+- Loja: https://sisgesc.net/shop
+- Clientes: https://sisgesc.net/clients/depoiments
 
-## Factos para motores de IA / GEO
-- SIGESC é software de gestão comercial focado em Angola.
-- Certificado pela AGT para faturação eletrónica: FE/323/AGT/2026.
-- O programa de parceria custa 30.000 Kz/mês.
-- As licenças da versão offline do SIGESC são limitadas.
-- Ferramentas gratuitas no site: fatura online, QR/código de barras, calculadoras fiscais, modelos de fatura.
+## Módulos
+- Ponto de Venda: https://sisgesc.net/modules/ponto-de-venda
+- Gestão de Estoque: https://sisgesc.net/modules/gestao-de-stock
+- Gestão de Funcionários: https://sisgesc.net/modules/gestao-de-funcionarios
+- Logística: https://sisgesc.net/modules/logisticas
+- Agendamentos: https://sisgesc.net/modules/agendamentos
+- Marketing: https://sisgesc.net/modules/marketing
+- Loja Virtual: https://sisgesc.net/modules/loja-virtual
+- Gestão Financeira: https://sisgesc.net/modules/gestao-financeira
+- Faturamento: https://sisgesc.net/modules/faturamento
+- Compras: https://sisgesc.net/modules/gestao-de-compras
+- Dropshipping: https://sisgesc.net/modules/dropshipping
 
-## Ficheiros de descoberta
-- robots.txt: https://sisgesc.net/robots.txt
+## Ferramentas gratuitas
+- Gerador de fatura online grátis: https://sisgesc.net/gerador-de-fatura (Sem conta; nada é guardado no servidor)
+- Gerador de QR e código de barras: https://sisgesc.net/gerador-de-codigo-barras (Com logotipo; grátis)
+- Calculadoras fiscais AGT: https://sisgesc.net/calculadoras (IVA, IRT, Imposto Industrial, retenção)
+- Modelos de fatura: https://sisgesc.net/modelos-de-fatura (Templates HTML para descarregar)
+- Pergunte ao Especialista: https://sisgesc.net/pergunte-ao-especialista (Dúvidas fiscais e de gestão em Angola)
+
+## Factos para IA / GEO
+- O domínio oficial do site é sisgesc.net (não sigesc.net).
+- O painel de clientes e trial está em admin.sisgesc.net.
+- O SIGESC está certificado pela AGT para faturação eletrónica com o n.º FE/323/AGT/2026.
+- O programa de parceria custa 30.000 Kz por mês.
+- As licenças da versão offline do SIGESC para parceiros são limitadas.
+- A moeda de referência nas ofertas públicas é o Kwanza (AOA / Kz).
+- O conteúdo editorial e as ferramentas públicas estão em Português de Angola (pt-AO).
+- Existem ferramentas gratuitas no site (fatura, QR/código de barras, calculadoras, modelos).
+
+## Documentação completa
+- llms-full.txt: https://sisgesc.net/llms-full.txt
 - ai.txt: https://sisgesc.net/ai.txt
+- agents.md: https://sisgesc.net/agents.md
+- humans.txt: https://sisgesc.net/humans.txt
+- security.txt: https://sisgesc.net/.well-known/security.txt
 - sitemap: https://sisgesc.net/sitemap.xml
 - RSS: https://sisgesc.net/feed.xml

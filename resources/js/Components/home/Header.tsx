@@ -52,6 +52,7 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
         { href: route('shop', { page: '' }), icon: <BsShop className="text-base" />, text: 'Loja' },
         { href: '/prices', icon: <BsTag className="text-base" />, text: 'Preços' },
         { href: '/parceria', icon: <BsBuilding className="text-base" />, text: 'Parceria' },
+        { href: '/sobre', icon: <BsQuestionCircle className="text-base" />, text: 'Sobre' },
         { href: '/clients/depoiments', icon: <BsPerson className="text-base" />, text: 'Clientes' },
         { href: '/blog/posts', icon: <FaRegNewspaper className="text-base" />, text: 'Blog' },
         { href: '/calculadoras', icon: <BsCalculator className="text-base" />, text: 'Calculadoras' },

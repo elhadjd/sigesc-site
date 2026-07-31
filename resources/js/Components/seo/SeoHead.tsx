@@ -10,6 +10,8 @@ export type SeoPayload = {
     og_image?: string;
     robots?: string;
     twitter_card?: string;
+    geo_links?: Array<{ rel?: string; href?: string; type?: string; title?: string }>;
+    json_ld?: Array<Record<string, unknown>>;
     article?: {
         published_time?: string;
         modified_time?: string;
@@ -58,6 +60,22 @@ export default function SeoHead({ seo, fallbackTitle, fallbackDescription }: Pro
             <meta name="twitter:title" content={title} />
             {description && <meta name="twitter:description" content={description} />}
             {seo?.og_image && <meta name="twitter:image" content={seo.og_image} />}
+            <meta name="geo.region" content="AO" />
+            <meta name="language" content="pt-AO" />
+            {(seo?.geo_links || []).map((link) => (
+                <link
+                    key={`${link.rel}-${link.href}`}
+                    rel={link.rel || 'alternate'}
+                    href={link.href}
+                    type={link.type}
+                    title={link.title}
+                />
+            ))}
+            {(seo?.json_ld || []).map((block, index) => (
+                <script key={index} type="application/ld+json">
+                    {JSON.stringify(block)}
+                </script>
+            ))}
         </Helmet>
     );
 }

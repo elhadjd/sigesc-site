@@ -21,6 +21,14 @@
     <meta name="twitter:title" content="{{ $seo['title'] }}">
     <meta name="twitter:description" content="{{ $seo['description'] }}">
     <meta name="twitter:image" content="{{ $seo['og_image'] }}">
+    <meta name="geo.region" content="AO">
+    <meta name="language" content="pt-AO">
+    @php $baseGeo = rtrim(config('app.url') ?: config('sigesc.site_url'), '/'); @endphp
+    <link rel="alternate" type="text/plain" title="LLMs" href="{{ $baseGeo }}/llms.txt">
+    <link rel="alternate" type="text/plain" title="LLMs full" href="{{ $baseGeo }}/llms-full.txt">
+    <link rel="alternate" type="text/plain" title="AI policy" href="{{ $baseGeo }}/ai.txt">
+    <link rel="alternate" type="text/markdown" title="Agents" href="{{ $baseGeo }}/agents.md">
+    <link rel="describedby" href="{{ $baseGeo }}/llms.txt">
     @foreach ($seo['json_ld'] ?? [] as $block)
     <script type="application/ld+json">{!! json_encode($block, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT) !!}</script>
     @endforeach
@@ -72,6 +80,7 @@
                 <a href="{{ $base }}/solutions">Soluções</a>
                 <a href="{{ $base }}/prices">Preços</a>
                 <a href="{{ $base }}/parceria">Parceria</a>
+                <a href="{{ $base }}/sobre">Sobre</a>
                 <a href="{{ $base }}/blog/posts">Blog</a>
                 <a href="{{ $base }}/calculadoras">Calculadoras</a>
                 <a href="{{ $base }}/gerador-de-fatura">Gerador de fatura</a>

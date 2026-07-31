@@ -40,6 +40,7 @@ class CrawlerDetector
             'whatsapp',
             'telegrambot',
             'applebot',
+            'applebot-extended',
             'semrushbot',
             'ahrefsbot',
             'mj12bot',

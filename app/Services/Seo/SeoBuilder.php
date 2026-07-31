@@ -15,36 +15,37 @@ class SeoBuilder
     {
         $siteName = 'SIGESC';
         $url = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
+        $geo = app(GeoManifest::class);
+        $coreLd = $geo->coreJsonLd();
 
-        return array_replace_recursive([
+        $overrideJsonLd = null;
+        if (array_key_exists('json_ld', $overrides)) {
+            $overrideJsonLd = $overrides['json_ld'];
+            unset($overrides['json_ld']);
+        }
+
+        $base = [
             'site_name' => $siteName,
             'title' => 'SIGESC - Software de Gestão Integrado para Empresas',
-            'description' => 'O SIGESC é o software de gestão comercial completo para pequenas e médias empresas. Gerencie PDV, estoque, finanças e compras em uma única plataforma.',
-            'keywords' => 'software de gestão, ERP Angola, faturação eletrónica AGT, PDV, gestão comercial, SIGESC',
+            'description' => (string) (config('geo.brand.description') ?: 'O SIGESC é o software de gestão comercial completo para pequenas e médias empresas. Gerencie PDV, estoque, finanças e compras em uma única plataforma.'),
+            'keywords' => 'software de gestão, ERP Angola, faturação eletrónica AGT, PDV, gestão comercial, SIGESC, parceria SIGESC, software offline Angola',
             'canonical' => $url,
             'og_type' => 'website',
             'og_image' => config('sigesc.logo_url'),
             'robots' => 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
             'twitter_card' => 'summary_large_image',
             'locale' => 'pt_AO',
-            'json_ld' => [
-                [
-                    '@context' => 'https://schema.org',
-                    '@type' => 'Organization',
-                    'name' => $siteName,
-                    'url' => $url,
-                    'logo' => config('sigesc.logo_url'),
-                    'identifier' => [
-                        '@type' => 'PropertyValue',
-                        'name' => 'Certificação AGT',
-                        'value' => config('sigesc.agt_certification.number', 'FE/323/AGT/2026'),
-                    ],
-                    'description' => 'Software de gestão comercial certificado pela AGT (n.º '
-                        .config('sigesc.agt_certification.number', 'FE/323/AGT/2026')
-                        .') para faturação eletrónica em Angola.',
-                ],
-            ],
-        ], $overrides);
+            'geo_links' => $geo->headLinks(),
+            'json_ld' => $coreLd,
+        ];
+
+        $merged = array_replace_recursive($base, $overrides);
+
+        if (is_array($overrideJsonLd)) {
+            $merged['json_ld'] = array_values(array_merge($coreLd, $overrideJsonLd));
+        }
+
+        return $merged;
     }
 
     /**
@@ -247,7 +248,31 @@ class SeoBuilder
             'title' => 'SIGESC - Software de Gestão Integrado para Empresas em Angola',
             'description' => 'Software de gestão comercial completo para PME em Angola: PDV, estoque, finanças, dropshipping, faturação eletrónica AGT e mais — numa só plataforma.',
             'path' => '/',
-            'keywords' => 'SIGESC, software gestão Angola, ERP, PDV, dropshipping Angola, faturação eletrónica AGT, PME',
+            'keywords' => 'SIGESC, software gestão Angola, ERP, PDV, dropshipping Angola, faturação eletrónica AGT, PME, parceria SIGESC',
+            'faq' => config('geo.faqs', []),
+        ]);
+    }
+
+    public function forAbout(): array
+    {
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $price = config('geo.partnership.price_formatted', '30.000 Kz');
+
+        return $this->forPage([
+            'title' => 'Sobre o SIGESC | Software de Gestão Comercial Certificado AGT',
+            'description' => "Conheça o SIGESC: ERP/PDV para PME em Angola, faturação eletrónica AGT {$agt}, módulos de stock, finanças e e-commerce. Parceria {$price}/mês com licenças offline limitadas.",
+            'path' => '/sobre',
+            'keywords' => implode(', ', [
+                'sobre SIGESC',
+                'o que é SIGESC',
+                'software gestão Angola',
+                'ERP certificado AGT',
+                'faturação eletrónica Angola',
+                'PDV Angola',
+                'parceria SIGESC',
+                'software offline Angola',
+            ]),
+            'faq' => config('geo.faqs', []),
         ]);
     }
 
@@ -258,6 +283,7 @@ class SeoBuilder
             'description' => 'Conheça as soluções SIGESC: ponto de venda, estoque, RH, finanças, logística, loja virtual, dropshipping e módulos feitos para empresas angolanas.',
             'path' => '/solutions',
             'keywords' => 'soluções SIGESC, módulos ERP, PDV Angola, gestão de estoque, dropshipping Angola, loja virtual',
+            'faq' => array_slice(config('geo.faqs', []), 0, 3),
         ]);
     }
 
@@ -283,11 +309,23 @@ class SeoBuilder
 
     public function forPrices(): array
     {
+        $price = config('geo.partnership.price_formatted', '30.000 Kz');
+
         return $this->forPage([
             'title' => 'Preços SIGESC | Planos para PME em Angola',
-            'description' => 'Planos e preços do software de gestão SIGESC. Escolha o plano ideal para a sua empresa em Angola.',
+            'description' => "Planos e preços do software de gestão SIGESC para empresas em Angola. Veja também a parceria {$price}/mês com licenças offline limitadas.",
             'path' => '/prices',
-            'keywords' => 'preços SIGESC, planos ERP Angola, software gestão preço',
+            'keywords' => 'preços SIGESC, planos ERP Angola, software gestão preço, parceria 30000 Kz',
+            'faq' => [
+                [
+                    'question' => 'Onde ver o preço da parceria offline?',
+                    'answer' => "A parceria com o sistema SIGESC custa {$price}/mês com licenças offline limitadas. Detalhes em sisgesc.net/parceria.",
+                ],
+                [
+                    'question' => 'Os planos cloud estão nesta página?',
+                    'answer' => 'Sim. Os planos cloud SIGESC são listados em /prices. Para trial use admin.sisgesc.net/getting-started.',
+                ],
+            ],
         ]);
     }
 
@@ -404,9 +442,9 @@ class SeoBuilder
     {
         return $this->forPage([
             'title' => 'Contacto | SIGESC Angola',
-            'description' => 'Fale com a equipa SIGESC. Suporte comercial e técnico para empresas em Angola.',
+            'description' => 'Fale com a equipa SIGESC. Suporte comercial, técnico e candidaturas ao programa de parceria (30.000 Kz/mês, offline limitado) para empresas em Angola.',
             'path' => '/contact',
-            'keywords' => 'contacto SIGESC, suporte, Angola',
+            'keywords' => 'contacto SIGESC, suporte, parceria SIGESC, Angola',
         ]);
     }
 
