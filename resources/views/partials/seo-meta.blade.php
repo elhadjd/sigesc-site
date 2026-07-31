@@ -52,6 +52,7 @@
     <meta name="geo.region" content="AO">
     <meta name="geo.placename" content="Angola">
     <meta name="language" content="pt-AO">
+    <meta name="agt:certification" content="{{ $seo['agt_certification_number'] ?? config('sigesc.agt_certification.number', 'FE/323/AGT/2026') }}">
 
     @foreach ($seo['json_ld'] ?? [] as $block)
         <script type="application/ld+json">{!! json_encode($block, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}</script>

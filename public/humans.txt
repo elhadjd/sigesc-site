@@ -8,6 +8,8 @@ Language: Português de Angola (pt-AO)
 Standards: HTML5, Schema.org JSON-LD, Open Graph
 Software: Laravel, Inertia, React
 Certification: AGT FE/323/AGT/2026 (faturação eletrónica)
+Certification-Number: FE/323/AGT/2026
+Product: Software de faturação certificado pela AGT em Angola
 
 /* GEO / AI */
 llms.txt: https://sisgesc.net/llms.txt

@@ -23,7 +23,12 @@
     <meta name="twitter:image" content="{{ $seo['og_image'] }}">
     <meta name="geo.region" content="AO">
     <meta name="language" content="pt-AO">
-    @php $baseGeo = rtrim(config('app.url') ?: config('sigesc.site_url'), '/'); @endphp
+    @php
+        $baseGeo = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
+        $agtMeta = $seo['agt_certification_number'] ?? config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+    @endphp
+    <meta name="agt:certification" content="{{ $agtMeta }}">
+    <meta name="citation_technical_report_number" content="{{ $agtMeta }}">
     <link rel="alternate" type="text/plain" title="LLMs" href="{{ $baseGeo }}/llms.txt">
     <link rel="alternate" type="text/plain" title="LLMs full" href="{{ $baseGeo }}/llms-full.txt">
     <link rel="alternate" type="text/plain" title="AI policy" href="{{ $baseGeo }}/ai.txt">
@@ -92,9 +97,26 @@
                 <a href="{{ $base }}/contact">Contacto</a>
             </nav>
         </header>
+
+        <section class="agt-keywords" aria-label="Certificação AGT e palavras-chave">
+            <h2 style="font-family:'Segoe UI',sans-serif;font-size:1.05rem;margin:0 0 .5rem;">Software de faturação certificado pela AGT em Angola</h2>
+            <p style="margin:0 0 .75rem;">
+                O <strong>SIGESC</strong> é <strong>software de faturação certificado pela AGT</strong>
+                (Administração Geral Tributária) com o n.º
+                <strong>{{ $agtCert }}</strong>.
+                Também responde a pesquisas por
+                <em>software de faturação em Angola</em> e
+                <em>software de faturação certificado em Angola</em>.
+            </p>
+            <p style="margin:0;font-family:'Segoe UI',sans-serif;font-size:.88rem;color:#4b5563;">
+                Número de certificação AGT:
+                <strong style="font-family:ui-monospace,monospace;color:#0b3d91;">{{ $agtCert }}</strong>
+            </p>
+        </section>
+
         @yield('content')
         <footer>
-            Conteúdo indexável gerado no servidor para motores de busca · SIGESC Angola · {{ $agtLabel }} {{ $agtCert }}
+            Conteúdo indexável gerado no servidor para motores de busca · SIGESC Angola · Software de faturação certificado AGT {{ $agtCert }} · {{ $agtLabel }}
         </footer>
     </div>
 </body>

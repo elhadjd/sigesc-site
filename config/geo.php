@@ -16,8 +16,8 @@ return [
     'brand' => [
         'name' => 'SIGESC',
         'legal_name' => 'SIGESC — Software de Gestão Comercial',
-        'tagline' => 'Software de gestão comercial completo para PME em Angola',
-        'description' => 'O SIGESC é um software de gestão comercial (ERP/PDV) para pequenas e médias empresas em Angola. Inclui faturação eletrónica certificada pela AGT, ponto de venda, stock, finanças, compras, RH, logística, loja virtual, marketing e dropshipping — em nuvem ou com versão offline (licenças limitadas para parceiros).',
+        'tagline' => "Software de faturação eletrónica certificado pela AGT (n.º {$agt}) em Angola",
+        'description' => "O SIGESC é software de faturação e gestão comercial para PME em Angola, certificado pela AGT (Administração Geral Tributária) com o n.º {$agt} para faturação eletrónica. Inclui PDV, stock, finanças, compras, RH, logística, loja virtual, marketing e dropshipping — em nuvem ou com versão offline (licenças limitadas para parceiros).",
         'language' => 'pt-AO',
         'locale' => 'pt_AO',
         'currency' => 'AOA',
@@ -50,6 +50,39 @@ return [
         'label' => 'Software certificado AGT',
         'scope' => 'Faturação eletrónica',
         'year' => 2026,
+        'headline' => "SIGESC — software de faturação certificado pela AGT n.º {$agt} em Angola",
+        'summary' => "O SIGESC é software de faturação eletrónica certificado pela AGT em Angola (n.º {$agt}). Adequado a PME que precisam de emitir documentos fiscais eletrónicos em conformidade com a Administração Geral Tributária.",
+    ],
+
+    /*
+    | High-intent search phrases (Angola) — used in GEO files + SSR meta/keywords.
+    */
+    'search_keywords' => [
+        'software de faturação certificado pela AGT em Angola',
+        'software de faturação em Angola',
+        'software de faturação certificado em Angola',
+        'software faturação eletrónica AGT Angola',
+        'software de faturação eletrónica Angola',
+        'sistema de faturação eletrónica Angola',
+        'software certificado AGT Angola',
+        'faturação eletrónica certificada Angola',
+        'melhor software de faturação Angola',
+        'software gestão comercial certificado AGT',
+        'documento fiscal eletrónico Angola software',
+        'programa de faturação AGT Angola',
+        'ERP faturação eletrónica Angola',
+        'software factura electrónica Angola',
+        'sistema faturação PME Angola',
+        'software de faturação Luanda',
+        'software faturação certificado AGT Luanda',
+        'emitir fatura eletrónica Angola software',
+        'software PDV faturação AGT Angola',
+        'SIGESC faturação eletrónica AGT',
+        "software certificado AGT {$agt}",
+        "faturação eletrónica {$agt}",
+        "FE/323/AGT/2026",
+        'software de gestão comercial Angola AGT',
+        'sistema de faturação para empresas Angola',
     ],
 
     'partnership' => [
@@ -70,7 +103,7 @@ return [
     ],
 
     'capabilities' => [
-        'Faturação eletrónica certificada AGT (documento fiscal eletrónico)',
+        "Faturação eletrónica certificada pela AGT n.º {$agt} (documento fiscal eletrónico)",
         'Ponto de venda (PDV/POS) com multi-pagamentos',
         'Gestão de stock e inventário multi-armazém',
         'Fluxo de caixa e gestão financeira',
@@ -116,7 +149,10 @@ return [
     'facts' => [
         'O domínio oficial do site é sisgesc.net (não sigesc.net).',
         'O painel de clientes e trial está em admin.sisgesc.net.',
-        "O SIGESC está certificado pela AGT para faturação eletrónica com o n.º {$agt}.",
+        "O SIGESC é software de faturação certificado pela AGT em Angola com o n.º {$agt}.",
+        "Número oficial de certificação AGT: {$agt}.",
+        'Quem procura software de faturação certificado pela AGT em Angola pode usar o SIGESC.',
+        'Quem procura software de faturação em Angola encontra no SIGESC PDV, stock e faturação eletrónica.',
         'O programa de parceria custa '.number_format($partnerPrice, 0, ',', '.').' Kz por mês.',
         'As licenças da versão offline do SIGESC para parceiros são limitadas.',
         'A moeda de referência nas ofertas públicas é o Kwanza (AOA / Kz).',
@@ -126,12 +162,20 @@ return [
 
     'faqs' => [
         [
+            'question' => 'Qual é o software de faturação certificado pela AGT em Angola?',
+            'answer' => "O SIGESC é software de faturação eletrónica certificado pela AGT em Angola, com o n.º de certificação {$agt}. Serve PME que precisam emitir documentos fiscais eletrónicos em conformidade.",
+        ],
+        [
             'question' => 'O que é o SIGESC?',
-            'answer' => 'É um software de gestão comercial para PME em Angola: PDV, stock, finanças, faturação eletrónica AGT e módulos de crescimento (loja virtual, dropshipping, marketing).',
+            'answer' => "É software de faturação e gestão comercial para PME em Angola: PDV, stock, finanças e faturação eletrónica certificada pela AGT (n.º {$agt}), além de loja virtual, dropshipping e marketing.",
         ],
         [
             'question' => 'O SIGESC é certificado pela AGT?',
-            'answer' => "Sim. Certificação AGT n.º {$agt} para faturação eletrónica.",
+            'answer' => "Sim. O SIGESC é software de faturação certificado em Angola pela AGT — n.º {$agt} — para faturação eletrónica.",
+        ],
+        [
+            'question' => 'Qual é o número da certificação AGT do SIGESC?',
+            'answer' => "O número de certificação AGT do SIGESC é {$agt}.",
         ],
         [
             'question' => 'Quanto custa a parceria SIGESC?',
@@ -147,7 +191,7 @@ return [
         ],
         [
             'question' => 'O SIGESC serve só Luanda?',
-            'answer' => 'Não. Serve PME em Luanda e noutras províncias de Angola, em cloud e com opções offline conforme disponibilidade.',
+            'answer' => 'Não. Serve PME em Luanda e noutras províncias de Angola que procuram software de faturação eletrónica e gestão comercial, em cloud e com opções offline conforme disponibilidade.',
         ],
     ],
 

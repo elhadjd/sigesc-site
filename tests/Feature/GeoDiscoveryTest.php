@@ -28,16 +28,28 @@ class GeoDiscoveryTest extends TestCase
             );
     }
 
-    public function test_discovery_files_contain_core_facts(): void
+    public function test_discovery_files_contain_agt_cert_and_invoicing_keywords(): void
     {
-        foreach (['/llms.txt', '/llms-full.txt', '/ai.txt', '/agents.md', '/humans.txt'] as $path) {
+        $needles = [
+            'FE/323/AGT/2026',
+            'software de faturação certificado pela AGT em Angola',
+            'software de faturação em Angola',
+            'software de faturação certificado em Angola',
+        ];
+
+        foreach (['/llms.txt', '/llms-full.txt', '/ai.txt', '/agents.md'] as $path) {
             $body = $this->get($path)->assertOk()->getContent();
-            $this->assertStringContainsString('SIGESC', $body);
-            $this->assertTrue(
-                str_contains($body, 'FE/323/AGT/2026') || str_contains($body, '30.000') || str_contains($body, '30000'),
-                "Expected AGT or partnership facts in {$path}"
-            );
+            foreach ($needles as $needle) {
+                $this->assertStringContainsString(
+                    $needle,
+                    $body,
+                    "Expected [{$needle}] in {$path}"
+                );
+            }
         }
+
+        $humans = $this->get('/humans.txt')->assertOk()->getContent();
+        $this->assertStringContainsString('FE/323/AGT/2026', $humans);
 
         $this->get('/.well-known/security.txt')
             ->assertOk()
@@ -45,9 +57,10 @@ class GeoDiscoveryTest extends TestCase
 
         $json = $this->get('/.well-known/ai-plugin.json')->assertOk()->json();
         $this->assertSame('SIGESC', $json['name_for_human'] ?? null);
+        $this->assertStringContainsString('FE/323/AGT/2026', (string) ($json['description_for_human'] ?? ''));
     }
 
-    public function test_home_seo_includes_organization_and_geo_links(): void
+    public function test_home_seo_includes_organization_geo_and_cert_keywords(): void
     {
         $seo = app(\App\Services\Seo\SeoBuilder::class)->forHome();
         $types = collect($seo['json_ld'])->pluck('@type')->all();
@@ -58,6 +71,26 @@ class GeoDiscoveryTest extends TestCase
         $this->assertContains('WebPage', $types);
         $this->assertContains('FAQPage', $types);
         $this->assertNotEmpty($seo['geo_links']);
+        $this->assertSame('FE/323/AGT/2026', $seo['agt_certification_number']);
+        $this->assertStringContainsString('software de faturação certificado pela AGT em Angola', (string) $seo['keywords']);
+        $this->assertStringContainsString('FE/323/AGT/2026', (string) $seo['title']);
+    }
+
+    public function test_ssr_home_and_about_expose_certification_keywords(): void
+    {
+        foreach (['/', '/sobre'] as $path) {
+            $html = $this->withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1)',
+            ])->get($path)
+                ->assertOk()
+                ->assertSee('FE/323/AGT/2026', false)
+                ->assertSee('software de faturação certificado pela AGT em Angola', false)
+                ->assertSee('software de faturação em Angola', false)
+                ->getContent();
+
+            $this->assertStringContainsString('agt:certification', $html);
+            $this->assertStringNotContainsString('data-page=', $html);
+        }
     }
 
     public function test_sitemap_lists_geo_surfaces(): void
