@@ -170,7 +170,7 @@ const SolutionsPage = () => {
                 </Helmet>
                 <HeaderComponent auth={props.auth} />
                 {/* Hero Section */}
-                <section className="relative bg-gradient-to-br from-gray-900 to-gray-800 text-white pt-28 pb-20 overflow-hidden">
+                <section className="relative bg-gradient-to-br from-gray-900 to-gray-800 text-white pt-12 pb-20 overflow-hidden sm:pt-16">
                     <div className="absolute inset-0 bg-black opacity-50"></div>
                     <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-blue-500 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
 

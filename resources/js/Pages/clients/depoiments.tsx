@@ -359,7 +359,7 @@ export default function SuccessStoriesPage(props: { auth: { user: User }, local:
                 <HeaderComponent auth={props.auth} />
 
                 {/* Hero Section */}
-                <section className="pt-28 pb-20 bg-gradient-to-br from-blue-50 to-indigo-50">
+                <section className="pt-12 pb-20 bg-gradient-to-br from-blue-50 to-indigo-50 sm:pt-16">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
