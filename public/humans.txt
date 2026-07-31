@@ -1,0 +1,20 @@
+/* TEAM */
+Company: SIGESC
+Site: https://sisgesc.net
+Location: Angola (Luanda focus)
+Language: Português de Angola (pt-AO)
+
+/* SITE */
+Standards: HTML5, Schema.org JSON-LD, Open Graph
+Software: Laravel, Inertia, React
+Certification: AGT FE/323/AGT/2026 (faturação eletrónica)
+
+/* GEO / AI */
+llms.txt: https://sisgesc.net/llms.txt
+llms-full.txt: https://sisgesc.net/llms-full.txt
+ai.txt: https://sisgesc.net/ai.txt
+agents.md: https://sisgesc.net/agents.md
+about: https://sisgesc.net/sobre
+
+/* CONTACT */
+https://sisgesc.net/contact
