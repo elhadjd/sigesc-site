@@ -59,8 +59,8 @@ class PartnershipPageTest extends TestCase
 
         $this->get('/ai.txt')
             ->assertOk()
-            ->assertSee('30,000 Kz', false)
-            ->assertSee('Offline version licenses', false);
+            ->assertSee('30.000 Kz', false)
+            ->assertSee('Offline licenses: limited', false);
     }
 
     public function test_sitemap_includes_partnership_and_geo_files(): void

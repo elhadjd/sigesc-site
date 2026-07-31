@@ -83,7 +83,9 @@ class PublicPageContent
             ],
             'links' => array_merge(
                 [
+                    ['href' => url('/sobre'), 'label' => 'Sobre o SIGESC', 'description' => 'Factos, certificação AGT e capacidades'],
                     ['href' => url('/solutions'), 'label' => 'Ver todas as soluções', 'description' => 'Catálogo completo de módulos SIGESC'],
+                    ['href' => url('/parceria'), 'label' => 'Parceria', 'description' => '30.000 Kz/mês · offline limitado'],
                 ],
                 $this->moduleLinks(),
                 [
@@ -93,6 +95,8 @@ class PublicPageContent
                     ['href' => url('/pergunte-ao-especialista'), 'label' => 'Pergunte ao Especialista', 'description' => 'Perguntas sobre fiscalidade e gestão com fontes'],
                     ['href' => url('/downloads'), 'label' => 'Downloads', 'description' => 'Instalar o SIGESC Admin'],
                     ['href' => url('/contact'), 'label' => 'Contacto', 'description' => 'Fale com a equipa comercial'],
+                    ['href' => url('/llms.txt'), 'label' => 'llms.txt', 'description' => 'Resumo para motores de IA'],
+                    ['href' => url('/llms-full.txt'), 'label' => 'llms-full.txt', 'description' => 'Dossiê completo GEO'],
                 ]
             ),
         ];
@@ -503,6 +507,75 @@ class PublicPageContent
                 ['href' => url('/prices'), 'label' => 'Preços cloud SIGESC', 'description' => 'Planos para PME'],
                 ['href' => url('/solutions'), 'label' => 'Soluções SIGESC', 'description' => 'Módulos de gestão'],
                 ['href' => url('/downloads'), 'label' => 'Downloads', 'description' => 'Instaladores e recursos'],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function about(): array
+    {
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number'));
+        $price = config('geo.partnership.price_formatted', '30.000 Kz');
+
+        return [
+            'kicker' => 'GEO · Conhecimento do produto SIGESC',
+            'headline' => 'Sobre o SIGESC — software de gestão comercial para Angola',
+            'lead' => (string) config('geo.brand.description'),
+            'sections' => [
+                [
+                    'heading' => 'Certificação e identidade',
+                    'items' => [
+                        'Site oficial: sisgesc.net',
+                        'Painel / trial: admin.sisgesc.net',
+                        'Certificação AGT: '.$agt.' (faturação eletrónica)',
+                        'Idioma: Português de Angola (pt-AO)',
+                        'Moeda: Kwanza (AOA / Kz)',
+                    ],
+                ],
+                [
+                    'heading' => 'Capacidades',
+                    'items' => config('geo.capabilities', []),
+                ],
+                [
+                    'heading' => 'Parceria e offline',
+                    'body' => config('geo.partnership.summary'),
+                    'items' => [
+                        'Mensalidade: '.$price,
+                        'Licenças offline: limitadas',
+                        'Página: '.url('/parceria'),
+                    ],
+                ],
+                [
+                    'heading' => 'Público-alvo',
+                    'items' => config('geo.audiences', []),
+                ],
+                [
+                    'heading' => 'Factos para motores de busca e IAs',
+                    'items' => config('geo.facts', []),
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => config('geo.faqs', []),
+                ],
+                [
+                    'heading' => 'Ficheiros de descoberta GEO',
+                    'items' => collect(config('geo.discovery_files', []))
+                        ->map(fn ($f) => url('/'.ltrim($f, '/')))
+                        ->all(),
+                ],
+            ],
+            'links' => [
+                ['href' => url('/sobre'), 'label' => 'Sobre o SIGESC', 'description' => 'Esta página'],
+                ['href' => url('/parceria'), 'label' => 'Parceria', 'description' => $price.'/mês'],
+                ['href' => url('/solutions'), 'label' => 'Soluções', 'description' => 'Módulos'],
+                ['href' => url('/prices'), 'label' => 'Preços', 'description' => 'Planos cloud'],
+                ['href' => url('/llms.txt'), 'label' => 'llms.txt', 'description' => 'Resumo IA'],
+                ['href' => url('/llms-full.txt'), 'label' => 'llms-full.txt', 'description' => 'Dossiê completo'],
+                ['href' => url('/ai.txt'), 'label' => 'ai.txt', 'description' => 'Política para IAs'],
+                ['href' => url('/agents.md'), 'label' => 'agents.md', 'description' => 'Instruções para agentes'],
+                ['href' => url('/contact'), 'label' => 'Contacto', 'description' => 'Comercial e suporte'],
             ],
         ];
     }

@@ -40,6 +40,19 @@
     <meta name="twitter:description" content="{{ $seoDescription }}">
     <meta name="twitter:image" content="{{ $seoImage }}">
 
+    @foreach ($seo['geo_links'] ?? [] as $geoLink)
+        <link
+            rel="{{ $geoLink['rel'] ?? 'alternate' }}"
+            href="{{ $geoLink['href'] ?? '#' }}"
+            @if (!empty($geoLink['type'])) type="{{ $geoLink['type'] }}" @endif
+            @if (!empty($geoLink['title'])) title="{{ $geoLink['title'] }}" @endif
+        >
+    @endforeach
+
+    <meta name="geo.region" content="AO">
+    <meta name="geo.placename" content="Angola">
+    <meta name="language" content="pt-AO">
+
     @foreach ($seo['json_ld'] ?? [] as $block)
         <script type="application/ld+json">{!! json_encode($block, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}</script>
     @endforeach
