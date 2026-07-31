@@ -11,13 +11,15 @@ use Illuminate\Support\Str;
 /**
  * Resolve a relevant cover image for an AI article.
  *
- * Order (auto, prefer_openai=false): Openverse → Wikimedia → Unsplash → Pexels → OpenAI → curated → local.
- * Rejects brand/logo-like hits and verifies the URL is reachable before accepting.
+ * Order: local catalog → remote sources (stored on disk) → curated (stored) → generated SVG → placeholder.
+ * With require_local_url=true, remote URLs are never returned unless saved under the app storage/public.
  */
 class CoverImageService
 {
     public function __construct(
-        protected LlmGateway $llm
+        protected LlmGateway $llm,
+        protected LocalCoverCatalog $localCatalog,
+        protected BlogCoverGenerator $coverGenerator,
     ) {}
 
     /**
@@ -25,10 +27,18 @@ class CoverImageService
      */
     public function resolve(Article $article, ?string $prompt = null): array
     {
+        if ((bool) config('ai_content_engine.images.prefer_local_catalog', true)) {
+            $local = $this->localCatalog->match($article);
+            if ($local !== null) {
+                return $local;
+            }
+        }
+
         $queries = $this->buildQueries($article);
         $prompt ??= $this->defaultPrompt($article);
         $preferOpenai = (bool) config('ai_content_engine.images.prefer_openai', false);
         $provider = strtolower((string) config('ai_content_engine.images.provider', 'auto'));
+        $requireLocal = (bool) config('ai_content_engine.images.require_local_url', true);
 
         $attempts = match ($provider) {
             'openai' => ['openai'],
@@ -36,6 +46,7 @@ class CoverImageService
             'wikimedia' => ['wikimedia'],
             'unsplash' => ['unsplash'],
             'pexels' => ['pexels'],
+            'local' => [],
             default => $preferOpenai
                 ? ['openai', 'openverse', 'wikimedia', 'unsplash', 'pexels']
                 : ['openverse', 'wikimedia', 'unsplash', 'pexels', 'openai'],
@@ -72,20 +83,42 @@ class CoverImageService
             }
 
             $stored = $this->maybeStore($url, $article->slug.'-cover');
+            if ($stored) {
+                return [
+                    'url' => $stored,
+                    'source' => 'curated',
+                    'attribution' => [
+                        'provider' => 'unsplash-cdn',
+                        'note' => 'Curated stock fallback keyed to article topic (stored locally)',
+                    ],
+                    'stored' => true,
+                ];
+            }
 
-            return [
-                'url' => $stored ?: $url,
-                'source' => 'curated',
-                'attribution' => [
-                    'provider' => 'unsplash-cdn',
-                    'note' => 'Curated stock fallback keyed to article topic',
-                ],
-                'stored' => (bool) $stored,
-            ];
+            if (! $requireLocal) {
+                return [
+                    'url' => $url,
+                    'source' => 'curated',
+                    'attribution' => [
+                        'provider' => 'unsplash-cdn',
+                        'note' => 'Curated stock fallback keyed to article topic',
+                    ],
+                    'stored' => false,
+                ];
+            }
+        }
+
+        if ((bool) config('ai_content_engine.images.generate_local_cover', true)) {
+            return $this->coverGenerator->ensureFor($article);
+        }
+
+        $fallback = $this->localServerFallback();
+        if (! $this->localCatalog->existsOnServer($fallback) && Str::startsWith($fallback, '/')) {
+            return $this->coverGenerator->ensureFor($article);
         }
 
         return [
-            'url' => $this->localServerFallback(),
+            'url' => $fallback,
             'source' => 'local',
             'attribution' => [
                 'provider' => 'local',
@@ -106,9 +139,17 @@ class CoverImageService
             return null;
         }
 
-        // Relative/local paths are already on our server.
+        $requireLocal = (bool) config('ai_content_engine.images.require_local_url', true);
+
+        // Relative/local paths must exist on this server.
         if (Str::startsWith($url, '/')) {
-            $hit['stored'] = false;
+            if (! $this->localPathExists($url)) {
+                Log::info('[AIContent][CoverImage] Skipping missing local path', ['url' => $url]);
+
+                return null;
+            }
+
+            $hit['stored'] = true;
 
             return $hit;
         }
@@ -119,6 +160,15 @@ class CoverImageService
             $hit['stored'] = true;
 
             return $hit;
+        }
+
+        if ($requireLocal) {
+            Log::info('[AIContent][CoverImage] Skipping remote URL not stored locally', [
+                'url' => $url,
+                'source' => $hit['source'] ?? null,
+            ]);
+
+            return null;
         }
 
         if (! $this->urlIsReachable($url)) {
@@ -133,6 +183,25 @@ class CoverImageService
         $hit['stored'] = false;
 
         return $hit;
+    }
+
+    protected function localPathExists(string $urlPath): bool
+    {
+        if ($this->localCatalog->existsOnServer($urlPath)) {
+            return true;
+        }
+
+        // storage/public URLs from maybeStore (e.g. /storage/ai-content/images/...)
+        if (Str::startsWith($urlPath, '/storage/')) {
+            $relative = Str::after($urlPath, '/storage/');
+            $disk = config('ai_content_engine.storage.disk', 'public');
+
+            return Storage::disk($disk)->exists($relative);
+        }
+
+        $full = public_path(ltrim($urlPath, '/'));
+
+        return is_file($full) && filesize($full) > 0;
     }
 
     /**

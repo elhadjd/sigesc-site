@@ -25,17 +25,21 @@ class CoverImageServiceTest extends TestCase
             'ai_content_engine.images.verify_url' => true,
             'ai_content_engine.images.reject_brand_terms' => true,
             'ai_content_engine.images.local_fallback' => '/img/placeholder-blog.svg',
+            'ai_content_engine.images.require_local_url' => true,
+            'ai_content_engine.images.prefer_local_catalog' => false,
+            'ai_content_engine.images.generate_local_cover' => true,
         ]);
     }
 
-    public function test_openverse_provides_topic_relevant_cover_without_openai(): void
+    public function test_openverse_stores_cover_locally_when_required(): void
     {
         Storage::fake('public');
         config([
             'ai_content_engine.images.provider' => 'auto',
             'ai_content_engine.images.prefer_openai' => false,
             'ai_content_engine.images.openverse_enabled' => true,
-            'ai_content_engine.images.store_locally' => false,
+            'ai_content_engine.images.store_locally' => true,
+            'ai_content_engine.images.require_local_url' => true,
             'ai_content_engine.openai.api_key' => null,
         ]);
 
@@ -75,8 +79,9 @@ class CoverImageServiceTest extends TestCase
 
         $result = app(CoverImageService::class)->resolve($article);
 
-        $this->assertSame('https://cdn.example.com/covers/retail-africa.jpg', $result['url']);
         $this->assertSame('openverse', $result['source']);
+        $this->assertTrue($result['stored']);
+        $this->assertStringContainsString('/storage/', $result['url']);
         $this->assertSame('Photo Author', $result['attribution']['creator'] ?? null);
     }
 
@@ -85,7 +90,8 @@ class CoverImageServiceTest extends TestCase
         Storage::fake('public');
         config([
             'ai_content_engine.images.provider' => 'openverse',
-            'ai_content_engine.images.store_locally' => false,
+            'ai_content_engine.images.store_locally' => true,
+            'ai_content_engine.images.require_local_url' => true,
             'ai_content_engine.openai.api_key' => null,
         ]);
 
@@ -128,8 +134,9 @@ class CoverImageServiceTest extends TestCase
 
         $result = app(CoverImageService::class)->resolve($article);
 
-        $this->assertSame('https://cdn.example.com/covers/office-photo.jpg', $result['url']);
         $this->assertSame('openverse', $result['source']);
+        $this->assertTrue($result['stored']);
+        $this->assertStringContainsString('/storage/', $result['url']);
     }
 
     public function test_skips_unreachable_url_and_uses_next_candidate(): void
@@ -137,7 +144,8 @@ class CoverImageServiceTest extends TestCase
         Storage::fake('public');
         config([
             'ai_content_engine.images.provider' => 'openverse',
-            'ai_content_engine.images.store_locally' => false,
+            'ai_content_engine.images.store_locally' => true,
+            'ai_content_engine.images.require_local_url' => true,
             'ai_content_engine.openai.api_key' => null,
         ]);
 
@@ -179,7 +187,9 @@ class CoverImageServiceTest extends TestCase
 
         $result = app(CoverImageService::class)->resolve($article);
 
-        $this->assertSame('https://cdn.example.com/covers/alive.jpg', $result['url']);
+        $this->assertSame('openverse', $result['source']);
+        $this->assertTrue($result['stored']);
+        $this->assertStringContainsString('/storage/', $result['url']);
     }
 
     public function test_image_agent_sets_featured_image_and_injects_cover_html(): void
@@ -187,7 +197,8 @@ class CoverImageServiceTest extends TestCase
         Storage::fake('public');
         config([
             'ai_content_engine.images.provider' => 'openverse',
-            'ai_content_engine.images.store_locally' => false,
+            'ai_content_engine.images.store_locally' => true,
+            'ai_content_engine.images.require_local_url' => true,
             'ai_content_engine.openai.api_key' => null,
         ]);
 
@@ -226,51 +237,76 @@ class CoverImageServiceTest extends TestCase
         $output = app(ImageAgent::class)->handle($article->fresh(), $job);
 
         $fresh = $article->fresh();
-        $this->assertSame('https://cdn.example.com/covers/tax-office.jpg', $fresh->featured_image);
+        $this->assertTrue(str_starts_with((string) $fresh->featured_image, '/storage/') || str_starts_with((string) $fresh->featured_image, '/img/'));
         $this->assertSame('openverse', $output['source']);
         $this->assertStringContainsString('ai-cover', (string) $fresh->content_html);
-        $this->assertStringContainsString('tax-office.jpg', (string) $fresh->content_html);
         $this->assertSame(5, $fresh->images()->count());
         $this->assertSame('openverse', $fresh->pipeline_meta['cover_image']['source'] ?? null);
     }
 
-    public function test_curated_fallback_varies_by_topic(): void
+    public function test_local_catalog_matches_billing_topic(): void
+    {
+        config([
+            'ai_content_engine.images.prefer_local_catalog' => true,
+            'ai_content_engine.images.provider' => 'local',
+        ]);
+
+        $article = Article::create([
+            'title' => 'Faturação eletrónica AGT Angola',
+            'slug' => 'faturacao-eletronica-agt',
+            'focus_keyword' => 'faturação eletrónica AGT',
+            'status' => Article::STATUS_DRAFT,
+        ]);
+
+        $result = app(CoverImageService::class)->resolve($article);
+
+        $this->assertSame('local-catalog', $result['source']);
+        $this->assertStringStartsWith('/img/', $result['url']);
+        $this->assertFileExists(public_path(ltrim($result['url'], '/')));
+    }
+
+    public function test_generated_local_cover_when_remotes_fail(): void
     {
         config([
             'ai_content_engine.images.provider' => 'auto',
+            'ai_content_engine.images.prefer_local_catalog' => false,
             'ai_content_engine.images.openverse_enabled' => false,
             'ai_content_engine.images.wikimedia_enabled' => false,
             'ai_content_engine.images.store_locally' => false,
+            'ai_content_engine.images.require_local_url' => true,
+            'ai_content_engine.images.generate_local_cover' => true,
             'ai_content_engine.openai.api_key' => null,
         ]);
 
         Http::fake([
-            'images.unsplash.com/*' => Http::response('ok', 200, ['Content-Type' => 'image/jpeg']),
+            'images.unsplash.com/*' => Http::response('gone', 404),
         ]);
 
-        $urls = [];
-        foreach (['alpha-seed-one', 'beta-seed-two', 'gamma-seed-three', 'delta-seed-four'] as $i => $seed) {
-            $article = Article::create([
-                'title' => 'Artigo '.$seed,
-                'slug' => 'artigo-'.$seed,
-                'focus_keyword' => $seed,
-                'status' => Article::STATUS_DRAFT,
-            ]);
-            $result = app(CoverImageService::class)->resolve($article);
-            $this->assertSame('curated', $result['source']);
-            $urls[] = $result['url'];
-        }
+        $article = Article::create([
+            'title' => 'Sem imagens remotas disponíveis',
+            'slug' => 'sem-imagens-remotas-disponiveis',
+            'focus_keyword' => 'teste capa',
+            'status' => Article::STATUS_DRAFT,
+        ]);
 
-        $this->assertGreaterThan(1, count(array_unique($urls)), 'Curated covers should vary across topics');
+        $result = app(CoverImageService::class)->resolve($article);
+
+        $this->assertSame('generated-local', $result['source']);
+        $this->assertStringStartsWith('/img/blog-covers/', $result['url']);
+        $this->assertFileExists(public_path(ltrim($result['url'], '/')));
+        $this->assertStringContainsString('SIGESC', (string) file_get_contents(public_path(ltrim($result['url'], '/'))));
     }
 
-    public function test_local_fallback_when_all_remote_fail(): void
+    public function test_local_fallback_when_generation_disabled(): void
     {
         config([
             'ai_content_engine.images.provider' => 'auto',
+            'ai_content_engine.images.prefer_local_catalog' => false,
             'ai_content_engine.images.openverse_enabled' => false,
             'ai_content_engine.images.wikimedia_enabled' => false,
             'ai_content_engine.images.store_locally' => false,
+            'ai_content_engine.images.require_local_url' => true,
+            'ai_content_engine.images.generate_local_cover' => false,
             'ai_content_engine.openai.api_key' => null,
         ]);
 
@@ -298,5 +334,21 @@ class CoverImageServiceTest extends TestCase
         $this->assertTrue($service->looksLikeBrandOrLogo('coca-cola company logo png'));
         $this->assertTrue($service->looksLikeBrandOrLogo('file:nike wordmark.svg'));
         $this->assertFalse($service->looksLikeBrandOrLogo('african retail shop photography'));
+    }
+
+    public function test_expanded_topic_buckets_and_weekly_topics(): void
+    {
+        $buckets = config('ai_content_engine.topic_buckets');
+        $this->assertGreaterThanOrEqual(4, count($buckets));
+        $this->assertGreaterThanOrEqual(15, count($buckets['fiscal']['queries'] ?? []));
+        $this->assertGreaterThanOrEqual(15, count($buckets['gestao']['queries'] ?? []));
+        $this->assertGreaterThanOrEqual(15, count($buckets['marketing']['queries'] ?? []));
+        $this->assertGreaterThanOrEqual(15, count($buckets['empreendedorismo']['queries'] ?? []));
+
+        $seed = config('ai_content_engine.seed_queries');
+        $this->assertGreaterThanOrEqual(60, count($seed));
+
+        $weekly = config('ai_blog.topics');
+        $this->assertGreaterThanOrEqual(10, count($weekly));
     }
 }
