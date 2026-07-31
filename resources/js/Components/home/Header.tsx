@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { AiOutlineMenu, AiOutlineClose, AiOutlineDown } from 'react-icons/ai';
-import { BsPerson, BsShop, BsTag, BsQuestionCircle, BsCalculator, BsChatDots, BsFileEarmarkText, BsBuilding } from 'react-icons/bs';
-import { Link, usePage } from '@inertiajs/react';
-import { useLoggedUser } from '@/contexts/loggedUser';
-import { FaRegNewspaper, FaTools, FaRobot } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AiOutlineClose, AiOutlineDown, AiOutlineMenu } from 'react-icons/ai';
+import {
+    BsBuilding,
+    BsCalculator,
+    BsChatDots,
+    BsFileEarmarkText,
+    BsPerson,
+    BsQuestionCircle,
+    BsShop,
+    BsTag,
+} from 'react-icons/bs';
+import { FaRegNewspaper, FaRobot, FaTools } from 'react-icons/fa';
 import { FaDownload } from 'react-icons/fa6';
 import { RiCustomerService2Line } from 'react-icons/ri';
+import { Link, usePage } from '@inertiajs/react';
+import { useLoggedUser } from '@/contexts/loggedUser';
 import { features } from '@/services/public/veriables';
 import {
     SIGESC_ADMIN_LOGIN_URL,
@@ -19,78 +28,128 @@ type NavItem = {
     href: string;
     icon: React.ReactNode;
     text: string;
-    dropdown?: typeof features;
+    dropdown?: Array<{ name: string; href: string; desc?: string }>;
 };
+
+const ICON = 'h-3.5 w-3.5 shrink-0';
+const NAV_LINK =
+    'inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium leading-none text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#00a5cf]';
+const MOBILE_LINK =
+    'flex min-h-11 items-center gap-3 rounded-lg px-3 text-[15px] font-medium leading-none text-slate-700 transition-colors hover:bg-sky-50 hover:text-[#00a5cf]';
+const DROPDOWN_LINK =
+    'block px-3.5 py-2.5 text-[13px] font-medium leading-snug text-slate-700 transition-colors hover:bg-sky-50 hover:text-[#00a5cf]';
 
 export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
     const { user, setUser } = useLoggedUser();
     const { canAccessAiContent } = usePage().props as { canAccessAiContent?: boolean };
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
+    const [openDesktopMenu, setOpenDesktopMenu] = useState<string | null>(null);
 
     useEffect(() => {
         setUser({ ...auth?.user });
 
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
+        const handleScroll = () => setIsScrolled(window.scrollY > 12);
+        const handleResize = () => {
+            if (window.innerWidth >= 1280) {
+                setIsMenuOpen(false);
+            }
         };
 
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleResize);
+        };
     }, [auth, setUser]);
 
-    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+    useEffect(() => {
+        document.body.style.overflow = isMenuOpen ? 'hidden' : '';
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isMenuOpen]);
 
-    const menuItems: NavItem[] = [
+    const solutionItems = features.map((item) => ({
+        name: item.name,
+        href: item.href,
+        desc: item.desc,
+    }));
+
+    const toolItems = [
+        { name: 'Calculadoras fiscais', href: '/calculadoras', desc: 'IVA, IRT e impostos' },
+        { name: 'Criar fatura', href: '/gerador-de-fatura', desc: 'Gerador online grátis' },
+        { name: 'QR / Código de barras', href: '/gerador-de-codigo-barras', desc: 'Com logotipo' },
+        { name: 'Modelos de fatura', href: '/modelos-de-fatura', desc: 'Templates para descarregar' },
+        { name: 'Pergunte ao Especialista', href: '/pergunte-ao-especialista', desc: 'Dúvidas fiscais' },
+    ];
+
+    const primaryItems: NavItem[] = [
         {
             href: '/solutions',
-            icon: <FaTools className="text-base" />,
+            icon: <FaTools className={ICON} />,
             text: 'Soluções',
-            dropdown: features,
+            dropdown: solutionItems,
         },
-        { href: route('shop', { page: '' }), icon: <BsShop className="text-base" />, text: 'Loja' },
-        { href: '/prices', icon: <BsTag className="text-base" />, text: 'Preços' },
-        { href: '/parceria', icon: <BsBuilding className="text-base" />, text: 'Parceria' },
-        { href: '/sobre', icon: <BsQuestionCircle className="text-base" />, text: 'Sobre' },
-        { href: '/clients/depoiments', icon: <BsPerson className="text-base" />, text: 'Clientes' },
-        { href: '/blog/posts', icon: <FaRegNewspaper className="text-base" />, text: 'Blog' },
-        { href: '/calculadoras', icon: <BsCalculator className="text-base" />, text: 'Calculadoras' },
+        { href: '/prices', icon: <BsTag className={ICON} />, text: 'Preços' },
+        { href: '/parceria', icon: <BsBuilding className={ICON} />, text: 'Parceria' },
+        { href: '/blog/posts', icon: <FaRegNewspaper className={ICON} />, text: 'Blog' },
         {
-            href: '/gerador-de-fatura',
-            icon: <BsFileEarmarkText className="text-base" />,
-            text: 'Criar fatura',
+            href: '/calculadoras',
+            icon: <BsCalculator className={ICON} />,
+            text: 'Ferramentas',
+            dropdown: toolItems,
         },
-        {
-            href: '/gerador-de-codigo-barras',
-            icon: <BsFileEarmarkText className="text-base" />,
-            text: 'QR / Código barras',
-        },
-        {
-            href: '/modelos-de-fatura',
-            icon: <BsFileEarmarkText className="text-base" />,
-            text: 'Modelos de fatura',
-        },
-        {
-            href: '/pergunte-ao-especialista',
-            icon: <BsChatDots className="text-base" />,
-            text: 'Especialista',
-        },
+        { href: '/sobre', icon: <BsQuestionCircle className={ICON} />, text: 'Sobre' },
+        { href: '/clients/depoiments', icon: <BsPerson className={ICON} />, text: 'Clientes' },
+        { href: route('shop', { page: '' }), icon: <BsShop className={ICON} />, text: 'Loja' },
     ];
 
     if (canAccessAiContent) {
-        menuItems.push({
+        primaryItems.push({
             href: '/admin/ai-content',
-            icon: <FaRobot className="text-base" />,
+            icon: <FaRobot className={ICON} />,
             text: 'AI Content',
         });
     }
 
-    const supportItems = [
-        { href: '/contact', icon: <RiCustomerService2Line className="text-base" />, text: 'Suporte' },
-        { href: route('download-page'), icon: <FaDownload className="text-base" />, text: 'Downloads' },
-        { href: route('resources', { resource: 'help' }), icon: <BsQuestionCircle className="text-base" />, text: 'Ajuda' },
+    const mobileItems: NavItem[] = [
+        ...primaryItems.filter((item) => item.text !== 'Ferramentas'),
+        {
+            href: '/calculadoras',
+            icon: <BsCalculator className={ICON} />,
+            text: 'Calculadoras',
+        },
+        {
+            href: '/gerador-de-fatura',
+            icon: <BsFileEarmarkText className={ICON} />,
+            text: 'Criar fatura',
+        },
+        {
+            href: '/gerador-de-codigo-barras',
+            icon: <BsFileEarmarkText className={ICON} />,
+            text: 'QR / Código barras',
+        },
+        {
+            href: '/modelos-de-fatura',
+            icon: <BsFileEarmarkText className={ICON} />,
+            text: 'Modelos de fatura',
+        },
+        {
+            href: '/pergunte-ao-especialista',
+            icon: <BsChatDots className={ICON} />,
+            text: 'Especialista',
+        },
     ];
+
+    const supportItems = [
+        { href: '/contact', icon: <RiCustomerService2Line className={ICON} />, text: 'Suporte' },
+        { href: route('download-page'), icon: <FaDownload className={ICON} />, text: 'Downloads' },
+        { href: route('resources', { resource: 'help' }), icon: <BsQuestionCircle className={ICON} />, text: 'Ajuda' },
+    ];
+
+    const closeMenu = () => setIsMenuOpen(false);
 
     const NavLink = ({
         item,
@@ -102,224 +161,239 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
         onClick?: () => void;
     }) => {
         const isExternal = item.href.startsWith('http');
+        const content = (
+            <>
+                <span className="inline-flex shrink-0 text-current">{item.icon}</span>
+                <span className="truncate">{item.text}</span>
+            </>
+        );
+
         if (isExternal) {
             return (
                 <a href={item.href} className={className} onClick={onClick}>
-                    <span>{item.icon}</span>
-                    <span>{item.text}</span>
+                    {content}
                 </a>
             );
         }
 
         return (
             <Link href={item.href} className={className} onClick={onClick}>
-                <span>{item.icon}</span>
-                <span>{item.text}</span>
+                {content}
             </Link>
         );
     };
 
     return (
-        <motion.header
-            className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-                isScrolled ? 'bg-white shadow-md' : 'bg-white border-b border-gray-100'
-            }`}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-        >
-            <div className="bg-[#0b3d91] text-white">
-                <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-1.5 text-center text-[11px] font-semibold tracking-wide sm:justify-between sm:text-xs sm:px-6 lg:px-8">
-                    <span className="inline-flex items-center gap-2">
-                        <span className="rounded bg-white/15 px-2 py-0.5 uppercase tracking-[0.14em]">
-                            {SIGESC_AGT_CERT_LABEL}
+        <>
+            <motion.header
+                className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
+                    isScrolled ? 'border-slate-200/80 bg-white/95 shadow-sm backdrop-blur' : 'border-slate-100 bg-white'
+                }`}
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+            >
+                <div className="h-9 bg-[#0b3d91] text-white">
+                    <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+                        <span className="inline-flex min-w-0 items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em]">
+                            <span className="truncate rounded bg-white/15 px-2 py-0.5">
+                                {SIGESC_AGT_CERT_LABEL}
+                            </span>
+                            <span className="hidden truncate text-[11px] font-medium normal-case tracking-normal text-sky-100 sm:inline">
+                                Faturação eletrónica · Angola
+                            </span>
                         </span>
-                        <span className="hidden text-sky-100 sm:inline">Faturação eletrónica · Angola</span>
-                    </span>
-                    <span className="font-mono text-sm font-bold tracking-wider text-amber-200 sm:text-base">
-                        {SIGESC_AGT_CERT_NUMBER}
-                    </span>
-                </div>
-            </div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
-                    <Link href="/" className="flex items-center space-x-2 group shrink-0">
-                        <div className="bg-blue-500 p-2 rounded-lg group-hover:bg-blue-600 transition-colors duration-300">
-                            <span className="text-white font-bold text-xl">S</span>
-                        </div>
-                        <span className="text-xl font-bold text-gray-900">IGESC</span>
-                        <span className="text-xs text-gray-500 hidden xl:block ml-2">
-                            Sistema de Gestão
-                        </span>
-                        <span
-                            className="ml-1 hidden rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-900 lg:inline-block"
-                            title={`${SIGESC_AGT_CERT_LABEL} — ${SIGESC_AGT_CERT_NUMBER}`}
-                        >
+                        <span className="shrink-0 font-mono text-[12px] font-bold tracking-wider text-amber-200 sm:text-[13px]">
                             {SIGESC_AGT_CERT_NUMBER}
                         </span>
-                    </Link>
-
-                    <nav className="hidden lg:flex items-center space-x-0.5 xl:space-x-1">
-                        {menuItems.map((item, index) => (
-                            <div key={item.text} className="relative group">
-                                {item.dropdown ? (
-                                    <a
-                                        href={item.href}
-                                        className="flex items-center space-x-1 px-2.5 xl:px-3 py-2 text-gray-700 hover:text-blue-500 transition-colors duration-300 font-medium text-sm whitespace-nowrap"
-                                        onMouseEnter={() => setActiveDropdown(index)}
-                                    >
-                                        <span>{item.icon}</span>
-                                        <span>{item.text}</span>
-                                        <AiOutlineDown className="text-xs ml-0.5 transition-transform duration-300 group-hover:rotate-180" />
-                                    </a>
-                                ) : (
-                                    <NavLink
-                                        item={item}
-                                        className="flex items-center space-x-1 px-2.5 xl:px-3 py-2 text-gray-700 hover:text-blue-500 transition-colors duration-300 font-medium text-sm whitespace-nowrap"
-                                    />
-                                )}
-
-                                {item.dropdown && (
-                                    <div
-                                        className="absolute top-full left-0 w-56 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-50"
-                                        onMouseLeave={() => setActiveDropdown(null)}
-                                    >
-                                        {item.dropdown.map((dropdownItem, idx) => (
-                                            <a
-                                                key={idx}
-                                                href={dropdownItem.href}
-                                                title={dropdownItem.desc}
-                                                className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
-                                            >
-                                                {dropdownItem.name}
-                                            </a>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </nav>
-
-                    <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-                        <div className="hidden md:flex items-center space-x-1">
-                            {supportItems.map((item) => (
-                                <Link
-                                    key={item.text}
-                                    href={item.href}
-                                    className="p-2 text-gray-500 hover:text-blue-500 transition-colors duration-300"
-                                    title={item.text}
-                                >
-                                    {item.icon}
-                                </Link>
-                            ))}
-                        </div>
-
-                        {user?.id ? (
-                            <Link href="/profile" className="flex items-center space-x-2 group">
-                                <div className="relative">
-                                    <img
-                                        src={user.user_profile?.image || '/img/avatar-placeholder.svg'}
-                                        alt="Profile"
-                                        className="w-8 h-8 rounded-full border-2 border-white shadow-sm group-hover:border-blue-300 transition-colors duration-300"
-                                    />
-                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
-                                </div>
-                            </Link>
-                        ) : (
-                            <div className="flex items-center space-x-2">
-                                <a
-                                    href={SIGESC_ADMIN_LOGIN_URL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-3 xl:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 font-medium text-sm shadow-sm hover:shadow-md"
-                                >
-                                    Entrar
-                                </a>
-                                <a
-                                    href={SIGESC_GETTING_STARTED_URL}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="px-3 xl:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-blue-300 hover:text-blue-600 transition-colors duration-300 font-medium text-sm hidden sm:block"
-                                >
-                                    Solicitar Demo
-                                </a>
-                            </div>
-                        )}
-
-                        <button
-                            onClick={toggleMenu}
-                            className="lg:hidden p-2 rounded-lg text-gray-500 hover:text-blue-500 hover:bg-gray-100 transition-colors duration-300"
-                            aria-label="Menu"
-                            type="button"
-                        >
-                            {isMenuOpen ? (
-                                <AiOutlineClose className="text-xl" />
-                            ) : (
-                                <AiOutlineMenu className="text-xl" />
-                            )}
-                        </button>
                     </div>
                 </div>
-            </div>
+
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="flex h-14 items-center justify-between gap-3 sm:h-16">
+                        <Link href="/" className="group flex min-w-0 shrink-0 items-center gap-2" onClick={closeMenu}>
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#00a5cf] text-[15px] font-bold text-white transition-colors group-hover:bg-[#0090b5]">
+                                S
+                            </span>
+                            <span className="text-[17px] font-bold leading-none tracking-tight text-slate-900 sm:text-[18px]">
+                                IGESC
+                            </span>
+                            <span
+                                className="ml-0.5 hidden rounded border border-amber-300/80 bg-amber-50 px-1.5 py-0.5 font-mono text-[10px] font-bold leading-none text-amber-900 xl:inline"
+                                title={`${SIGESC_AGT_CERT_LABEL} — ${SIGESC_AGT_CERT_NUMBER}`}
+                            >
+                                {SIGESC_AGT_CERT_NUMBER}
+                            </span>
+                        </Link>
+
+                        <nav
+                            className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex"
+                            aria-label="Principal"
+                            onMouseLeave={() => setOpenDesktopMenu(null)}
+                        >
+                            {primaryItems.map((item) => (
+                                <div
+                                    key={item.text}
+                                    className="relative"
+                                    onMouseEnter={() => setOpenDesktopMenu(item.dropdown ? item.text : null)}
+                                >
+                                    {item.dropdown ? (
+                                        <a href={item.href} className={NAV_LINK}>
+                                            <span className="inline-flex shrink-0">{item.icon}</span>
+                                            <span>{item.text}</span>
+                                            <AiOutlineDown
+                                                className={`h-3 w-3 shrink-0 transition-transform ${
+                                                    openDesktopMenu === item.text ? 'rotate-180' : ''
+                                                }`}
+                                            />
+                                        </a>
+                                    ) : (
+                                        <NavLink item={item} className={NAV_LINK} />
+                                    )}
+
+                                    {item.dropdown && openDesktopMenu === item.text && (
+                                        <div className="absolute left-0 top-full z-50 pt-1">
+                                            <div className="w-64 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                                                {item.dropdown.map((dropdownItem) => (
+                                                    <a
+                                                        key={dropdownItem.href + dropdownItem.name}
+                                                        href={dropdownItem.href}
+                                                        title={dropdownItem.desc}
+                                                        className={DROPDOWN_LINK}
+                                                    >
+                                                        {dropdownItem.name}
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </nav>
+
+                        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                            <div className="hidden items-center gap-0.5 md:flex">
+                                {supportItems.map((item) => (
+                                    <Link
+                                        key={item.text}
+                                        href={item.href}
+                                        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-50 hover:text-[#00a5cf]"
+                                        title={item.text}
+                                        aria-label={item.text}
+                                    >
+                                        {item.icon}
+                                    </Link>
+                                ))}
+                            </div>
+
+                            {user?.id ? (
+                                <Link href="/profile" className="inline-flex h-9 w-9 items-center justify-center">
+                                    <img
+                                        src={user.user_profile?.image || '/img/avatar-placeholder.svg'}
+                                        alt="Perfil"
+                                        className="h-8 w-8 rounded-full border border-slate-200 object-cover"
+                                    />
+                                </Link>
+                            ) : (
+                                <div className="flex items-center gap-1.5">
+                                    <a
+                                        href={SIGESC_ADMIN_LOGIN_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex h-9 items-center rounded-lg bg-[#00a5cf] px-3 text-[13px] font-semibold leading-none text-white transition-colors hover:bg-[#0090b5] sm:px-3.5"
+                                    >
+                                        Entrar
+                                    </a>
+                                    <a
+                                        href={SIGESC_GETTING_STARTED_URL}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="hidden h-9 items-center rounded-lg border border-slate-300 px-3 text-[13px] font-semibold leading-none text-slate-700 transition-colors hover:border-[#00a5cf] hover:text-[#00a5cf] sm:inline-flex"
+                                    >
+                                        Demo
+                                    </a>
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => setIsMenuOpen((open) => !open)}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 transition-colors hover:bg-slate-100 hover:text-[#00a5cf] xl:hidden"
+                                aria-label={isMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+                                aria-expanded={isMenuOpen}
+                                type="button"
+                            >
+                                {isMenuOpen ? (
+                                    <AiOutlineClose className="h-5 w-5" />
+                                ) : (
+                                    <AiOutlineMenu className="h-5 w-5" />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </motion.header>
+
+            {/* Reserva espaço do header fixo (barra AGT + barra principal) */}
+            <div className="h-[5.75rem] sm:h-[6.25rem]" aria-hidden="true" />
 
             <AnimatePresence>
                 {isMenuOpen && (
                     <>
-                        <motion.div
+                        <motion.button
+                            type="button"
+                            aria-label="Fechar menu"
                             initial={{ opacity: 0 }}
-                            animate={{ opacity: 0.5 }}
+                            animate={{ opacity: 0.45 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black lg:hidden z-40"
-                            onClick={toggleMenu}
+                            className="fixed inset-0 z-[60] bg-slate-900 xl:hidden"
+                            onClick={closeMenu}
                         />
-                        <motion.div
+                        <motion.aside
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
-                            transition={{ type: 'spring', damping: 25 }}
-                            className="fixed top-0 right-0 w-80 h-screen bg-white shadow-2xl z-50 lg:hidden overflow-y-auto"
+                            transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+                            className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[20rem] flex-col bg-white shadow-2xl xl:hidden"
                         >
-                            <div className="p-6">
-                                <div className="mb-4 rounded-xl bg-[#0b3d91] px-3 py-2 text-center text-white">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-100">
-                                        {SIGESC_AGT_CERT_LABEL}
-                                    </p>
-                                    <p className="mt-0.5 font-mono text-sm font-bold tracking-wider text-amber-200">
-                                        {SIGESC_AGT_CERT_NUMBER}
-                                    </p>
-                                </div>
-                                <div className="flex items-center justify-between mb-8">
-                                    <Link href="/" className="flex items-center space-x-2" onClick={toggleMenu}>
-                                        <div className="bg-blue-500 p-2 rounded-lg">
-                                            <span className="text-white font-bold text-xl">S</span>
-                                        </div>
-                                        <span className="text-xl font-bold text-gray-900">IGESC</span>
-                                    </Link>
-                                    <button
-                                        onClick={toggleMenu}
-                                        type="button"
-                                        className="p-2 text-gray-500 hover:text-blue-500 rounded-lg hover:bg-gray-100"
-                                    >
-                                        <AiOutlineClose className="text-xl" />
-                                    </button>
-                                </div>
+                            <div className="flex h-14 items-center justify-between border-b border-slate-100 px-4">
+                                <Link href="/" className="flex items-center gap-2" onClick={closeMenu}>
+                                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#00a5cf] text-[15px] font-bold text-white">
+                                        S
+                                    </span>
+                                    <span className="text-[17px] font-bold leading-none text-slate-900">IGESC</span>
+                                </Link>
+                                <button
+                                    onClick={closeMenu}
+                                    type="button"
+                                    className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
+                                    aria-label="Fechar"
+                                >
+                                    <AiOutlineClose className="h-5 w-5" />
+                                </button>
+                            </div>
 
-                                <nav className="space-y-1">
-                                    {menuItems.map((item) => (
+                            <div className="border-b border-slate-100 bg-[#0b3d91] px-4 py-3 text-center text-white">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sky-100">
+                                    {SIGESC_AGT_CERT_LABEL}
+                                </p>
+                                <p className="mt-1 font-mono text-[13px] font-bold tracking-wider text-amber-200">
+                                    {SIGESC_AGT_CERT_NUMBER}
+                                </p>
+                            </div>
+
+                            <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-3" aria-label="Mobile">
+                                <div className="space-y-0.5">
+                                    {mobileItems.map((item) => (
                                         <div key={item.text}>
-                                            <NavLink
-                                                item={item}
-                                                className="flex items-center space-x-3 p-3 text-gray-700 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                                                onClick={toggleMenu}
-                                            />
+                                            <NavLink item={item} className={MOBILE_LINK} onClick={closeMenu} />
                                             {item.dropdown && (
-                                                <div className="pl-11 space-y-1">
-                                                    {item.dropdown.map((dropdownItem, idx) => (
+                                                <div className="mb-1 ml-8 space-y-0.5 border-l border-slate-200 pl-3">
+                                                    {item.dropdown.map((dropdownItem) => (
                                                         <Link
-                                                            key={idx}
+                                                            key={dropdownItem.href + dropdownItem.name}
                                                             href={dropdownItem.href}
-                                                            className="block py-2 px-4 text-sm text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                                                            onClick={toggleMenu}
+                                                            className="flex min-h-10 items-center text-[14px] font-medium leading-none text-slate-600 transition-colors hover:text-[#00a5cf]"
+                                                            onClick={closeMenu}
                                                         >
                                                             {dropdownItem.name}
                                                         </Link>
@@ -328,52 +402,52 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
                                             )}
                                         </div>
                                     ))}
+                                </div>
 
-                                    <div className="pt-4 mt-4 border-t border-gray-200">
-                                        <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                                            Recursos
-                                        </p>
-                                        {supportItems.map((item) => (
-                                            <Link
-                                                key={item.text}
-                                                href={item.href}
-                                                className="flex items-center space-x-3 p-3 text-gray-700 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                                                onClick={toggleMenu}
-                                            >
-                                                <span className="text-blue-500">{item.icon}</span>
-                                                <span className="font-medium">{item.text}</span>
-                                            </Link>
-                                        ))}
+                                <div className="mt-4 border-t border-slate-200 pt-3">
+                                    <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                                        Recursos
+                                    </p>
+                                    {supportItems.map((item) => (
+                                        <Link
+                                            key={item.text}
+                                            href={item.href}
+                                            className={MOBILE_LINK}
+                                            onClick={closeMenu}
+                                        >
+                                            <span className="inline-flex shrink-0 text-[#00a5cf]">{item.icon}</span>
+                                            <span>{item.text}</span>
+                                        </Link>
+                                    ))}
+                                </div>
+
+                                {!user?.id && (
+                                    <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
+                                        <a
+                                            href={SIGESC_ADMIN_LOGIN_URL}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex h-11 items-center justify-center rounded-lg bg-[#00a5cf] text-[15px] font-semibold text-white hover:bg-[#0090b5]"
+                                            onClick={closeMenu}
+                                        >
+                                            Entrar
+                                        </a>
+                                        <a
+                                            href={SIGESC_GETTING_STARTED_URL}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="flex h-11 items-center justify-center rounded-lg border border-slate-300 text-[15px] font-semibold text-slate-700 hover:border-[#00a5cf] hover:text-[#00a5cf]"
+                                            onClick={closeMenu}
+                                        >
+                                            Solicitar Demo
+                                        </a>
                                     </div>
-
-                                    {!user?.id && (
-                                        <div className="pt-4 mt-4 border-t border-gray-200 space-y-2">
-                                            <a
-                                                href={SIGESC_ADMIN_LOGIN_URL}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="block w-full text-center px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 font-medium"
-                                                onClick={toggleMenu}
-                                            >
-                                                Entrar
-                                            </a>
-                                            <a
-                                                href={SIGESC_GETTING_STARTED_URL}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="block w-full text-center px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:border-blue-300 hover:text-blue-600 transition-colors duration-300 font-medium"
-                                                onClick={toggleMenu}
-                                            >
-                                                Solicitar Demo
-                                            </a>
-                                        </div>
-                                    )}
-                                </nav>
-                            </div>
-                        </motion.div>
+                                )}
+                            </nav>
+                        </motion.aside>
                     </>
                 )}
             </AnimatePresence>
-        </motion.header>
+        </>
     );
 };
