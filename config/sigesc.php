@@ -22,4 +22,16 @@ return [
 
     'favicon_url' => rtrim(env('SIGESC_ADMIN_URL', 'https://admin.sisgesc.net'), '/').'/favicon.ico',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Certificação AGT (faturação eletrónica)
+    |--------------------------------------------------------------------------
+    */
+    'agt_certification' => [
+        'number' => env('SIGESC_AGT_CERT_NUMBER', 'FE/323/AGT/2026'),
+        'label' => env('SIGESC_AGT_CERT_LABEL', 'Software certificado AGT'),
+        'authority' => 'AGT',
+        'year' => 2026,
+    ],
+
 ];

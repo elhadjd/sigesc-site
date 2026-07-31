@@ -7,3 +7,7 @@ export const SIGESC_GETTING_STARTED_URL = `${SIGESC_ADMIN_URL}/getting-started`;
 export const SIGESC_ADMIN_LOGIN_URL = `${SIGESC_ADMIN_URL}/auth/login`;
 export const SIGESC_FAVICON_URL = `${SIGESC_ADMIN_URL}/favicon.ico`;
 export const SIGESC_LOGO_URL = `${SIGESC_ADMIN_URL}/logo.png`;
+
+/** Certificação oficial AGT — faturação eletrónica. */
+export const SIGESC_AGT_CERT_NUMBER = 'FE/323/AGT/2026';
+export const SIGESC_AGT_CERT_LABEL = 'Software certificado AGT';

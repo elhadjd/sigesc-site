@@ -8,7 +8,12 @@ import { FaRegNewspaper, FaTools, FaRobot } from 'react-icons/fa';
 import { FaDownload } from 'react-icons/fa6';
 import { RiCustomerService2Line } from 'react-icons/ri';
 import { features } from '@/services/public/veriables';
-import { SIGESC_ADMIN_LOGIN_URL, SIGESC_GETTING_STARTED_URL } from '@/services/public/domains';
+import {
+    SIGESC_ADMIN_LOGIN_URL,
+    SIGESC_AGT_CERT_LABEL,
+    SIGESC_AGT_CERT_NUMBER,
+    SIGESC_GETTING_STARTED_URL,
+} from '@/services/public/domains';
 
 type NavItem = {
     href: string;
@@ -121,6 +126,19 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
         >
+            <div className="bg-[#0b3d91] text-white">
+                <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-1.5 text-center text-[11px] font-semibold tracking-wide sm:justify-between sm:text-xs sm:px-6 lg:px-8">
+                    <span className="inline-flex items-center gap-2">
+                        <span className="rounded bg-white/15 px-2 py-0.5 uppercase tracking-[0.14em]">
+                            {SIGESC_AGT_CERT_LABEL}
+                        </span>
+                        <span className="hidden text-sky-100 sm:inline">Faturação eletrónica · Angola</span>
+                    </span>
+                    <span className="font-mono text-sm font-bold tracking-wider text-amber-200 sm:text-base">
+                        {SIGESC_AGT_CERT_NUMBER}
+                    </span>
+                </div>
+            </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <Link href="/" className="flex items-center space-x-2 group shrink-0">
@@ -130,6 +148,12 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
                         <span className="text-xl font-bold text-gray-900">IGESC</span>
                         <span className="text-xs text-gray-500 hidden xl:block ml-2">
                             Sistema de Gestão
+                        </span>
+                        <span
+                            className="ml-1 hidden rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-900 lg:inline-block"
+                            title={`${SIGESC_AGT_CERT_LABEL} — ${SIGESC_AGT_CERT_NUMBER}`}
+                        >
+                            {SIGESC_AGT_CERT_NUMBER}
                         </span>
                     </Link>
 
@@ -254,6 +278,14 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
                             className="fixed top-0 right-0 w-80 h-screen bg-white shadow-2xl z-50 lg:hidden overflow-y-auto"
                         >
                             <div className="p-6">
+                                <div className="mb-4 rounded-xl bg-[#0b3d91] px-3 py-2 text-center text-white">
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-100">
+                                        {SIGESC_AGT_CERT_LABEL}
+                                    </p>
+                                    <p className="mt-0.5 font-mono text-sm font-bold tracking-wider text-amber-200">
+                                        {SIGESC_AGT_CERT_NUMBER}
+                                    </p>
+                                </div>
                                 <div className="flex items-center justify-between mb-8">
                                     <Link href="/" className="flex items-center space-x-2" onClick={toggleMenu}>
                                         <div className="bg-blue-500 p-2 rounded-lg">

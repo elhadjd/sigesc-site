@@ -33,6 +33,9 @@
         header.site a { color: #0b3d91; text-decoration: none; font-family: "Segoe UI", sans-serif; font-weight: 700; letter-spacing: .04em; }
         header.site nav { display: flex; flex-wrap: wrap; gap: .65rem 1rem; font-family: "Segoe UI", sans-serif; font-size: .9rem; }
         header.site nav a { font-weight: 600; }
+        .agt-cert { margin: 0 0 1rem; padding: .65rem .9rem; border-radius: 10px; background: #0b3d91; color: #fff; font-family: "Segoe UI", sans-serif; display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; justify-content: space-between; }
+        .agt-cert .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 700; opacity: .9; }
+        .agt-cert .number { font-family: ui-monospace, monospace; font-weight: 800; letter-spacing: .06em; color: #fde68a; font-size: 1.05rem; }
         .kicker { font-family: "Segoe UI", sans-serif; text-transform: uppercase; letter-spacing: .12em; font-size: .75rem; color: #6b7280; }
         h1 { font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; margin: .6rem 0 1rem; }
         .meta { font-family: "Segoe UI", sans-serif; color: #4b5563; font-size: .95rem; margin-bottom: 1.5rem; }
@@ -49,9 +52,17 @@
     </style>
 </head>
 <body>
-    @php $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/'); @endphp
+    @php
+        $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
+        $agtCert = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $agtLabel = config('sigesc.agt_certification.label', 'Software certificado AGT');
+    @endphp
     <div class="wrap">
         <header class="site">
+            <div class="agt-cert" role="note" aria-label="{{ $agtLabel }}">
+                <span class="label">{{ $agtLabel }} · Faturação eletrónica</span>
+                <span class="number">{{ $agtCert }}</span>
+            </div>
             <div class="brand">
                 <a href="{{ $base }}/">SIGESC</a>
                 <a href="{{ $base }}/auth">Entrar</a>
@@ -73,7 +84,7 @@
         </header>
         @yield('content')
         <footer>
-            Conteúdo indexável gerado no servidor para motores de busca · SIGESC Angola
+            Conteúdo indexável gerado no servidor para motores de busca · SIGESC Angola · {{ $agtLabel }} {{ $agtCert }}
         </footer>
     </div>
 </body>
