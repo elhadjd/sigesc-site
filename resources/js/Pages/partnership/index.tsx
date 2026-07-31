@@ -81,7 +81,7 @@ export default function PartnershipIndex({
                         />
                         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(0,165,207,.28),transparent_42%)]" />
 
-                        <div className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-4 pb-16 pt-32 sm:px-6 sm:pb-20">
+                        <div className="relative mx-auto flex min-h-[calc(100svh-5.75rem)] max-w-6xl flex-col justify-end px-4 pb-16 pt-16 sm:min-h-[calc(100svh-6.25rem)] sm:px-6 sm:pb-20 sm:pt-20">
                             <motion.p
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={ready ? { opacity: 1, y: 0 } : undefined}

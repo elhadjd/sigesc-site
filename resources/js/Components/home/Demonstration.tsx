@@ -143,7 +143,7 @@ export const Demonstration = ({ auth }: { auth: { user: User } }) => {
                 <link rel="preload" href="/img/billing/SIGESC Software de Gestao Empresarial Sigesc Paineies proficionais.png" as="image" />
             </Helmet>
 
-            <section className="relative bg-gradient-to-br from-slate-50 via-white to-slate-100 pt-24 lg:pt-24 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-slate-50 via-white to-slate-100 pt-8 sm:pt-10 overflow-hidden">
                 <div className="absolute top-10% right-10% w-80 h-80 bg-blue-100/20 rounded-full blur-3xl"></div>
                 <div className="absolute bottom-10% left-10% w-96 h-96 bg-blue-200/10 rounded-full blur-3xl"></div>
 
