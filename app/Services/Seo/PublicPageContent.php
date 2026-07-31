@@ -444,6 +444,70 @@ class PublicPageContent
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function partnership(): array
+    {
+        $cfg = config('sigesc.partnership', []);
+        $price = (int) ($cfg['monthly_price'] ?? 30000);
+        $priceLabel = number_format($price, 0, ',', '.').' '.($cfg['currency_label'] ?? 'Kz');
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+
+        return [
+            'kicker' => 'Programa de parceria · Licenças offline limitadas',
+            'headline' => 'Parceria SIGESC — '.$priceLabel.'/mês com o nosso sistema',
+            'lead' => 'Junte-se ao programa de parceiros SIGESC: revenda e implemente software de gestão comercial certificado pela AGT ('.$agt.') em Angola. Mensalidade de '.$priceLabel.'. As licenças da versão offline são limitadas — candidate-se enquanto houver cupos.',
+            'sections' => [
+                [
+                    'heading' => 'O que inclui a parceria',
+                    'items' => [
+                        'Mensalidade de '.$priceLabel.' para parceria com o sistema SIGESC',
+                        'Acesso a licenças limitadas da versão offline (Windows/Linux)',
+                        'Material comercial e suporte para implantação em PME',
+                        'Faturação eletrónica certificada AGT ('.$agt.')',
+                        'Módulos: PDV, stock, finanças, compras, RH e mais',
+                        'Território: Luanda e outras províncias de Angola',
+                    ],
+                ],
+                [
+                    'heading' => 'Versão offline — licenças limitadas',
+                    'body' => 'A versão offline do SIGESC permite operar sem dependência contínua da internet — ideal para lojas, armazéns e escritórios com ligação instável. Os cupos de licença offline para parceiros são limitados e atribuídos conforme disponibilidade.',
+                    'items' => [
+                        'Instalação local com sincronização quando houver rede',
+                        'Cupos limitados por parceiro e por região',
+                        'Pedido sujeito a aprovação comercial SIGESC',
+                    ],
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => [
+                        [
+                            'question' => 'Quanto custa a parceria?',
+                            'answer' => 'O plano de parceria custa '.$priceLabel.' por mês.',
+                        ],
+                        [
+                            'question' => 'As licenças offline são ilimitadas?',
+                            'answer' => 'Não. As licenças da versão offline são limitadas. Contacte-nos para reservar o seu cupo.',
+                        ],
+                        [
+                            'question' => 'Como me candidatar?',
+                            'answer' => 'Use o formulário de contacto ou registe uma conta Parceiro. A equipa confirma disponibilidade e próximos passos.',
+                        ],
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => url('/parceria'), 'label' => 'Página de parceria SIGESC', 'description' => $priceLabel.'/mês · offline limitado'],
+                ['href' => url('/contact'), 'label' => 'Pedir parceria', 'description' => 'Fale com a equipa comercial'],
+                ['href' => url('/auth/register'), 'label' => 'Registar como parceiro', 'description' => 'Criar conta Parceiro'],
+                ['href' => url('/prices'), 'label' => 'Preços cloud SIGESC', 'description' => 'Planos para PME'],
+                ['href' => url('/solutions'), 'label' => 'Soluções SIGESC', 'description' => 'Módulos de gestão'],
+                ['href' => url('/downloads'), 'label' => 'Downloads', 'description' => 'Instaladores e recursos'],
+            ],
+        ];
+    }
+
+    /**
      * @param  list<array<string, mixed>>  $templates
      * @return array<string, mixed>
      */

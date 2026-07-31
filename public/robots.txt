@@ -7,7 +7,62 @@ Allow: /calculadoras
 Allow: /modelos-de-fatura
 Allow: /gerador-de-fatura
 Allow: /gerador-de-codigo-barras
+Allow: /parceria
+Allow: /llms.txt
+Allow: /ai.txt
 Allow: /feed.xml
+
+# AI / generative search crawlers (GEO)
+User-agent: GPTBot
+Allow: /
+Allow: /parceria
+Allow: /llms.txt
+Allow: /ai.txt
+Allow: /blog/posts
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /parceria
+Allow: /llms.txt
+
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /parceria
+Allow: /llms.txt
+Allow: /ai.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /parceria
+Allow: /llms.txt
+Allow: /ai.txt
+
+User-agent: anthropic-ai
+Allow: /
+Allow: /parceria
+Allow: /llms.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /parceria
+Allow: /llms.txt
+Allow: /ai.txt
+
+User-agent: Google-Extended
+Allow: /
+Allow: /parceria
+Allow: /llms.txt
+Allow: /ai.txt
+
+User-agent: Amazonbot
+Allow: /
+Allow: /parceria
+Allow: /llms.txt
+
+User-agent: Bytespider
+Allow: /
+Allow: /parceria
+Allow: /llms.txt
 
 Disallow: /authenticate
 Disallow: /auth/
@@ -18,4 +73,4 @@ Disallow: /new-chat
 # Respostas individuais (UUID) — indexar só o hub
 Disallow: /pergunte-ao-especialista/
 
-Sitemap: https://www.sisgesc.net/sitemap.xml
+Sitemap: https://sisgesc.net/sitemap.xml

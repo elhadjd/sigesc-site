@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AiOutlineMenu, AiOutlineClose, AiOutlineDown } from 'react-icons/ai';
-import { BsPerson, BsShop, BsTag, BsQuestionCircle, BsCalculator, BsChatDots, BsFileEarmarkText } from 'react-icons/bs';
+import { BsPerson, BsShop, BsTag, BsQuestionCircle, BsCalculator, BsChatDots, BsFileEarmarkText, BsBuilding } from 'react-icons/bs';
 import { Link, usePage } from '@inertiajs/react';
 import { useLoggedUser } from '@/contexts/loggedUser';
 import { FaRegNewspaper, FaTools, FaRobot } from 'react-icons/fa';
@@ -51,6 +51,7 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
         },
         { href: route('shop', { page: '' }), icon: <BsShop className="text-base" />, text: 'Loja' },
         { href: '/prices', icon: <BsTag className="text-base" />, text: 'Preços' },
+        { href: '/parceria', icon: <BsBuilding className="text-base" />, text: 'Parceria' },
         { href: '/clients/depoiments', icon: <BsPerson className="text-base" />, text: 'Clientes' },
         { href: '/blog/posts', icon: <FaRegNewspaper className="text-base" />, text: 'Blog' },
         { href: '/calculadoras', icon: <BsCalculator className="text-base" />, text: 'Calculadoras' },
