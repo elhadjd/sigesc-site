@@ -40,8 +40,8 @@ return [
     /*
     | Topics researched and published every Monday.
     | Each topic can define extra search queries and default taxonomy.
-    | Cover images resolve via CoverImageService (contextual stock / editorial SVG).
-    | Never uses SIGESC module product screenshots or brand logos.
+    | Cover images resolve via CoverImageService from the internet
+    | (Tavily / Google / DuckDuckGo / stock APIs). External URLs are used.
     */
     'topics' => [
         [

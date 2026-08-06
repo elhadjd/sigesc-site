@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * Resolve a contextual cover image for an AI article.
+ * Resolve a contextual cover image for an AI article from the public internet.
  *
- * Order: remote stock (stored locally) → curated topic photos → editorial
- * blog-covers SVG catalog → generated SVG → placeholder.
+ * Order: Tavily web images → Google CSE → DuckDuckGo → Openverse → Wikimedia →
+ * Unsplash → Pexels → curated external Unsplash CDN URLs.
  *
- * Never uses SIGESC module/product screenshots or brand logos.
- * With require_local_url=true, remote URLs are never returned unless saved under storage/public.
+ * External image URLs are preferred (not project-generated SVGs / product screenshots).
+ * Local SVG generation is off by default.
  */
 class CoverImageService
 {
@@ -23,6 +23,7 @@ class CoverImageService
         protected LlmGateway $llm,
         protected LocalCoverCatalog $localCatalog,
         protected BlogCoverGenerator $coverGenerator,
+        protected \App\Services\AiContentEngine\Research\TavilyClient $tavily,
     ) {}
 
     /**
@@ -34,10 +35,11 @@ class CoverImageService
         $prompt ??= $this->defaultPrompt($article);
         $preferOpenai = (bool) config('ai_content_engine.images.prefer_openai', false);
         $provider = strtolower((string) config('ai_content_engine.images.provider', 'auto'));
-        $requireLocal = (bool) config('ai_content_engine.images.require_local_url', true);
+        $requireLocal = (bool) config('ai_content_engine.images.require_local_url', false);
+        $allowLocalCovers = (bool) config('ai_content_engine.images.allow_local_covers', false);
 
-        // Editorial catalog (blog-covers SVGs) is optional early preference — never product UI.
-        if ((bool) config('ai_content_engine.images.prefer_local_catalog', false)) {
+        // Local editorial catalog is OFF unless explicitly enabled — user wants internet photos.
+        if ($allowLocalCovers && (bool) config('ai_content_engine.images.prefer_local_catalog', false)) {
             $local = $this->localCatalog->match($article);
             if ($local !== null && ! $this->localCatalog->isForbiddenProductPath((string) $local['url'])) {
                 return $local;
@@ -46,19 +48,25 @@ class CoverImageService
 
         $attempts = match ($provider) {
             'openai' => ['openai'],
+            'tavily' => ['tavily'],
+            'google' => ['google'],
+            'duckduckgo' => ['duckduckgo'],
             'openverse' => ['openverse'],
             'wikimedia' => ['wikimedia'],
             'unsplash' => ['unsplash'],
             'pexels' => ['pexels'],
             'local' => [],
             default => $preferOpenai
-                ? ['openai', 'openverse', 'wikimedia', 'unsplash', 'pexels']
-                : ['openverse', 'wikimedia', 'unsplash', 'pexels', 'openai'],
+                ? ['openai', 'tavily', 'google', 'duckduckgo', 'openverse', 'wikimedia', 'unsplash', 'pexels']
+                : ['tavily', 'google', 'duckduckgo', 'openverse', 'wikimedia', 'unsplash', 'pexels', 'openai'],
         };
 
         foreach ($attempts as $source) {
             $candidates = match ($source) {
                 'openai' => array_values(array_filter([$this->fromOpenAi($prompt)])),
+                'tavily' => $this->fromTavily($queries),
+                'google' => $this->fromGoogle($queries),
+                'duckduckgo' => $this->fromDuckDuckGo($queries),
                 'openverse' => $this->fromOpenverse($queries),
                 'wikimedia' => $this->fromWikimedia($queries),
                 'unsplash' => $this->fromUnsplash($queries),
@@ -93,7 +101,7 @@ class CoverImageService
                     'source' => 'curated',
                     'attribution' => [
                         'provider' => 'unsplash-cdn',
-                        'note' => 'Curated stock photo keyed to article topic (stored locally)',
+                        'note' => 'Curated internet stock photo keyed to article topic',
                     ],
                     'stored' => true,
                 ];
@@ -105,38 +113,34 @@ class CoverImageService
                     'source' => 'curated',
                     'attribution' => [
                         'provider' => 'unsplash-cdn',
-                        'note' => 'Curated stock photo keyed to article topic',
+                        'note' => 'External curated stock photo keyed to article topic',
                     ],
                     'stored' => false,
                 ];
             }
         }
 
-        // Topic-matched editorial SVG catalog (never product screenshots).
-        $editorial = $this->localCatalog->match($article);
-        if ($editorial !== null) {
-            return $editorial;
+        // Local SVG / catalog only if explicitly allowed (default: never).
+        if ($allowLocalCovers) {
+            $editorial = $this->localCatalog->match($article);
+            if ($editorial !== null) {
+                return $editorial;
+            }
+
+            if ((bool) config('ai_content_engine.images.generate_local_cover', false)) {
+                return $this->coverGenerator->ensureFor($article);
+            }
         }
 
-        if ((bool) config('ai_content_engine.images.generate_local_cover', true)) {
-            return $this->coverGenerator->ensureFor($article);
-        }
-
-        $fallback = $this->localServerFallback();
-        if ($this->localCatalog->isForbiddenProductPath($fallback)) {
-            return $this->coverGenerator->ensureFor($article);
-        }
-
-        if (! $this->localPathExists($fallback) && Str::startsWith($fallback, '/')) {
-            return $this->coverGenerator->ensureFor($article);
-        }
+        // Absolute last resort: still an external Unsplash URL (never a local generated SVG).
+        $lastResort = $pool[0] ?? 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=80';
 
         return [
-            'url' => $fallback,
-            'source' => 'local',
+            'url' => $lastResort,
+            'source' => 'curated',
             'attribution' => [
-                'provider' => 'local',
-                'note' => 'Server fallback cover — remote sources unavailable',
+                'provider' => 'unsplash-cdn',
+                'note' => 'External last-resort stock photo',
             ],
             'stored' => false,
         ];
@@ -159,17 +163,25 @@ class CoverImageService
             return null;
         }
 
+        $allowLocalCovers = (bool) config('ai_content_engine.images.allow_local_covers', false);
+        if (Str::startsWith($url, '/') && ! $allowLocalCovers) {
+            Log::info('[AIContent][CoverImage] Skipping local project path — internet covers required', ['url' => $url]);
+
+            return null;
+        }
+
         $attributionBlob = strtolower(trim(implode(' ', array_filter([
             (string) ($hit['attribution']['title'] ?? ''),
             (string) ($hit['attribution']['creator'] ?? ''),
             (string) ($hit['attribution']['note'] ?? ''),
+            (string) ($hit['attribution']['description'] ?? ''),
             (string) ($hit['source'] ?? ''),
         ]))));
         if ($attributionBlob !== '' && $this->looksLikeBrandOrLogo($attributionBlob)) {
             return null;
         }
 
-        $requireLocal = (bool) config('ai_content_engine.images.require_local_url', true);
+        $requireLocal = (bool) config('ai_content_engine.images.require_local_url', false);
 
         // Relative/local paths must exist on this server and never be product UI.
         if (Str::startsWith($url, '/')) {
@@ -180,6 +192,22 @@ class CoverImageService
             }
 
             $hit['stored'] = true;
+
+            return $hit;
+        }
+
+        // Prefer keeping the external URL when local storage is optional.
+        if (! $requireLocal && ! (bool) config('ai_content_engine.images.store_locally', false)) {
+            if (! $this->urlIsReachable($url)) {
+                Log::info('[AIContent][CoverImage] Skipping unreachable URL', [
+                    'url' => $url,
+                    'source' => $hit['source'] ?? null,
+                ]);
+
+                return null;
+            }
+
+            $hit['stored'] = false;
 
             return $hit;
         }
@@ -248,13 +276,14 @@ class CoverImageService
         $english = $this->englishBoosts($seed);
         $queries = array_values(array_unique(array_filter([
             $english[0] ?? null,
+            trim(($english[0] ?? '').' editorial photo'),
             trim(($article->focus_keyword ?: '').' '.($english[0] ?? '')),
-            $seed,
+            $seed !== '' ? $seed.' foto' : null,
             ...array_slice($english, 1),
             'african business office retail photography',
         ])));
 
-        return array_slice($queries, 0, 5);
+        return array_slice($queries, 0, 6);
     }
 
     protected function defaultPrompt(Article $article): string
@@ -286,6 +315,200 @@ class CoverImageService
                 'model' => config('ai_content_engine.openai.image_model'),
             ],
         ];
+    }
+
+    /**
+     * Web image search via Tavily (query-related images from the open web).
+     *
+     * @param  list<string>  $queries
+     * @return list<array{url: string, source: string, attribution: array<string, mixed>}>
+     */
+    protected function fromTavily(array $queries): array
+    {
+        if (! (bool) config('ai_content_engine.images.tavily_enabled', true)) {
+            return [];
+        }
+
+        if (! $this->tavily->configured()) {
+            return [];
+        }
+
+        $hits = [];
+        foreach ($queries as $query) {
+            $imageQuery = trim($query.' photography photo');
+            foreach ($this->tavily->searchImages($imageQuery, 8) as $image) {
+                $url = (string) ($image['url'] ?? '');
+                $description = (string) ($image['description'] ?? '');
+                if ($url === '' || ! Str::startsWith($url, ['http://', 'https://'])) {
+                    continue;
+                }
+                if ($this->looksLikeBrandOrLogo(Str::lower($description.' '.$url))) {
+                    continue;
+                }
+                $hits[] = [
+                    'url' => $url,
+                    'source' => 'tavily',
+                    'attribution' => [
+                        'provider' => 'tavily-web',
+                        'description' => $description !== '' ? $description : null,
+                        'query' => $query,
+                    ],
+                ];
+            }
+        }
+
+        return $hits;
+    }
+
+    /**
+     * Google Programmable Search (Custom Search JSON API) — image mode.
+     *
+     * @param  list<string>  $queries
+     * @return list<array{url: string, source: string, attribution: array<string, mixed>}>
+     */
+    protected function fromGoogle(array $queries): array
+    {
+        $key = trim((string) config('ai_content_engine.images.google_cse_api_key'));
+        $cx = trim((string) config('ai_content_engine.images.google_cse_cx'));
+        if ($key === '' || $cx === '' || ! (bool) config('ai_content_engine.images.google_enabled', true)) {
+            return [];
+        }
+
+        $hits = [];
+        foreach ($queries as $query) {
+            try {
+                $response = Http::withHeaders($this->headers())
+                    ->timeout(20)
+                    ->get('https://www.googleapis.com/customsearch/v1', [
+                        'key' => $key,
+                        'cx' => $cx,
+                        'q' => $query,
+                        'searchType' => 'image',
+                        'num' => 8,
+                        'safe' => 'active',
+                        'imgSize' => 'large',
+                        'imgType' => 'photo',
+                    ]);
+
+                if (! $response->successful()) {
+                    continue;
+                }
+
+                foreach (collect($response->json('items') ?? [])->take(6) as $item) {
+                    $url = (string) ($item['link'] ?? '');
+                    $title = (string) ($item['title'] ?? '');
+                    $snippet = (string) ($item['snippet'] ?? '');
+                    if ($url === '' || ! Str::startsWith($url, ['http://', 'https://'])) {
+                        continue;
+                    }
+                    if ($this->looksLikeBrandOrLogo(Str::lower($title.' '.$snippet.' '.$url))) {
+                        continue;
+                    }
+                    $hits[] = [
+                        'url' => $url,
+                        'source' => 'google',
+                        'attribution' => [
+                            'provider' => 'google-cse',
+                            'title' => $title !== '' ? $title : null,
+                            'context' => data_get($item, 'image.contextLink'),
+                            'query' => $query,
+                        ],
+                    ];
+                }
+            } catch (\Throwable $e) {
+                Log::info('[AIContent][CoverImage] Google CSE failed', [
+                    'query' => $query,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $hits;
+    }
+
+    /**
+     * DuckDuckGo image results (free web image search, no API key).
+     *
+     * @param  list<string>  $queries
+     * @return list<array{url: string, source: string, attribution: array<string, mixed>}>
+     */
+    protected function fromDuckDuckGo(array $queries): array
+    {
+        if (! (bool) config('ai_content_engine.images.duckduckgo_enabled', true)) {
+            return [];
+        }
+
+        $hits = [];
+        foreach ($queries as $query) {
+            try {
+                $tokenResponse = Http::withHeaders([
+                    'User-Agent' => $this->headers()['User-Agent'],
+                ])->timeout(20)->get('https://duckduckgo.com/', [
+                    'q' => $query,
+                ]);
+
+                if (! $tokenResponse->successful()) {
+                    continue;
+                }
+
+                if (! preg_match("/vqd=['\"]([^'\"]+)['\"]/", $tokenResponse->body(), $match)) {
+                    continue;
+                }
+
+                $vqd = $match[1];
+                $imagesResponse = Http::withHeaders([
+                    'User-Agent' => $this->headers()['User-Agent'],
+                    'Referer' => 'https://duckduckgo.com/',
+                ])->timeout(25)->get('https://duckduckgo.com/i.js', [
+                    'l' => 'wt-wt',
+                    'o' => 'json',
+                    'q' => $query,
+                    'vqd' => $vqd,
+                    'f' => ',,,',
+                    'p' => '1',
+                ]);
+
+                if (! $imagesResponse->successful()) {
+                    continue;
+                }
+
+                $results = $imagesResponse->json('results') ?? [];
+                if (! is_array($results)) {
+                    continue;
+                }
+
+                foreach (array_slice($results, 0, 8) as $row) {
+                    if (! is_array($row)) {
+                        continue;
+                    }
+                    $url = (string) ($row['image'] ?? $row['thumbnail'] ?? '');
+                    $title = (string) ($row['title'] ?? '');
+                    if ($url === '' || ! Str::startsWith($url, ['http://', 'https://'])) {
+                        continue;
+                    }
+                    if ($this->looksLikeBrandOrLogo(Str::lower($title.' '.$url))) {
+                        continue;
+                    }
+                    $hits[] = [
+                        'url' => $url,
+                        'source' => 'duckduckgo',
+                        'attribution' => [
+                            'provider' => 'duckduckgo-images',
+                            'title' => $title !== '' ? $title : null,
+                            'source_page' => $row['url'] ?? null,
+                            'query' => $query,
+                        ],
+                    ];
+                }
+            } catch (\Throwable $e) {
+                Log::info('[AIContent][CoverImage] DuckDuckGo images failed', [
+                    'query' => $query,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $hits;
     }
 
     /**

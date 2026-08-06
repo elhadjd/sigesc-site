@@ -25,20 +25,22 @@ class TavilyClient
      *   search_depth?: string,
      *   topic?: string,
      *   include_answer?: bool,
+     *   include_images?: bool,
+     *   include_image_descriptions?: bool,
      *   include_domains?: list<string>|null,
      *   days?: int|null
      * }  $options
-     * @return array{answer:?string, results: list<array<string, mixed>>}
+     * @return array{answer:?string, results: list<array<string, mixed>>, images: list<mixed>}
      */
     public function search(array $options): array
     {
         if (! $this->configured()) {
-            return ['answer' => null, 'results' => []];
+            return ['answer' => null, 'results' => [], 'images' => []];
         }
 
         $query = trim((string) ($options['query'] ?? ''));
         if ($query === '') {
-            return ['answer' => null, 'results' => []];
+            return ['answer' => null, 'results' => [], 'images' => []];
         }
 
         $maxResults = (int) ($options['max_results'] ?? config('ai_content_engine.tavily.max_results', 8));
@@ -50,6 +52,14 @@ class TavilyClient
             'max_results' => max(1, min(20, $maxResults)),
             'topic' => $options['topic'] ?? 'general',
         ];
+
+        if (array_key_exists('include_images', $options)) {
+            $payload['include_images'] = (bool) $options['include_images'];
+        }
+
+        if (array_key_exists('include_image_descriptions', $options)) {
+            $payload['include_image_descriptions'] = (bool) $options['include_image_descriptions'];
+        }
 
         if (! empty($options['include_domains'])) {
             $payload['include_domains'] = array_values(array_unique($options['include_domains']));
@@ -76,7 +86,88 @@ class TavilyClient
         return [
             'answer' => isset($data['answer']) && is_string($data['answer']) ? $data['answer'] : null,
             'results' => is_array($data['results'] ?? null) ? $data['results'] : [],
+            'images' => is_array($data['images'] ?? null) ? $data['images'] : [],
         ];
+    }
+
+    /**
+     * Image-focused web search (Google-like) for blog covers.
+     *
+     * @return list<array{url: string, description?: string|null}>
+     */
+    public function searchImages(string $query, int $maxResults = 8): array
+    {
+        if (! $this->configured()) {
+            return [];
+        }
+
+        try {
+            $data = $this->search([
+                'query' => $query,
+                'max_results' => max(3, min(10, $maxResults)),
+                'search_depth' => 'basic',
+                'include_answer' => false,
+                'include_images' => true,
+                'include_image_descriptions' => true,
+                'topic' => 'general',
+            ]);
+        } catch (\Throwable $e) {
+            Log::info('Tavily image search failed', ['error' => $e->getMessage(), 'query' => $query]);
+
+            return [];
+        }
+
+        $out = [];
+        $seen = [];
+
+        foreach ($data['images'] as $image) {
+            $url = null;
+            $description = null;
+            if (is_string($image)) {
+                $url = $image;
+            } elseif (is_array($image)) {
+                $url = (string) ($image['url'] ?? $image['src'] ?? $image['image_url'] ?? '');
+                $description = isset($image['description']) ? (string) $image['description'] : null;
+            }
+
+            if (! is_string($url) || $url === '' || isset($seen[$url])) {
+                continue;
+            }
+            $seen[$url] = true;
+            $out[] = ['url' => $url, 'description' => $description];
+            if (count($out) >= $maxResults) {
+                return $out;
+            }
+        }
+
+        // Also harvest images attached to each result page.
+        foreach ($data['results'] as $result) {
+            if (! is_array($result)) {
+                continue;
+            }
+            $pageImages = $result['images'] ?? [];
+            if (! is_array($pageImages)) {
+                continue;
+            }
+            foreach ($pageImages as $image) {
+                $url = is_string($image)
+                    ? $image
+                    : (string) (is_array($image) ? ($image['url'] ?? $image['src'] ?? '') : '');
+                if ($url === '' || isset($seen[$url])) {
+                    continue;
+                }
+                $seen[$url] = true;
+                $out[] = [
+                    'url' => $url,
+                    'description' => is_array($image) ? (string) ($image['description'] ?? $result['title'] ?? '') : (string) ($result['title'] ?? ''),
+                ];
+                if (count($out) >= $maxResults) {
+                    return $out;
+                }
+            }
+        }
+
+        return $out;
     }
 
     /**
