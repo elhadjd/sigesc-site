@@ -141,9 +141,8 @@ class RefreshBlogCoversCommand extends Command
             return true;
         }
 
-        // External remotes that were never stored locally tend to break in production.
-        if (Str::startsWith($url, ['http://', 'https://'])
-            && ! Str::contains($url, ['/storage/', 'localhost', '127.0.0.1'])) {
+        // Any project-local cover must be replaced with an internet photo.
+        if (Str::startsWith($url, '/img/') || Str::startsWith($url, '/storage/')) {
             return true;
         }
 

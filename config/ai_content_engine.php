@@ -288,24 +288,32 @@ return [
 
     /*
     | Cover images for AI articles / blog posts.
-    | Prefer contextual stock photos (stored locally) or editorial SVGs.
-    | Never use SIGESC module/product screenshots or brand logos as covers.
+    | Always prefer real internet photos matched to the article topic
+    | (Tavily / Google CSE / DuckDuckGo / Openverse / Wikimedia / Unsplash / Pexels).
+    | External URLs are allowed. Local SVG generation and product screenshots are OFF.
     */
     'images' => [
         'provider' => env('AI_CONTENT_IMAGE_PROVIDER', 'auto'),
         // Prefer free web search by default; set true to try DALL-E first when OPENAI_API_KEY exists.
         'prefer_openai' => (bool) env('AI_CONTENT_IMAGE_PREFER_OPENAI', false),
+        'tavily_enabled' => (bool) env('AI_CONTENT_TAVILY_IMAGES', true),
+        'google_enabled' => (bool) env('AI_CONTENT_GOOGLE_IMAGES', true),
+        'google_cse_api_key' => env('GOOGLE_CSE_API_KEY', env('GOOGLE_API_KEY')),
+        'google_cse_cx' => env('GOOGLE_CSE_CX'),
+        'duckduckgo_enabled' => (bool) env('AI_CONTENT_DDG_IMAGES', true),
         'openverse_enabled' => (bool) env('AI_CONTENT_OPENVERSE_ENABLED', true),
         'wikimedia_enabled' => (bool) env('AI_CONTENT_WIKIMEDIA_ENABLED', true),
         'unsplash_access_key' => env('UNSPLASH_ACCESS_KEY'),
         'pexels_api_key' => env('PEXELS_API_KEY'),
-        'store_locally' => (bool) env('AI_CONTENT_STORE_IMAGES', true),
-        // Never accept a remote URL unless it was saved under storage/public.
-        'require_local_url' => (bool) env('AI_CONTENT_IMAGE_REQUIRE_LOCAL', true),
-        // Prefer editorial /img/blog-covers SVGs before remotes (OFF by default — remotes first).
+        // Keep external CDN/URLs by default — do not copy into the project.
+        'store_locally' => (bool) env('AI_CONTENT_STORE_IMAGES', false),
+        // Allow external https image URLs on published posts.
+        'require_local_url' => (bool) env('AI_CONTENT_IMAGE_REQUIRE_LOCAL', false),
+        // Never prefer project SVG/catalog covers unless explicitly forced.
         'prefer_local_catalog' => (bool) env('AI_CONTENT_IMAGE_PREFER_LOCAL_CATALOG', false),
-        // Generate a unique SVG under /img/blog-covers when remotes fail.
-        'generate_local_cover' => (bool) env('AI_CONTENT_IMAGE_GENERATE_LOCAL', true),
+        'allow_local_covers' => (bool) env('AI_CONTENT_IMAGE_ALLOW_LOCAL', false),
+        // Do not generate SVG covers under /img/blog-covers by default.
+        'generate_local_cover' => (bool) env('AI_CONTENT_IMAGE_GENERATE_LOCAL', false),
         // HEAD/GET probe before accepting a remote cover URL.
         'verify_url' => (bool) env('AI_CONTENT_IMAGE_VERIFY_URL', true),
         // Skip logo / trademark / wordmark / product-screenshot style results.
