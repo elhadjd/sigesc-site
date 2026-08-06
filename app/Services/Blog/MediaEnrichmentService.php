@@ -4,7 +4,6 @@ namespace App\Services\Blog;
 
 use App\Models\AiContent\Article;
 use App\Services\AiContentEngine\Support\CoverImageService;
-use App\Services\AiContentEngine\Support\BlogCoverGenerator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +14,6 @@ class MediaEnrichmentService
     public function __construct(
         protected OpenAiClient $openAi,
         protected CoverImageService $covers,
-        protected BlogCoverGenerator $coverGenerator,
     ) {}
 
     /**
@@ -43,8 +41,9 @@ class MediaEnrichmentService
 
         try {
             $resolved = $this->covers->resolve($proxy, $prompt);
-            $cover = (string) ($resolved['url'] ?? '');
-            if ($cover !== '') {
+            $candidate = (string) ($resolved['url'] ?? '');
+            if (Str::startsWith($candidate, ['http://', 'https://'])) {
+                $cover = $candidate;
                 $media[] = [
                     'type' => 'image',
                     'url' => $cover,
@@ -60,29 +59,26 @@ class MediaEnrichmentService
 
         if (! $cover) {
             $aiImage = $this->openAi->generateImage($prompt);
-            if ($aiImage) {
-                $stored = $this->storeRemoteImage($aiImage, 'ai-covers');
-                if ($stored) {
-                    $cover = $stored;
-                    $media[] = [
-                        'type' => 'image',
-                        'url' => $stored,
-                        'alt' => $draft['title'] ?? $topic['label'],
-                        'role' => 'cover',
-                    ];
-                }
+            if ($aiImage && Str::startsWith($aiImage, ['http://', 'https://'])) {
+                $cover = $aiImage;
+                $media[] = [
+                    'type' => 'image',
+                    'url' => $cover,
+                    'alt' => $draft['title'] ?? $topic['label'],
+                    'role' => 'cover',
+                ];
             }
         }
 
         if (! $cover) {
-            $generated = $this->coverGenerator->ensureFor($proxy);
-            $cover = $generated['url'];
+            // External curated Unsplash CDN — never a local generated SVG.
+            $cover = 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=80';
             $media[] = [
                 'type' => 'image',
                 'url' => $cover,
                 'alt' => $draft['title'] ?? $topic['label'],
                 'role' => 'cover',
-                'source' => 'generated-local',
+                'source' => 'curated',
             ];
         }
 
