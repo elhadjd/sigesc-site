@@ -2,6 +2,9 @@
 
 namespace App\Services\Blog;
 
+use App\Models\AiContent\Article;
+use App\Services\AiContentEngine\Support\CoverImageService;
+use App\Services\AiContentEngine\Support\BlogCoverGenerator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -10,7 +13,9 @@ use Illuminate\Support\Str;
 class MediaEnrichmentService
 {
     public function __construct(
-        protected OpenAiClient $openAi
+        protected OpenAiClient $openAi,
+        protected CoverImageService $covers,
+        protected BlogCoverGenerator $coverGenerator,
     ) {}
 
     /**
@@ -25,35 +30,60 @@ class MediaEnrichmentService
         $media = [];
         $cover = null;
 
-        $aiImage = $this->openAi->generateImage(
-            'Professional editorial cover photo for a business blog about '.$topic['label']
-            .' in Angola. Clean corporate style, no text overlay, photorealistic.'
-        );
+        $proxy = new Article([
+            'title' => (string) ($draft['title'] ?? $topic['label'] ?? 'Artigo'),
+            'slug' => Str::slug((string) ($draft['title'] ?? $topic['key'] ?? 'artigo-blog')),
+            'focus_keyword' => (string) ($topic['image_keywords'] ?? $topic['label'] ?? ''),
+            'content_html' => (string) ($draft['content_html'] ?? ''),
+        ]);
 
-        if ($aiImage) {
-            $stored = $this->storeRemoteImage($aiImage, 'ai-covers');
-            if ($stored) {
-                $cover = $stored;
+        $prompt = 'Professional editorial cover photo for a business blog about '
+            .($topic['label'] ?? $proxy->title)
+            .' in Angola. Clean corporate photography, African context when possible, no text overlay, no logos or brand marks, photorealistic.';
+
+        try {
+            $resolved = $this->covers->resolve($proxy, $prompt);
+            $cover = (string) ($resolved['url'] ?? '');
+            if ($cover !== '') {
                 $media[] = [
                     'type' => 'image',
-                    'url' => $stored,
+                    'url' => $cover,
                     'alt' => $draft['title'] ?? $topic['label'],
                     'role' => 'cover',
+                    'source' => $resolved['source'] ?? null,
+                    'attribution' => $resolved['attribution'] ?? [],
                 ];
+            }
+        } catch (\Throwable $e) {
+            Log::info('CoverImageService enrichment failed', ['error' => $e->getMessage()]);
+        }
+
+        if (! $cover) {
+            $aiImage = $this->openAi->generateImage($prompt);
+            if ($aiImage) {
+                $stored = $this->storeRemoteImage($aiImage, 'ai-covers');
+                if ($stored) {
+                    $cover = $stored;
+                    $media[] = [
+                        'type' => 'image',
+                        'url' => $stored,
+                        'alt' => $draft['title'] ?? $topic['label'],
+                        'role' => 'cover',
+                    ];
+                }
             }
         }
 
         if (! $cover) {
-            $unsplash = $this->unsplashCover($topic['image_keywords'] ?? $topic['label']);
-            if ($unsplash) {
-                $cover = $unsplash;
-                $media[] = [
-                    'type' => 'image',
-                    'url' => $unsplash,
-                    'alt' => $draft['title'] ?? $topic['label'],
-                    'role' => 'cover',
-                ];
-            }
+            $generated = $this->coverGenerator->ensureFor($proxy);
+            $cover = $generated['url'];
+            $media[] = [
+                'type' => 'image',
+                'url' => $cover,
+                'alt' => $draft['title'] ?? $topic['label'],
+                'role' => 'cover',
+                'source' => 'generated-local',
+            ];
         }
 
         $video = $this->youtubeVideo($topic['youtube_query'] ?? $topic['label']);
@@ -61,7 +91,7 @@ class MediaEnrichmentService
             $media[] = $video;
         }
 
-        // Extra images suggested by the model
+        // Extra images suggested by the model — store locally when possible; skip brand/logo URLs.
         foreach ($draft['suggested_images'] ?? [] as $suggestion) {
             if (! is_array($suggestion)) {
                 continue;
@@ -72,10 +102,16 @@ class MediaEnrichmentService
                 continue;
             }
 
+            $alt = (string) ($suggestion['alt'] ?? ($draft['title'] ?? 'Imagem do artigo'));
+            if ($this->covers->looksLikeBrandOrLogo(Str::lower($alt.' '.$url))) {
+                continue;
+            }
+
+            $stored = $this->storeRemoteImage($url, 'ai-covers');
             $media[] = [
                 'type' => 'image',
-                'url' => $url,
-                'alt' => $suggestion['alt'] ?? ($draft['title'] ?? 'Imagem do artigo'),
+                'url' => $stored ?: $url,
+                'alt' => $alt,
                 'role' => 'inline',
             ];
         }
@@ -137,36 +173,6 @@ HTML;
         }
 
         return $blocks.$html;
-    }
-
-    protected function unsplashCover(string $keywords): ?string
-    {
-        $slug = Str::slug($keywords);
-        // Source Unsplash provides a stable random image for a keyword set.
-        $url = 'https://source.unsplash.com/1600x900/?'.urlencode($keywords);
-
-        try {
-            $response = Http::withHeaders([
-                'User-Agent' => config('ai_blog.research.user_agent'),
-            ])->withOptions([
-                'allow_redirects' => false,
-            ])->timeout(15)->get($url);
-
-            $location = $response->header('Location');
-
-            if ($location && Str::startsWith($location, ['http://', 'https://'])) {
-                return $location;
-            }
-
-            // Some environments resolve immediately; store the redirect target URL as-is.
-            if ($response->successful()) {
-                return "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80&sig={$slug}";
-            }
-        } catch (\Throwable $e) {
-            Log::info('Unsplash cover lookup failed', ['error' => $e->getMessage()]);
-        }
-
-        return "https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=1600&q=80&sig={$slug}";
     }
 
     /**

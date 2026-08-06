@@ -34,7 +34,7 @@ class ImageAgent implements AgentInterface
 
         $prompt = 'Editorial cover photo for a business knowledge article about "'
             .$article->title
-            .'" in Angola. Clean corporate photography, African context when possible, no text overlay, professional lighting.';
+            .'" in Angola. Clean corporate photography, African context when possible, no text overlay, no logos or brand marks, no software product screenshots, professional lighting.';
 
         $roles = [
             'cover' => '1792x1024',

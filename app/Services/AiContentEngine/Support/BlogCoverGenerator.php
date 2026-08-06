@@ -6,7 +6,8 @@ use App\Models\AiContent\Article;
 use Illuminate\Support\Str;
 
 /**
- * Creates unique SVG cover images under public/img/blog-covers for blog posts.
+ * Creates unique editorial SVG cover images under public/img/blog-covers.
+ * No product screenshots and no brand logos — title + category only.
  */
 class BlogCoverGenerator
 {
@@ -16,9 +17,9 @@ class BlogCoverGenerator
     public function ensureFor(Article $article): array
     {
         $dir = trim((string) config('ai_content_engine.images.blog_covers_dir', 'img/blog-covers'), '/');
-        $slug = Str::slug($article->slug ?: ($article->title ?: 'artigo-sigesc'));
+        $slug = Str::slug($article->slug ?: ($article->title ?: 'artigo-blog'));
         if ($slug === '') {
-            $slug = 'artigo-sigesc-'.Str::random(6);
+            $slug = 'artigo-blog-'.Str::random(6);
         }
 
         $relative = $dir.'/'.$slug.'.svg';
@@ -38,8 +39,41 @@ class BlogCoverGenerator
             'url' => $url,
             'source' => 'generated-local',
             'attribution' => [
-                'provider' => 'sigesc-cover-generator',
-                'note' => 'Generated SVG cover stored on the application server',
+                'provider' => 'editorial-cover-generator',
+                'note' => 'Generated editorial SVG cover (no product UI, no brand logo)',
+            ],
+            'stored' => true,
+        ];
+    }
+
+    /**
+     * Force-regenerate the SVG even if a file already exists.
+     *
+     * @return array{url: string, source: string, attribution: array<string, mixed>, stored: bool}
+     */
+    public function regenerateFor(Article $article): array
+    {
+        $dir = trim((string) config('ai_content_engine.images.blog_covers_dir', 'img/blog-covers'), '/');
+        $slug = Str::slug($article->slug ?: ($article->title ?: 'artigo-blog'));
+        if ($slug === '') {
+            $slug = 'artigo-blog-'.Str::random(6);
+        }
+
+        $relative = $dir.'/'.$slug.'.svg';
+        $full = public_path($relative);
+        $directory = dirname($full);
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        file_put_contents($full, $this->svgMarkup($article));
+
+        return [
+            'url' => '/'.$relative,
+            'source' => 'generated-local',
+            'attribution' => [
+                'provider' => 'editorial-cover-generator',
+                'note' => 'Regenerated editorial SVG cover',
             ],
             'stored' => true,
         ];
@@ -47,8 +81,8 @@ class BlogCoverGenerator
 
     protected function svgMarkup(Article $article): string
     {
-        $title = trim((string) ($article->title ?: 'Blog SIGESC'));
-        $category = trim((string) ($article->category?->name ?: $article->focus_keyword ?: 'Gestão Comercial'));
+        $title = trim((string) ($article->title ?: 'Artigo de gestão'));
+        $category = trim((string) ($article->category?->name ?: $article->focus_keyword ?: 'Gestão empresarial'));
         $seed = abs(crc32(Str::slug($article->slug ?: $title)));
 
         $palettes = [
@@ -73,6 +107,7 @@ class BlogCoverGenerator
         $accentX = 120 + ($seed % 40);
         $circleR = 180 + ($seed % 80);
 
+        // Editorial cover: category + title only — no brand wordmark / product UI.
         return <<<SVG
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="{$line1}">
   <defs>
@@ -89,13 +124,13 @@ class BlogCoverGenerator
   <rect width="1600" height="900" fill="url(#bg)"/>
   <circle cx="1280" cy="220" r="{$circleR}" fill="url(#glow)"/>
   <rect x="80" y="72" width="120" height="8" rx="4" fill="{$palette[2]}"/>
-  <text x="80" y="130" fill="{$palette[2]}" font-family="Arial, Helvetica, sans-serif" font-size="28" letter-spacing="4" font-weight="700">SIGESC</text>
+  <text x="80" y="130" fill="{$palette[2]}" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="3" font-weight="700">BLOG</text>
   <text x="80" y="178" fill="#FFFFFF" fill-opacity="0.78" font-family="Arial, Helvetica, sans-serif" font-size="22" letter-spacing="1">{$safeCategory}</text>
   <text x="80" y="236" fill="#FFFFFF" font-family="Georgia, 'Times New Roman', serif" font-size="46" font-weight="700">{$line1}</text>
   {$y2}
   {$y3}
   <rect x="{$accentX}" y="760" width="220" height="6" rx="3" fill="{$palette[2]}"/>
-  <text x="80" y="820" fill="#FFFFFF" fill-opacity="0.7" font-family="Arial, Helvetica, sans-serif" font-size="20">sisgesc.net · Gestão comercial para Angola</text>
+  <text x="80" y="820" fill="#FFFFFF" fill-opacity="0.65" font-family="Arial, Helvetica, sans-serif" font-size="18">Gestão · Finanças · Negócios em Angola</text>
 </svg>
 SVG;
     }
@@ -127,10 +162,7 @@ SVG;
         }
 
         if (count($lines) === $maxLines) {
-            $remaining = array_slice($words, count(preg_split('/\s+/u', implode(' ', array_slice($lines, 0, $maxLines - 1))) ?: []));
-            // Keep last line truncated cleanly.
             $lines[$maxLines - 1] = $this->truncate($lines[$maxLines - 1], $width);
-            unset($remaining);
         }
 
         return $lines;
