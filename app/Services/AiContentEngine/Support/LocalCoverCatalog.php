@@ -6,10 +6,35 @@ use App\Models\AiContent\Article;
 use Illuminate\Support\Str;
 
 /**
- * Maps article topics to product screenshots already shipped under public/img.
+ * Maps article topics to editorial blog covers under public/img/blog-covers.
+ *
+ * Never returns SIGESC module / product screenshots (billing, PDV, stock, etc.).
  */
 class LocalCoverCatalog
 {
+    /**
+     * Product UI directories that must never be used as blog covers.
+     *
+     * @var list<string>
+     */
+    public const FORBIDDEN_IMG_PREFIXES = [
+        '/img/billing/',
+        '/img/finance/',
+        '/img/point-of-sale/',
+        '/img/stock/',
+        '/img/marketing/',
+        '/img/e-commerce/',
+        '/img/logistics/',
+        '/img/employee/',
+        '/img/purchase/',
+        '/img/appointment/',
+        '/img/dropshipping/',
+        '/img/crm/',
+        '/img/dashboard',
+        '/img/sigesc',
+        '/img/Sigesc',
+    ];
+
     /**
      * @return array{url: string, source: string, attribution: array<string, mixed>, stored: bool}|null
      */
@@ -27,20 +52,24 @@ class LocalCoverCatalog
             $candidates = $this->defaultPool();
         }
 
-        $index = abs(crc32(Str::slug($article->focus_keyword ?: $article->title ?: 'sigesc'))) % count($candidates);
+        $index = abs(crc32(Str::slug($article->focus_keyword ?: $article->title ?: 'blog'))) % max(1, count($candidates));
         $ordered = array_merge(
             array_slice($candidates, $index),
             array_slice($candidates, 0, $index)
         );
 
         foreach ($ordered as $path) {
+            if ($this->isForbiddenProductPath($path)) {
+                continue;
+            }
+
             if ($this->existsOnServer($path)) {
                 return [
                     'url' => $path,
-                    'source' => 'local-catalog',
+                    'source' => 'editorial-catalog',
                     'attribution' => [
-                        'provider' => 'sigesc-local',
-                        'note' => 'Product screenshot from public/img matched to article topic',
+                        'provider' => 'editorial-local',
+                        'note' => 'Editorial blog cover matched to article topic (not a product screenshot)',
                     ],
                     'stored' => true,
                 ];
@@ -48,6 +77,28 @@ class LocalCoverCatalog
         }
 
         return null;
+    }
+
+    /**
+     * True when a path points at SIGESC product UI / brand marketing shots.
+     */
+    public function isForbiddenProductPath(string $urlPath): bool
+    {
+        $path = '/'.ltrim(parse_url($urlPath, PHP_URL_PATH) ?: $urlPath, '/');
+        $lower = Str::lower($path);
+
+        foreach (self::FORBIDDEN_IMG_PREFIXES as $prefix) {
+            if (str_starts_with($lower, Str::lower($prefix))) {
+                return true;
+            }
+        }
+
+        // Loose filename brand shots at /img root
+        if (preg_match('#^/img/[^/]*(sigesc|dashboard)[^/]*\.(png|jpe?g|webp|gif)$#i', $path) === 1) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -59,7 +110,7 @@ class LocalCoverCatalog
     {
         $paths = [];
         foreach ($this->allMappedPaths() as $path) {
-            if ($this->existsOnServer($path)) {
+            if ($this->existsOnServer($path) && ! $this->isForbiddenProductPath($path)) {
                 $paths[] = $path;
             }
         }
@@ -70,6 +121,10 @@ class LocalCoverCatalog
     public function existsOnServer(string $urlPath): bool
     {
         if (! Str::startsWith($urlPath, '/img/')) {
+            return false;
+        }
+
+        if ($this->isForbiddenProductPath($urlPath)) {
             return false;
         }
 
@@ -85,38 +140,29 @@ class LocalCoverCatalog
     protected function candidatesFor(string $haystack): array
     {
         $groups = [
-            'billing' => [
-                'iva', 'agt', 'fatura', 'factura', 'fiscal', 'imposto', 'irt', 'nif', 'tribut', 'selo', 'retenção', 'retencao', 'documento fiscal',
+            'faturacao' => [
+                'iva', 'agt', 'fatura', 'factura', 'fiscal', 'imposto', 'irt', 'nif', 'tribut', 'selo', 'retenção', 'retencao', 'documento fiscal', 'eletrón', 'eletron',
             ],
-            'finance' => [
-                'fluxo', 'caixa', 'finanç', 'financ', 'banco', 'crédito', 'credito', 'lucro', 'margem', 'preçário', 'precario',
+            'fluxo-caixa' => [
+                'fluxo', 'caixa', 'finanç', 'financ', 'banco', 'crédito', 'credito', 'lucro', 'margem', 'tesouraria',
             ],
-            'point-of-sale' => [
-                'pdv', 'pos', 'ponto de venda', 'loja', 'venda', 'promoção', 'promocao', 'desconto', 'multicaixa', 'tpa',
-            ],
-            'stock' => [
-                'stock', 'estoque', 'inventário', 'inventario', 'armazém', 'armazem', 'produto', 'farmácia', 'farmacia',
+            'pdv-stock' => [
+                'pdv', 'pos', 'ponto de venda', 'loja', 'venda', 'stock', 'estoque', 'inventário', 'inventario', 'armazém', 'armazem',
             ],
             'marketing' => [
-                'marketing', 'anúncio', 'anuncio', 'ads', 'facebook', 'instagram', 'whatsapp', 'email', 'meta', 'merchant', 'catálogo', 'catalogo',
+                'marketing', 'anúncio', 'anuncio', 'ads', 'facebook', 'instagram', 'email', 'digital',
             ],
-            'e-commerce' => [
+            'whatsapp' => [
+                'whatsapp', 'whats', 'mensagem', 'chat business',
+            ],
+            'ecommerce' => [
                 'e-commerce', 'ecommerce', 'loja online', 'loja virtual', 'dropshipping', 'marketplace', 'vendas online',
             ],
-            'logistics' => [
+            'logistica' => [
                 'logística', 'logistica', 'entrega', 'frota', 'transporte', 'delivery', 'rastreamento',
             ],
-            'employee' => [
-                'rh', 'salário', 'salario', 'folha', 'funcionário', 'funcionario', 'ponto', 'trabalho', 'irt', 'recursos humanos',
-            ],
-            'purchase' => [
-                'compra', 'fornecedor', 'import', 'export', 'encomenda',
-            ],
-            'appointment' => [
-                'agenda', 'marcação', 'marcacao', 'salão', 'salao', 'clínica', 'clinica', 'agendamento',
-            ],
-            'software' => [
-                'software', 'erp', 'crm', 'gestão', 'gestao', 'sigesc', 'sistema',
+            'folha' => [
+                'rh', 'salário', 'salario', 'folha', 'funcionário', 'funcionario', 'ponto', 'trabalho', 'recursos humanos',
             ],
         ];
 
@@ -139,67 +185,29 @@ class LocalCoverCatalog
     protected function pathsByGroup(string $group): array
     {
         return match ($group) {
-            'billing' => [
-                '/img/billing/SIGESC Software de Gestao Empresarial emissao-de-fatura.png',
-                '/img/billing/SIGESC Software de Gestao Empresarial Lista de faturas.png',
-                '/img/billing/SIGESC Software de Gestao Empresarial Sigesc Paineies proficionais.png',
-                '/img/dashboard-sigesc-angola.png',
+            'faturacao' => [
+                '/img/blog-covers/capa-faturacao-eletronica.svg',
             ],
-            'finance' => [
-                '/img/finance/Fluxo de caixa.png',
-                '/img/finance/gestao-financeira-dashboard.png',
-                '/img/finance/Gestao de contas bancarias.png',
+            'fluxo-caixa' => [
+                '/img/blog-covers/capa-fluxo-caixa.svg',
             ],
-            'point-of-sale' => [
-                '/img/point-of-sale/SIGESC Software de Gestao Empresarial Pdv Pos Ponto de venda Software gratuito.png',
-                '/img/point-of-sale/software de gestao angola pdv-vendas-rapidas.png',
-                '/img/point-of-sale/software de gestao angola pdv-multi-pagamentos.png',
-                '/img/point-of-sale/software de gestao angola Gestao de promocoes e descontos.png',
-            ],
-            'stock' => [
-                '/img/stock/Sigesc software de gestao comercial gratis gestao de stock.png',
-                '/img/stock/Sigesc software de gestao comercial gratis controle-inventario.png',
-                '/img/stock/Sigesc software de gestao comercial gratis relatorios-stock.png',
-                '/img/stock/Sigesc software de gestao comercial gratis gestao de tranferencia de produtos entre armagens.png',
+            'pdv-stock' => [
+                '/img/blog-covers/capa-pdv-stock.svg',
             ],
             'marketing' => [
-                '/img/marketing/marketing-dashboard.png',
-                '/img/marketing/gestao de contas whatsapp ecatalogos.png',
-                '/img/marketing/Integracao com meta facebook.png',
-                '/img/marketing/email-marketing.png',
-                '/img/marketing/Integracao com google merchant center.png',
+                '/img/blog-covers/capa-marketing-digital.svg',
             ],
-            'e-commerce' => [
-                '/img/e-commerce/loja-virtual-dashboard.png',
-                '/img/e-commerce/catalogo-produtos.png',
-                '/img/e-commerce/Gestao de entregas e pagamentos.png',
-                '/img/e-commerce/Gestao de entregas e logistica Rastreamento em tempo real.png',
+            'whatsapp' => [
+                '/img/blog-covers/capa-whatsapp-business.svg',
             ],
-            'logistics' => [
-                '/img/logistics/SIGESC Software de Gestao Empresarial Logistica Transporte Frota Entregas Rotas.png',
-                '/img/logistics/SIGESC Software de Gestao Empresarial Logistica Acompanhamento em tempo real.png',
-                '/img/logistics/SIGESC Software de Gestao Empresarial Logistica gestao de frota.png',
+            'ecommerce' => [
+                '/img/blog-covers/capa-ecommerce-angola.svg',
             ],
-            'employee' => [
-                '/img/employee/sigesc folha-pagamento.png',
-                '/img/employee/sigesc gestao-funcionarios-dashboard.png',
-                '/img/employee/sigesc controlo-ponto.png',
-                '/img/employee/sigesc Calculo de horas e salarios.png',
+            'logistica' => [
+                '/img/blog-covers/capa-logistica-entregas.svg',
             ],
-            'purchase' => [
-                '/img/purchase/gestao-compras-dashboard.png',
-                '/img/purchase/gestao-compras-controlo-fornecedores.png',
-            ],
-            'appointment' => [
-                '/img/appointment/Dashboard de Agendamentos SIGESC Visao completa da agenda.png',
-                '/img/appointment/agenda-online.png',
-                '/img/appointment/confirmacoes-automaticas.png',
-            ],
-            'software' => [
-                '/img/dashboard-sigesc-angola.png',
-                '/img/Sigesc Paineies proficionais.png',
-                '/img/billing/SIGESC Software de Gestao Empresarial Sigesc Paineies proficionais.png',
-                '/img/point-of-sale/SIGESC Software de Gestao Empresarial Pdv Pos Ponto de venda Software gratuito.png',
+            'folha' => [
+                '/img/blog-covers/capa-folha-pagamento.svg',
             ],
             default => $this->defaultPool(),
         };
@@ -211,14 +219,15 @@ class LocalCoverCatalog
     protected function defaultPool(): array
     {
         return [
-            '/img/dashboard-sigesc-angola.png',
-            '/img/sigesc capa.png',
-            '/img/Sigesc Paineies proficionais.png',
-            '/img/billing/SIGESC Software de Gestao Empresarial emissao-de-fatura.png',
-            '/img/point-of-sale/software de gestao angola pdv-vendas-rapidas.png',
-            '/img/finance/gestao-financeira-dashboard.png',
-            '/img/stock/Sigesc software de gestao comercial gratis gestao de stock.png',
-            '/img/marketing/marketing-dashboard.png',
+            '/img/blog-covers/capa-faturacao-eletronica.svg',
+            '/img/blog-covers/capa-fluxo-caixa.svg',
+            '/img/blog-covers/capa-pdv-stock.svg',
+            '/img/blog-covers/capa-marketing-digital.svg',
+            '/img/blog-covers/capa-ecommerce-angola.svg',
+            '/img/blog-covers/capa-folha-pagamento.svg',
+            '/img/blog-covers/capa-logistica-entregas.svg',
+            '/img/blog-covers/capa-whatsapp-business.svg',
+            '/img/placeholder-blog.svg',
         ];
     }
 
@@ -228,7 +237,7 @@ class LocalCoverCatalog
     protected function allMappedPaths(): array
     {
         $all = $this->defaultPool();
-        foreach (['billing', 'finance', 'point-of-sale', 'stock', 'marketing', 'e-commerce', 'logistics', 'employee', 'purchase', 'appointment', 'software'] as $group) {
+        foreach (['faturacao', 'fluxo-caixa', 'pdv-stock', 'marketing', 'whatsapp', 'ecommerce', 'logistica', 'folha'] as $group) {
             $all = array_merge($all, $this->pathsByGroup($group));
         }
 

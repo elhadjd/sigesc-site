@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * Resolve a relevant cover image for an AI article.
+ * Resolve a contextual cover image for an AI article.
  *
- * Order: local catalog → remote sources (stored on disk) → curated (stored) → generated SVG → placeholder.
- * With require_local_url=true, remote URLs are never returned unless saved under the app storage/public.
+ * Order: remote stock (stored locally) → curated topic photos → editorial
+ * blog-covers SVG catalog → generated SVG → placeholder.
+ *
+ * Never uses SIGESC module/product screenshots or brand logos.
+ * With require_local_url=true, remote URLs are never returned unless saved under storage/public.
  */
 class CoverImageService
 {
@@ -27,18 +30,19 @@ class CoverImageService
      */
     public function resolve(Article $article, ?string $prompt = null): array
     {
-        if ((bool) config('ai_content_engine.images.prefer_local_catalog', true)) {
-            $local = $this->localCatalog->match($article);
-            if ($local !== null) {
-                return $local;
-            }
-        }
-
         $queries = $this->buildQueries($article);
         $prompt ??= $this->defaultPrompt($article);
         $preferOpenai = (bool) config('ai_content_engine.images.prefer_openai', false);
         $provider = strtolower((string) config('ai_content_engine.images.provider', 'auto'));
         $requireLocal = (bool) config('ai_content_engine.images.require_local_url', true);
+
+        // Editorial catalog (blog-covers SVGs) is optional early preference — never product UI.
+        if ((bool) config('ai_content_engine.images.prefer_local_catalog', false)) {
+            $local = $this->localCatalog->match($article);
+            if ($local !== null && ! $this->localCatalog->isForbiddenProductPath((string) $local['url'])) {
+                return $local;
+            }
+        }
 
         $attempts = match ($provider) {
             'openai' => ['openai'],
@@ -70,8 +74,8 @@ class CoverImageService
             }
         }
 
-        $pool = $this->curatedPool();
-        $preferred = abs(crc32(Str::slug($article->focus_keyword ?: $article->title ?: 'sigesc'))) % count($pool);
+        $pool = $this->curatedPoolFor($article);
+        $preferred = abs(crc32(Str::slug($article->focus_keyword ?: $article->title ?: 'blog'))) % max(1, count($pool));
         $ordered = array_merge(
             array_slice($pool, $preferred),
             array_slice($pool, 0, $preferred)
@@ -89,7 +93,7 @@ class CoverImageService
                     'source' => 'curated',
                     'attribution' => [
                         'provider' => 'unsplash-cdn',
-                        'note' => 'Curated stock fallback keyed to article topic (stored locally)',
+                        'note' => 'Curated stock photo keyed to article topic (stored locally)',
                     ],
                     'stored' => true,
                 ];
@@ -101,11 +105,17 @@ class CoverImageService
                     'source' => 'curated',
                     'attribution' => [
                         'provider' => 'unsplash-cdn',
-                        'note' => 'Curated stock fallback keyed to article topic',
+                        'note' => 'Curated stock photo keyed to article topic',
                     ],
                     'stored' => false,
                 ];
             }
+        }
+
+        // Topic-matched editorial SVG catalog (never product screenshots).
+        $editorial = $this->localCatalog->match($article);
+        if ($editorial !== null) {
+            return $editorial;
         }
 
         if ((bool) config('ai_content_engine.images.generate_local_cover', true)) {
@@ -113,7 +123,11 @@ class CoverImageService
         }
 
         $fallback = $this->localServerFallback();
-        if (! $this->localCatalog->existsOnServer($fallback) && Str::startsWith($fallback, '/')) {
+        if ($this->localCatalog->isForbiddenProductPath($fallback)) {
+            return $this->coverGenerator->ensureFor($article);
+        }
+
+        if (! $this->localPathExists($fallback) && Str::startsWith($fallback, '/')) {
             return $this->coverGenerator->ensureFor($article);
         }
 
@@ -139,9 +153,25 @@ class CoverImageService
             return null;
         }
 
+        if ($this->localCatalog->isForbiddenProductPath($url)) {
+            Log::info('[AIContent][CoverImage] Skipping product/brand screenshot path', ['url' => $url]);
+
+            return null;
+        }
+
+        $attributionBlob = strtolower(trim(implode(' ', array_filter([
+            (string) ($hit['attribution']['title'] ?? ''),
+            (string) ($hit['attribution']['creator'] ?? ''),
+            (string) ($hit['attribution']['note'] ?? ''),
+            (string) ($hit['source'] ?? ''),
+        ]))));
+        if ($attributionBlob !== '' && $this->looksLikeBrandOrLogo($attributionBlob)) {
+            return null;
+        }
+
         $requireLocal = (bool) config('ai_content_engine.images.require_local_url', true);
 
-        // Relative/local paths must exist on this server.
+        // Relative/local paths must exist on this server and never be product UI.
         if (Str::startsWith($url, '/')) {
             if (! $this->localPathExists($url)) {
                 Log::info('[AIContent][CoverImage] Skipping missing local path', ['url' => $url]);
@@ -573,9 +603,14 @@ class CoverImageService
         }
 
         if (preg_match(
-            '/\b(logo|logotipo|logotype|wordmark|trademark|marca\s+registrada|brand\s+mark|emblem|badge|seal|coat\s+of\s+arms|brasão|bandeira\s+oficial|icon\s+set|app\s+icon|favicon)\b/u',
+            '/\b(logo|logotipo|logotype|wordmark|trademark|marca\s+registrada|brand\s+mark|emblem|badge|seal|coat\s+of\s+arms|brasão|bandeira\s+oficial|icon\s+set|app\s+icon|favicon|screenshot|ui\s+mockup|product\s+screenshot|software\s+screenshot)\b/u',
             $blob
         ) === 1) {
+            return true;
+        }
+
+        // Never accept SIGESC product / brand marketing imagery as blog covers.
+        if (preg_match('/\b(sigesc|sisgesc)\b/u', $blob) === 1) {
             return true;
         }
 
@@ -636,24 +671,92 @@ class CoverImageService
     }
 
     /**
+     * Topic-aware curated Unsplash CDN photos (no logos / product UI).
+     *
+     * @return list<string>
+     */
+    protected function curatedPoolFor(Article $article): array
+    {
+        $blob = Str::lower(trim(implode(' ', array_filter([
+            $article->focus_keyword,
+            $article->category?->name,
+            $article->title,
+        ]))));
+
+        $topicPools = [
+            'fiscal' => [
+                'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=1600&q=80',
+            ],
+            'retail' => [
+                'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80',
+            ],
+            'marketing' => [
+                'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1432888498266-38ffecfd34cd?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80',
+            ],
+            'finance' => [
+                'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
+            ],
+            'hr' => [
+                'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1600&q=80',
+            ],
+            'logistics' => [
+                'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=1600&q=80',
+                'https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1600&q=80',
+            ],
+        ];
+
+        $picked = [];
+        if (preg_match('/(iva|agt|fatura|factura|fiscal|imposto|tribut)/u', $blob) === 1) {
+            $picked = array_merge($picked, $topicPools['fiscal']);
+        }
+        if (preg_match('/(pdv|loja|stock|estoque|venda|retail|pos)/u', $blob) === 1) {
+            $picked = array_merge($picked, $topicPools['retail']);
+        }
+        if (preg_match('/(marketing|whatsapp|anúncio|anuncio|digital|ads)/u', $blob) === 1) {
+            $picked = array_merge($picked, $topicPools['marketing']);
+        }
+        if (preg_match('/(fluxo|caixa|finanç|financ|banco|crédito|credito)/u', $blob) === 1) {
+            $picked = array_merge($picked, $topicPools['finance']);
+        }
+        if (preg_match('/(rh|salário|salario|folha|funcionário|funcionario)/u', $blob) === 1) {
+            $picked = array_merge($picked, $topicPools['hr']);
+        }
+        if (preg_match('/(logística|logistica|entrega|frota|transporte)/u', $blob) === 1) {
+            $picked = array_merge($picked, $topicPools['logistics']);
+        }
+
+        $general = [
+            'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80',
+            'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1600&q=80',
+            'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?auto=format&fit=crop&w=1600&q=80',
+            'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1600&q=80',
+            'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80',
+            'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=1600&q=80',
+        ];
+
+        return array_values(array_unique(array_merge($picked !== [] ? $picked : $general, $general)));
+    }
+
+    /**
      * @return list<string>
      */
     protected function curatedPool(): array
     {
-        return [
-            'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1600&q=80',
-        ];
+        return $this->curatedPoolFor(new Article([
+            'title' => 'business',
+            'focus_keyword' => 'business',
+        ]));
     }
 
     protected function localServerFallback(): string
@@ -677,7 +780,7 @@ class CoverImageService
         $map = [
             'iva|imposto|agt|fiscal|irt|retenção|fatura' => 'tax accounting invoice office africa',
             'pdv|ponto de venda|loja|stock|estoque|inventário' => 'retail shop point of sale africa',
-            'software|erp|gestão|sigesc|sistema' => 'business software laptop office africa',
+            'software|erp|gestão|sistema' => 'business laptop office africa entrepreneurship',
             'marketing|anúncio|ads|whatsapp|e-commerce|online' => 'digital marketing smartphone business africa',
             'empresa|empreendedor|abrir|licença|inapem' => 'african entrepreneur small business startup',
             'salário|rh|trabalho|funcionário' => 'payroll human resources office africa',

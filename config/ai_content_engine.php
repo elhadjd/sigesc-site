@@ -288,8 +288,8 @@ return [
 
     /*
     | Cover images for AI articles / blog posts.
-    | Prefer local product screenshots + generated covers so published posts
-    | never point at remote URLs that are missing on the server.
+    | Prefer contextual stock photos (stored locally) or editorial SVGs.
+    | Never use SIGESC module/product screenshots or brand logos as covers.
     */
     'images' => [
         'provider' => env('AI_CONTENT_IMAGE_PROVIDER', 'auto'),
@@ -302,19 +302,20 @@ return [
         'store_locally' => (bool) env('AI_CONTENT_STORE_IMAGES', true),
         // Never accept a remote URL unless it was saved under storage/public.
         'require_local_url' => (bool) env('AI_CONTENT_IMAGE_REQUIRE_LOCAL', true),
-        // Match article topic to existing /public/img product screenshots first.
-        'prefer_local_catalog' => (bool) env('AI_CONTENT_IMAGE_PREFER_LOCAL_CATALOG', true),
+        // Prefer editorial /img/blog-covers SVGs before remotes (OFF by default — remotes first).
+        'prefer_local_catalog' => (bool) env('AI_CONTENT_IMAGE_PREFER_LOCAL_CATALOG', false),
         // Generate a unique SVG under /img/blog-covers when remotes fail.
         'generate_local_cover' => (bool) env('AI_CONTENT_IMAGE_GENERATE_LOCAL', true),
         // HEAD/GET probe before accepting a remote cover URL.
         'verify_url' => (bool) env('AI_CONTENT_IMAGE_VERIFY_URL', true),
-        // Skip logo / trademark / wordmark style results from stock APIs.
+        // Skip logo / trademark / wordmark / product-screenshot style results.
         'reject_brand_terms' => (bool) env('AI_CONTENT_IMAGE_REJECT_BRANDS', true),
         'brand_denylist' => [
             'coca-cola', 'pepsi', 'nike', 'adidas', 'apple', 'google', 'microsoft', 'amazon',
             'meta', 'facebook', 'instagram', 'whatsapp', 'twitter', 'x corp', 'samsung',
             'mcdonald', 'starbucks', 'visa', 'mastercard', 'paypal', 'netflix', 'spotify',
             'toyota', 'bmw', 'mercedes', 'shell', 'bp', 'totalenergies',
+            'sigesc', 'sisgesc',
         ],
         'local_fallback' => env('AI_CONTENT_IMAGE_LOCAL_FALLBACK', '/img/placeholder-blog.svg'),
         'blog_covers_dir' => env('AI_CONTENT_BLOG_COVERS_DIR', 'img/blog-covers'),
