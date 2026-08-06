@@ -10,6 +10,7 @@ use App\Services\AiContentEngine\Support\LlmGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Mockery;
 use Tests\TestCase;
 
@@ -244,7 +245,7 @@ class CoverImageServiceTest extends TestCase
         $this->assertSame('openverse', $fresh->pipeline_meta['cover_image']['source'] ?? null);
     }
 
-    public function test_local_catalog_matches_billing_topic(): void
+    public function test_editorial_catalog_matches_billing_topic_without_product_ui(): void
     {
         config([
             'ai_content_engine.images.prefer_local_catalog' => true,
@@ -260,9 +261,44 @@ class CoverImageServiceTest extends TestCase
 
         $result = app(CoverImageService::class)->resolve($article);
 
-        $this->assertSame('local-catalog', $result['source']);
-        $this->assertStringStartsWith('/img/', $result['url']);
+        $this->assertSame('editorial-catalog', $result['source']);
+        $this->assertStringStartsWith('/img/blog-covers/', $result['url']);
+        $this->assertStringNotContainsString('/img/billing/', $result['url']);
+        $this->assertStringNotContainsString('sigesc', Str::lower($result['url']));
         $this->assertFileExists(public_path(ltrim($result['url'], '/')));
+    }
+
+    public function test_never_returns_product_screenshot_even_when_catalog_preferred(): void
+    {
+        config([
+            'ai_content_engine.images.prefer_local_catalog' => true,
+            'ai_content_engine.images.provider' => 'local',
+            'ai_content_engine.images.generate_local_cover' => true,
+        ]);
+
+        $catalog = app(\App\Services\AiContentEngine\Support\LocalCoverCatalog::class);
+        $this->assertTrue($catalog->isForbiddenProductPath('/img/billing/SIGESC Software de Gestao Empresarial emissao-de-fatura.png'));
+        $this->assertTrue($catalog->isForbiddenProductPath('/img/point-of-sale/software de gestao angola pdv-vendas-rapidas.png'));
+        $this->assertTrue($catalog->isForbiddenProductPath('/img/dashboard-sigesc-angola.png'));
+        $this->assertTrue($catalog->isForbiddenProductPath('/img/sigesc capa.png'));
+        $this->assertFalse($catalog->isForbiddenProductPath('/img/blog-covers/capa-faturacao-eletronica.svg'));
+        $this->assertFalse($catalog->isForbiddenProductPath('/img/placeholder-blog.svg'));
+
+        $article = Article::create([
+            'title' => 'PDV e stock para loja em Luanda',
+            'slug' => 'pdv-stock-loja-luanda',
+            'focus_keyword' => 'PDV stock Angola',
+            'status' => Article::STATUS_DRAFT,
+        ]);
+
+        $result = app(CoverImageService::class)->resolve($article);
+
+        $this->assertFalse($catalog->isForbiddenProductPath($result['url']));
+        $this->assertTrue(
+            str_starts_with($result['url'], '/img/blog-covers/')
+            || str_starts_with($result['url'], '/img/placeholder-blog')
+            || str_starts_with($result['url'], '/storage/')
+        );
     }
 
     public function test_generated_local_cover_when_remotes_fail(): void
@@ -294,7 +330,9 @@ class CoverImageServiceTest extends TestCase
         $this->assertSame('generated-local', $result['source']);
         $this->assertStringStartsWith('/img/blog-covers/', $result['url']);
         $this->assertFileExists(public_path(ltrim($result['url'], '/')));
-        $this->assertStringContainsString('SIGESC', (string) file_get_contents(public_path(ltrim($result['url'], '/'))));
+        $svg = (string) file_get_contents(public_path(ltrim($result['url'], '/')));
+        $this->assertStringContainsString('BLOG', $svg);
+        $this->assertStringNotContainsString('SIGESC', $svg);
     }
 
     public function test_local_fallback_when_generation_disabled(): void
@@ -333,6 +371,7 @@ class CoverImageServiceTest extends TestCase
 
         $this->assertTrue($service->looksLikeBrandOrLogo('coca-cola company logo png'));
         $this->assertTrue($service->looksLikeBrandOrLogo('file:nike wordmark.svg'));
+        $this->assertTrue($service->looksLikeBrandOrLogo('sigesc software dashboard screenshot'));
         $this->assertFalse($service->looksLikeBrandOrLogo('african retail shop photography'));
     }
 

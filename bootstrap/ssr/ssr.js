@@ -12,7 +12,8 @@ async function resolvePageComponent(path, pages) {
   }
   throw new Error(`Page not found: ${path}`);
 }
-const appName = "SIGESC-TECH";
+var define_import_meta_env_default = { BASE_URL: "/build/", MODE: "production", DEV: false, PROD: true, SSR: true };
+const appName = define_import_meta_env_default.VITE_APP_NAME || "SIGESC-SITE";
 createServer(
   (page) => createInertiaApp({
     page,
