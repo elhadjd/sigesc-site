@@ -34,36 +34,34 @@ class PartnershipController extends Controller
     }
 
     /**
-     * @return array{
-     *     monthly_price: int,
-     *     currency: string,
-     *     currency_label: string,
-     *     price_formatted: string,
-     *     offline_licenses_limited: bool,
-     *     offline_licenses_note: string,
-     *     contact_url: string,
-     *     register_url: string,
-     *     admin_url: string,
-     *     agt_cert: string
-     * }
+     * @return array<string, mixed>
      */
     protected function planPayload(): array
     {
         $cfg = config('sigesc.partnership', []);
-        $price = (int) ($cfg['monthly_price'] ?? 30000);
+        $price = (int) ($cfg['monthly_price'] ?? 40000);
         $label = (string) ($cfg['currency_label'] ?? 'Kz');
+        $freelancer = is_array($cfg['freelancer'] ?? null) ? $cfg['freelancer'] : [];
+        $commission = (int) ($freelancer['commission_percent'] ?? 30);
 
         return [
             'monthly_price' => $price,
             'currency' => (string) ($cfg['currency'] ?? 'AOA'),
             'currency_label' => $label,
             'price_formatted' => number_format($price, 0, ',', '.').' '.$label,
-            'offline_licenses_limited' => (bool) ($cfg['offline_licenses_limited'] ?? true),
-            'offline_licenses_note' => (string) ($cfg['offline_licenses_note'] ?? 'Licenças limitadas para a versão offline'),
+            'offline_licenses_limited' => (bool) ($cfg['offline_licenses_limited'] ?? false),
+            'offline_licenses_note' => (string) ($cfg['offline_licenses_note'] ?? 'Licenças ilimitadas'),
             'contact_url' => url($cfg['contact_path'] ?? '/contact'),
             'register_url' => url($cfg['register_path'] ?? '/auth/register'),
             'admin_url' => (string) config('sigesc.admin_url'),
             'agt_cert' => (string) config('sigesc.agt_certification.number', 'FE/323/AGT/2026'),
+            'freelancer' => [
+                'enabled' => (bool) ($freelancer['enabled'] ?? true),
+                'commission_percent' => $commission,
+                'commission_formatted' => $commission.'%',
+                'label' => (string) ($freelancer['label'] ?? 'Freelancer'),
+                'summary' => (string) ($freelancer['summary'] ?? 'Indique o SIGESC a clientes e ganhe comissão sobre as vendas fechadas.'),
+            ],
         ];
     }
 }

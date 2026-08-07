@@ -58,10 +58,13 @@ export default function AboutIndex({
                                     AGT {String(cert.number || '')}
                                 </span>
                                 <span className="border border-white/20 px-3 py-2">
-                                    Parceria {String(partner.price_formatted || '30.000 Kz')}/mês
+                                    Parceria {String(partner.price_formatted || '40.000 Kz')}/mês
                                 </span>
                                 <span className="border border-white/20 px-3 py-2">
-                                    Offline com licenças limitadas
+                                    Licenças ilimitadas
+                                </span>
+                                <span className="border border-white/20 px-3 py-2">
+                                    Freelancer {String((partner.freelancer as any)?.commission_percent || 30)}% comissão
                                 </span>
                             </div>
                         </div>

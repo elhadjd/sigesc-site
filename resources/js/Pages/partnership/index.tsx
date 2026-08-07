@@ -8,6 +8,14 @@ import { UserLoggedProvider } from '@/contexts/loggedUser';
 import SeoHead, { SeoPayload } from '@/Components/seo/SeoHead';
 import { User } from '@/types';
 
+type FreelancerPlan = {
+    enabled: boolean;
+    commission_percent: number;
+    commission_formatted: string;
+    label: string;
+    summary: string;
+};
+
 type Plan = {
     monthly_price: number;
     currency: string;
@@ -19,29 +27,23 @@ type Plan = {
     register_url: string;
     admin_url: string;
     agt_cert: string;
+    freelancer: FreelancerPlan;
 };
 
-const benefits = [
+const partnerBenefits = [
     'Revenda e implantação do SIGESC junto de PME',
+    'Licenças ilimitadas (cloud e offline)',
     'Faturação eletrónica certificada AGT',
     'PDV, stock, finanças, compras e RH',
     'Suporte comercial para o seu território',
-    'Material para apresentar o sistema a clientes',
 ];
 
-const faqs = [
-    {
-        q: 'Quanto custa a parceria?',
-        a: 'A mensalidade do programa de parceria com o sistema SIGESC é de 30.000 Kz.',
-    },
-    {
-        q: 'A versão offline tem licenças limitadas?',
-        a: 'Sim. Os cupos da versão offline são limitados e atribuídos conforme disponibilidade e região.',
-    },
-    {
-        q: 'Como me candidatar?',
-        a: 'Peça parceria pelo contacto ou registe uma conta Parceiro. A equipa confirma o cupo offline e os próximos passos.',
-    },
+const freelancerBenefits = [
+    'Indique o SIGESC a empresas e empresários',
+    'Ganhe 30% de comissão sobre cada venda fechada',
+    'Sem mensalidade — só comissão',
+    'Ideal para consultores, contabilistas e comerciais',
+    'Acompanhe as indicações com a equipa SIGESC',
 ];
 
 export default function PartnershipIndex({
@@ -54,6 +56,27 @@ export default function PartnershipIndex({
     plan: Plan;
 }) {
     const [ready, setReady] = useState(false);
+    const freelancer = plan.freelancer;
+    const commission = freelancer?.commission_formatted || '30%';
+
+    const faqs = [
+        {
+            q: 'Quanto custa a parceria Parceiro?',
+            a: `A mensalidade do programa Parceiro SIGESC é de ${plan.price_formatted}, com licenças ilimitadas.`,
+        },
+        {
+            q: 'As licenças são ilimitadas?',
+            a: 'Sim. No plano Parceiro as licenças são ilimitadas para cloud e versão offline.',
+        },
+        {
+            q: 'O que é a parceria Freelancer?',
+            a: `Freelancers indicam o SIGESC a clientes e ganham ${commission} de comissão sobre as vendas fechadas. Não há mensalidade.`,
+        },
+        {
+            q: 'Como me candidatar?',
+            a: 'Peça parceria pelo contacto ou registe uma conta. Indique se pretende o plano Parceiro ou Freelancer.',
+        },
+    ];
 
     useEffect(() => {
         const id = window.requestAnimationFrame(() => setReady(true));
@@ -65,8 +88,8 @@ export default function PartnershipIndex({
             <FormStateProvider>
                 <SeoHead
                     seo={seo}
-                    fallbackTitle="Parceria SIGESC | 30.000 Kz/mês · Licenças Offline Limitadas"
-                    fallbackDescription="Torne-se parceiro SIGESC: revenda software de gestão comercial certificado AGT em Angola. Mensalidade 30.000 Kz com licenças offline limitadas."
+                    fallbackTitle={`Parceria SIGESC | ${plan.price_formatted}/mês · Freelancer ${commission}`}
+                    fallbackDescription={`Parceiro SIGESC: ${plan.price_formatted}/mês com licenças ilimitadas. Freelancer: indique clientes e ganhe ${commission} de comissão.`}
                 />
                 <HeaderComponent auth={auth as any} />
 
@@ -96,7 +119,7 @@ export default function PartnershipIndex({
                                 transition={{ duration: 0.6, delay: 0.08 }}
                                 className="mt-4 max-w-3xl font-serif text-3xl leading-tight text-white sm:text-5xl"
                             >
-                                Parceria com o nosso sistema — {plan.price_formatted}/mês
+                                Dois caminhos de parceria com o nosso sistema
                             </motion.h1>
                             <motion.p
                                 initial={{ opacity: 0, y: 18 }}
@@ -104,8 +127,8 @@ export default function PartnershipIndex({
                                 transition={{ duration: 0.55, delay: 0.16 }}
                                 className="mt-5 max-w-xl text-lg text-white/80"
                             >
-                                Revenda e implemente gestão comercial certificada AGT em Angola.
-                                Licenças limitadas para a versão offline.
+                                Parceiro: {plan.price_formatted}/mês com licenças ilimitadas. Freelancer:
+                                indique clientes e ganhe {commission} de comissão.
                             </motion.p>
                             <motion.div
                                 initial={{ opacity: 0, y: 14 }}
@@ -123,54 +146,90 @@ export default function PartnershipIndex({
                                     href={plan.register_url}
                                     className="border border-white/40 px-6 py-3 text-sm font-semibold tracking-wide text-white transition hover:border-white hover:bg-white/10"
                                 >
-                                    Registar como parceiro
+                                    Registar conta
                                 </a>
                             </motion.div>
                         </div>
                     </section>
 
                     <section className="relative border-t border-white/10 bg-[#0b2833]">
-                        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-                            <div>
-                                <h2 className="font-serif text-3xl text-white sm:text-4xl">
-                                    Plano de parceria mensal
-                                </h2>
-                                <p className="mt-4 max-w-lg text-white/75">
-                                    Um valor claro para crescer com o SIGESC: apresente o sistema,
-                                    feche clientes e acompanhe implantações na sua região.
-                                </p>
-                                <ul className="mt-8 space-y-3 text-white/85">
-                                    {benefits.map((item) => (
-                                        <li key={item} className="flex gap-3">
-                                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#00a5cf]" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+                            <h2 className="font-serif text-3xl text-white sm:text-4xl">
+                                Escolha o tipo de parceria
+                            </h2>
+                            <p className="mt-4 max-w-2xl text-white/75">
+                                Revenda e implantar como Parceiro, ou indicar clientes como Freelancer.
+                            </p>
 
-                            <div className="relative overflow-hidden border border-white/15 bg-[#071820] p-8 sm:p-10">
-                                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7fd4e8]">
-                                    Mensalidade
-                                </p>
-                                <p className="mt-3 font-serif text-5xl text-white sm:text-6xl">
-                                    {plan.price_formatted}
-                                    <span className="ml-2 text-xl text-white/60">/mês</span>
-                                </p>
-                                {plan.offline_licenses_limited && (
-                                    <p className="mt-5 border-t border-white/10 pt-5 text-white/80">
-                                        {plan.offline_licenses_note}
-                                    </p>
-                                )}
-                                <p className="mt-3 text-sm text-white/55">
-                                    Certificação AGT {plan.agt_cert}
-                                </p>
-                                <Link
-                                    href="/contact"
-                                    className="mt-8 inline-flex bg-white px-5 py-3 text-sm font-semibold text-[#071820] transition hover:bg-[#7fd4e8]"
+                            <div className="mt-10 grid gap-6 lg:grid-cols-2">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 18 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, amount: 0.35 }}
+                                    transition={{ duration: 0.45 }}
+                                    className="border border-white/15 bg-[#071820] p-8 sm:p-10"
                                 >
-                                    Quero ser parceiro
-                                </Link>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7fd4e8]">
+                                        Parceiro
+                                    </p>
+                                    <p className="mt-3 font-serif text-5xl text-white sm:text-6xl">
+                                        {plan.price_formatted}
+                                        <span className="ml-2 text-xl text-white/60">/mês</span>
+                                    </p>
+                                    <p className="mt-4 text-white/80">{plan.offline_licenses_note}</p>
+                                    <ul className="mt-8 space-y-3 text-white/85">
+                                        {partnerBenefits.map((item) => (
+                                            <li key={item} className="flex gap-3">
+                                                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#00a5cf]" />
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <p className="mt-5 text-sm text-white/55">
+                                        Certificação AGT {plan.agt_cert}
+                                    </p>
+                                    <Link
+                                        href="/contact"
+                                        className="mt-8 inline-flex bg-white px-5 py-3 text-sm font-semibold text-[#071820] transition hover:bg-[#7fd4e8]"
+                                    >
+                                        Quero ser parceiro
+                                    </Link>
+                                </motion.div>
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 18 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, amount: 0.35 }}
+                                    transition={{ duration: 0.45, delay: 0.08 }}
+                                    className="border border-[#00a5cf]/35 bg-[#071820] p-8 sm:p-10"
+                                >
+                                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7fd4e8]">
+                                        {freelancer?.label || 'Freelancer'}
+                                    </p>
+                                    <p className="mt-3 font-serif text-5xl text-white sm:text-6xl">
+                                        {commission}
+                                        <span className="ml-2 text-xl text-white/60">comissão</span>
+                                    </p>
+                                    <p className="mt-4 text-white/80">
+                                        {freelancer?.summary ||
+                                            'Indique o SIGESC a clientes e ganhe comissão sobre as vendas fechadas.'}
+                                    </p>
+                                    <ul className="mt-8 space-y-3 text-white/85">
+                                        {freelancerBenefits.map((item) => (
+                                            <li key={item} className="flex gap-3">
+                                                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7fd4e8]" />
+                                                <span>{item.replace('30%', commission)}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <p className="mt-5 text-sm text-white/55">Sem mensalidade · só comissão</p>
+                                    <Link
+                                        href="/contact"
+                                        className="mt-8 inline-flex bg-[#00a5cf] px-5 py-3 text-sm font-semibold text-[#071820] transition hover:bg-[#3ec4e6]"
+                                    >
+                                        Quero ser freelancer
+                                    </Link>
+                                </motion.div>
                             </div>
                         </div>
                     </section>
@@ -179,32 +238,32 @@ export default function PartnershipIndex({
                         <div
                             className="absolute inset-0 bg-cover bg-center opacity-30"
                             style={{
-                                backgroundImage: "url('/img/point-of-sale/software de gestao angola pdv-vendas-rapidas.png')",
+                                backgroundImage:
+                                    "url('/img/point-of-sale/software de gestao angola pdv-vendas-rapidas.png')",
                             }}
                         />
                         <div className="absolute inset-0 bg-[#071820]/85" />
                         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6">
                             <h2 className="font-serif text-3xl text-white sm:text-4xl">
-                                Versão offline com cupos limitados
+                                Licenças ilimitadas para parceiros
                             </h2>
                             <p className="mt-4 max-w-2xl text-lg text-white/75">
-                                Ideal para lojas e escritórios com internet instável. A instalação
-                                local continua a emitir e gerir o negócio — as licenças offline para
-                                parceiros não são ilimitadas.
+                                No plano Parceiro, as licenças cloud e offline são ilimitadas — ideal
+                                para crescer a sua carteira de clientes em Angola sem teto de cupos.
                             </p>
                             <div className="mt-10 grid gap-8 sm:grid-cols-3">
                                 {[
                                     {
-                                        title: 'Instalação local',
-                                        body: 'Windows ou Linux no posto do cliente, com sincronização quando houver rede.',
+                                        title: 'Cloud e offline',
+                                        body: 'Implante no posto do cliente ou na nuvem, com sincronização quando houver rede.',
                                     },
                                     {
-                                        title: 'Cupos por região',
-                                        body: 'Distribuição controlada para proteger território e qualidade de suporte.',
+                                        title: 'Sem limite de licenças',
+                                        body: 'Escale a sua operação comercial sem restrição de cupos no plano Parceiro.',
                                     },
                                     {
-                                        title: 'Aprovação comercial',
-                                        body: 'Cada pedido de parceria e licença offline passa por validação da equipa SIGESC.',
+                                        title: 'Freelancer à parte',
+                                        body: `Se preferir só indicar clientes, o modelo Freelancer paga ${commission} de comissão.`,
                                     },
                                 ].map((block, index) => (
                                     <motion.div
@@ -229,11 +288,7 @@ export default function PartnershipIndex({
                                 {faqs.map((faq) => (
                                     <div key={faq.q}>
                                         <h3 className="text-lg font-semibold text-white">{faq.q}</h3>
-                                        <p className="mt-2 text-white/75">
-                                            {faq.q.includes('custa')
-                                                ? `A mensalidade do programa de parceria com o sistema SIGESC é de ${plan.price_formatted}.`
-                                                : faq.a}
-                                        </p>
+                                        <p className="mt-2 text-white/75">{faq.a}</p>
                                     </div>
                                 ))}
                             </div>

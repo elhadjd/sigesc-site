@@ -104,7 +104,7 @@ class PublicPageContent
                 [
                     ['href' => url('/sobre'), 'label' => 'Sobre o SIGESC', 'description' => "Certificação AGT {$agt}"],
                     ['href' => url('/solutions'), 'label' => 'Ver todas as soluções', 'description' => 'Catálogo completo de módulos SIGESC'],
-                    ['href' => url('/parceria'), 'label' => 'Parceria', 'description' => '30.000 Kz/mês · offline limitado'],
+                    ['href' => url('/parceria'), 'label' => 'Parceria', 'description' => '40.000 Kz/mês · freelancer 30%'],
                 ],
                 $this->moduleLinks(),
                 [
@@ -472,20 +472,21 @@ class PublicPageContent
     public function partnership(): array
     {
         $cfg = config('sigesc.partnership', []);
-        $price = (int) ($cfg['monthly_price'] ?? 30000);
+        $price = (int) ($cfg['monthly_price'] ?? 40000);
         $priceLabel = number_format($price, 0, ',', '.').' '.($cfg['currency_label'] ?? 'Kz');
         $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $commission = (int) data_get($cfg, 'freelancer.commission_percent', 30);
 
         return [
-            'kicker' => 'Programa de parceria · Licenças offline limitadas',
-            'headline' => 'Parceria SIGESC — '.$priceLabel.'/mês com o nosso sistema',
-            'lead' => 'Junte-se ao programa de parceiros SIGESC: revenda e implemente software de gestão comercial certificado pela AGT ('.$agt.') em Angola. Mensalidade de '.$priceLabel.'. As licenças da versão offline são limitadas — candidate-se enquanto houver cupos.',
+            'kicker' => 'Programa de parceria · Licenças ilimitadas · Freelancer '.$commission.'%',
+            'headline' => 'Parceria SIGESC — Parceiro '.$priceLabel.'/mês ou Freelancer '.$commission.'%',
+            'lead' => 'Junte-se ao programa SIGESC: como Parceiro, revenda e implemente software de gestão comercial certificado pela AGT ('.$agt.') em Angola por '.$priceLabel.'/mês com licenças ilimitadas. Como Freelancer, indique clientes e ganhe '.$commission.'% de comissão.',
             'sections' => [
                 [
-                    'heading' => 'O que inclui a parceria',
+                    'heading' => 'Parceiro — o que inclui',
                     'items' => [
                         'Mensalidade de '.$priceLabel.' para parceria com o sistema SIGESC',
-                        'Acesso a licenças limitadas da versão offline (Windows/Linux)',
+                        'Licenças ilimitadas (cloud e offline)',
                         'Material comercial e suporte para implantação em PME',
                         'Faturação eletrónica certificada AGT ('.$agt.')',
                         'Módulos: PDV, stock, finanças, compras, RH e mais',
@@ -493,11 +494,21 @@ class PublicPageContent
                     ],
                 ],
                 [
-                    'heading' => 'Versão offline — licenças limitadas',
-                    'body' => 'A versão offline do SIGESC permite operar sem dependência contínua da internet — ideal para lojas, armazéns e escritórios com ligação instável. Os cupos de licença offline para parceiros são limitados e atribuídos conforme disponibilidade.',
+                    'heading' => 'Freelancer — indicação com comissão',
+                    'body' => 'Freelancers indicam o SIGESC a empresas e empresários. Por cada venda fechada através da sua indicação, recebe '.$commission.'% de comissão. Não há mensalidade.',
                     'items' => [
-                        'Instalação local com sincronização quando houver rede',
-                        'Cupos limitados por parceiro e por região',
+                        $commission.'% de comissão sobre vendas fechadas',
+                        'Sem mensalidade — só comissão',
+                        'Ideal para consultores, contabilistas e comerciais',
+                        'Acompanhe as indicações com a equipa SIGESC',
+                    ],
+                ],
+                [
+                    'heading' => 'Licenças ilimitadas',
+                    'body' => 'No plano Parceiro, as licenças cloud e offline são ilimitadas — ideal para crescer a carteira de clientes sem teto de cupos.',
+                    'items' => [
+                        'Instalação local ou cloud',
+                        'Sem limite de licenças no plano Parceiro',
                         'Pedido sujeito a aprovação comercial SIGESC',
                     ],
                 ],
@@ -505,24 +516,28 @@ class PublicPageContent
                     'heading' => 'Perguntas frequentes',
                     'faqs' => [
                         [
-                            'question' => 'Quanto custa a parceria?',
-                            'answer' => 'O plano de parceria custa '.$priceLabel.' por mês.',
+                            'question' => 'Quanto custa a parceria Parceiro?',
+                            'answer' => 'O plano Parceiro custa '.$priceLabel.' por mês, com licenças ilimitadas.',
                         ],
                         [
                             'question' => 'As licenças offline são ilimitadas?',
-                            'answer' => 'Não. As licenças da versão offline são limitadas. Contacte-nos para reservar o seu cupo.',
+                            'answer' => 'Sim. No plano Parceiro as licenças são ilimitadas.',
+                        ],
+                        [
+                            'question' => 'O que é a parceria Freelancer?',
+                            'answer' => 'Freelancers indicam o SIGESC a clientes e ganham '.$commission.'% de comissão. Não há mensalidade.',
                         ],
                         [
                             'question' => 'Como me candidatar?',
-                            'answer' => 'Use o formulário de contacto ou registe uma conta Parceiro. A equipa confirma disponibilidade e próximos passos.',
+                            'answer' => 'Use o formulário de contacto ou registe uma conta. Indique se pretende o plano Parceiro ou Freelancer.',
                         ],
                     ],
                 ],
             ],
             'links' => [
-                ['href' => url('/parceria'), 'label' => 'Página de parceria SIGESC', 'description' => $priceLabel.'/mês · offline limitado'],
+                ['href' => url('/parceria'), 'label' => 'Página de parceria SIGESC', 'description' => $priceLabel.'/mês · freelancer '.$commission.'%'],
                 ['href' => url('/contact'), 'label' => 'Pedir parceria', 'description' => 'Fale com a equipa comercial'],
-                ['href' => url('/auth/register'), 'label' => 'Registar como parceiro', 'description' => 'Criar conta Parceiro'],
+                ['href' => url('/auth/register'), 'label' => 'Registar conta', 'description' => 'Criar conta Parceiro ou Freelancer'],
                 ['href' => url('/prices'), 'label' => 'Preços cloud SIGESC', 'description' => 'Planos para PME'],
                 ['href' => url('/solutions'), 'label' => 'Soluções SIGESC', 'description' => 'Módulos de gestão'],
                 ['href' => url('/downloads'), 'label' => 'Downloads', 'description' => 'Instaladores e recursos'],
@@ -530,13 +545,11 @@ class PublicPageContent
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function about(): array
     {
         $agt = config('geo.certification.number', config('sigesc.agt_certification.number'));
-        $price = config('geo.partnership.price_formatted', '30.000 Kz');
+        $price = config('geo.partnership.price_formatted', '40.000 Kz');
+        $commission = (int) config('geo.partnership.freelancer.commission_percent', 30);
 
         return [
             'kicker' => "Certificação AGT n.º {$agt} · GEO",
@@ -578,7 +591,8 @@ class PublicPageContent
                     'body' => config('geo.partnership.summary'),
                     'items' => [
                         'Mensalidade: '.$price,
-                        'Licenças offline: limitadas',
+                        'Licenças: ilimitadas',
+                        'Freelancer: '.$commission.'% de comissão',
                         'Página: '.url('/parceria'),
                     ],
                 ],
