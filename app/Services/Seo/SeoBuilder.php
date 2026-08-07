@@ -236,6 +236,10 @@ class SeoBuilder
             'json_ld' => $jsonLd,
         ];
 
+        if (! empty($page['og_image'])) {
+            $payload['og_image'] = $page['og_image'];
+        }
+
         if (! empty($page['robots'])) {
             $payload['robots'] = $page['robots'];
         }
@@ -290,6 +294,10 @@ class SeoBuilder
             ->first(fn (array $m) => ($m['slug'] ?? '') === $slug
                 || strcasecmp((string) ($m['name'] ?? ''), $moduleName) === 0);
 
+        if (($catalog['slug'] ?? $slug) === 'crm') {
+            return $this->forCrm();
+        }
+
         $description = $catalog['description']
             ?? "Saiba como o módulo {$moduleName} do SIGESC ajuda a gerir o seu negócio em Angola com eficiência e conformidade.";
         $keywords = $catalog['keywords']
@@ -301,6 +309,93 @@ class SeoBuilder
             'path' => '/modules/'.($catalog['slug'] ?? $slug),
             'keywords' => $keywords,
         ]);
+    }
+
+    public function forCrm(): array
+    {
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $hero = \App\Support\CrmScreenshots::heroSrc();
+        $url = rtrim(config('app.url') ?: config('sigesc.site_url'), '/').'/modules/crm';
+
+        $faqs = [
+            [
+                'question' => 'O que é o CRM do SIGESC?',
+                'answer' => 'É o módulo de gestão comercial do SIGESC para PME em Angola: pipeline de vendas, contactos, atividades, WhatsApp, email e relatórios — no mesmo sistema da faturação eletrónica AGT.',
+            ],
+            [
+                'question' => 'O CRM SIGESC integra WhatsApp e email?',
+                'answer' => 'Sim. Pode acompanhar conversas com clientes via WhatsApp e email ligadas ao contacto e ao negócio no funil.',
+            ],
+            [
+                'question' => 'O CRM está ligado à faturação AGT?',
+                'answer' => "Sim. O CRM faz parte do SIGESC, software de faturação eletrónica certificado pela AGT (n.º {$agt}), com PDV, stock e finanças na mesma plataforma.",
+            ],
+            [
+                'question' => 'Para quem é o módulo CRM?',
+                'answer' => 'Para equipas comerciais, lojas, prestadores de serviços e PME em Luanda e noutras províncias que precisam de organizar leads, follow-ups e fechos de venda.',
+            ],
+            [
+                'question' => 'Como experimentar o CRM SIGESC?',
+                'answer' => 'Peça demonstração em sisgesc.net/contact ou inicie o trial em admin.sisgesc.net/getting-started.',
+            ],
+        ];
+
+        $payload = [
+            'title' => 'CRM SIGESC | Pipeline, WhatsApp e Gestão de Clientes em Angola',
+            'description' => "CRM comercial do SIGESC para PME em Angola: pipeline de vendas, contactos, atividades, WhatsApp, email e relatórios. Integrado à faturação eletrónica AGT ({$agt}), PDV e gestão da empresa.",
+            'path' => '/modules/crm',
+            'keywords' => implode(', ', [
+                'CRM Angola',
+                'software CRM Angola',
+                'CRM SIGESC',
+                'gestão de clientes Angola',
+                'pipeline de vendas Angola',
+                'CRM WhatsApp Angola',
+                'funil de vendas PME',
+                'CRM Luanda',
+                'software comercial Angola',
+                'gestão de leads Angola',
+                'CRM faturação AGT',
+                'sistema CRM PME Angola',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'SoftwareApplication',
+                    'name' => 'SIGESC CRM',
+                    'applicationCategory' => 'BusinessApplication',
+                    'operatingSystem' => 'Web, Windows',
+                    'description' => 'Módulo CRM do SIGESC: pipeline, contactos, WhatsApp, email e relatórios para PME em Angola.',
+                    'url' => $url,
+                    'image' => $hero ? (rtrim(config('app.url') ?: config('sigesc.site_url'), '/').$hero) : config('sigesc.logo_url'),
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'url' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/').'/prices',
+                        'priceCurrency' => 'AOA',
+                        'availability' => 'https://schema.org/InStock',
+                        'areaServed' => [
+                            '@type' => 'Country',
+                            'name' => 'Angola',
+                        ],
+                    ],
+                    'featureList' => [
+                        'Pipeline de vendas',
+                        'Gestão de contactos e leads',
+                        'Atividades e follow-ups',
+                        'WhatsApp e email integrados',
+                        'Relatórios comerciais',
+                        'Integração com faturação AGT',
+                    ],
+                ],
+            ],
+        ];
+
+        if ($hero) {
+            $payload['og_image'] = rtrim(config('app.url') ?: config('sigesc.site_url'), '/').$hero;
+        }
+
+        return $this->forPage($payload);
     }
 
     public function forPrices(): array

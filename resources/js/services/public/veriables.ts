@@ -1,5 +1,5 @@
 import { SIGESC_GETTING_STARTED_URL, SIGESC_ADMIN_URL } from './domains';
-import { FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar, FiBarChart2, FiShoppingBag, FiDollarSign, FiGlobe } from "react-icons/fi";
+import { FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar, FiBarChart2, FiShoppingBag, FiDollarSign, FiGlobe, FiMessageSquare } from "react-icons/fi";
 
 export const features = [
     {
@@ -89,6 +89,14 @@ export const features = [
         name: "Dropshipping",
         color: "cyan",
         href: route('modules', { module: 'dropshipping' })
+    },
+    {
+        icon: FiMessageSquare,
+        className: "text-lg",
+        desc: "Pipeline, contactos, WhatsApp, email e relatórios comerciais no mesmo sistema.",
+        name: "CRM",
+        color: "teal",
+        href: route('modules', { module: 'crm' })
     }
 ];
 
@@ -1636,6 +1644,65 @@ export const moduleData = {
                 "PME em crescimento digital"
             ]
         }
+    },
+    crm: {
+        title: "CRM SIGESC | Pipeline, WhatsApp e Gestão de Clientes em Angola",
+        description: "CRM comercial do SIGESC: pipeline de vendas, contactos, atividades, WhatsApp, email e relatórios. Integrado à faturação eletrónica AGT, PDV e gestão da PME em Angola.",
+        keywords: "CRM Angola, software CRM Angola, CRM SIGESC, pipeline de vendas, CRM WhatsApp, gestão de clientes Angola",
+        heroTitle: "CRM comercial integrado ao SIGESC",
+        heroSubtitle: "Organize leads, follow-ups e fechos de venda com WhatsApp, email e pipeline no mesmo sistema da faturação AGT.",
+        images: [
+            "/img/crm/painel.png",
+            "/img/crm/pipeline.png",
+            "/img/crm/contactos.png",
+            "/img/crm/atividades.png",
+            "/img/crm/whatsapp.png",
+            "/img/crm/email.png",
+            "/img/crm/relatorios.png"
+        ],
+        imageAlts: [
+            "Painel CRM SIGESC",
+            "Pipeline de vendas CRM SIGESC",
+            "Gestão de contactos CRM SIGESC",
+            "Atividades CRM SIGESC",
+            "WhatsApp no CRM SIGESC",
+            "Email no CRM SIGESC",
+            "Relatórios CRM SIGESC"
+        ],
+        features: [
+            {
+                icon: "M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2",
+                title: "Pipeline de vendas",
+                description: "Funil visual para acompanhar negócios até ao fecho."
+            },
+            {
+                icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
+                title: "Contactos e leads",
+                description: "Fichas completas com histórico comercial."
+            },
+            {
+                icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
+                title: "WhatsApp e email",
+                description: "Converse com o cliente sem sair do SIGESC."
+            }
+        ],
+        benefits: [
+            {
+                number: "01",
+                title: "Funil organizado",
+                description: "Saiba em que etapa está cada oportunidade."
+            },
+            {
+                number: "02",
+                title: "Comunicação integrada",
+                description: "WhatsApp e email ligados ao contacto."
+            },
+            {
+                number: "03",
+                title: "Uma plataforma",
+                description: "CRM + faturação AGT + PDV no mesmo sistema."
+            }
+        ]
     }
 
 };

@@ -766,6 +766,10 @@ class PublicPageContent
      */
     public function modulePage(string $moduleName, string $slug): array
     {
+        if ($slug === 'crm') {
+            return $this->crm();
+        }
+
         $catalog = collect($this->modules())->firstWhere('slug', $slug)
             ?? collect($this->modules())->first(fn ($m) => strcasecmp($m['name'], $moduleName) === 0);
 
@@ -815,6 +819,123 @@ class PublicPageContent
                     ['href' => url('/pergunte-ao-especialista'), 'label' => 'Pergunte ao Especialista', 'description' => 'Dúvidas de gestão e fiscalidade'],
                 ]
             ),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function crm(): array
+    {
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026'));
+        $screenshots = \App\Support\CrmScreenshots::all();
+        $catalog = collect($this->modules())->firstWhere('slug', 'crm');
+        $highlights = $catalog['highlights'] ?? [];
+
+        return [
+            'kicker' => 'Módulo CRM · SIGESC Angola',
+            'headline' => 'CRM SIGESC — pipeline, WhatsApp e gestão de clientes',
+            'lead' => ($catalog['description'] ?? 'CRM comercial integrado ao SIGESC.')
+                .' Software de faturação eletrónica certificado pela AGT (n.º '.$agt.').',
+            'sections' => [
+                [
+                    'heading' => 'O que inclui o CRM SIGESC',
+                    'body' => 'Organize o funil comercial e a relação com o cliente no mesmo sistema onde fatura, vende no PDV e controla stock.',
+                    'items' => $highlights !== [] ? $highlights : [
+                        'Pipeline visual de oportunidades',
+                        'Contactos, leads e histórico',
+                        'Atividades e follow-ups',
+                        'WhatsApp e email integrados',
+                        'Relatórios de conversão',
+                    ],
+                ],
+                [
+                    'heading' => 'Ecrãs do módulo',
+                    'body' => 'Interfaces reais do CRM no SIGESC.',
+                    'items' => collect($screenshots)->map(fn ($s) => $s['title'].' — '.$s['summary'])->all(),
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => [
+                        [
+                            'question' => 'O CRM SIGESC serve PME em Angola?',
+                            'answer' => 'Sim. Foi pensado para equipas comerciais e PME em Luanda e noutras províncias, com fluxos simples e integração à faturação AGT.',
+                        ],
+                        [
+                            'question' => 'Posso falar com clientes por WhatsApp no CRM?',
+                            'answer' => 'Sim. As conversas WhatsApp e email ficam ligadas ao contacto e ao negócio no pipeline.',
+                        ],
+                        [
+                            'question' => 'O CRM substitui o PDV ou a faturação?',
+                            'answer' => 'Não. Complementa: o CRM trata da relação comercial; PDV e faturação eletrónica AGT tratam da venda e do documento fiscal.',
+                        ],
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => url('/modules/crm'), 'label' => 'CRM SIGESC', 'description' => 'Página do módulo'],
+                ['href' => url('/solutions'), 'label' => 'Todas as soluções', 'description' => 'Catálogo de módulos'],
+                ['href' => url('/prices'), 'label' => 'Preços', 'description' => 'Planos SIGESC'],
+                ['href' => url('/contact'), 'label' => 'Pedir demonstração', 'description' => 'Falar com a equipa'],
+                ['href' => (string) (config('geo.urls.trial') ?: 'https://admin.sisgesc.net/getting-started'), 'label' => 'Testar online', 'description' => 'Trial em admin.sisgesc.net'],
+            ],
+        ];
+    }
+
+    /**
+     * Payload Inertia para a página dedicada do CRM.
+     *
+     * @return array<string, mixed>
+     */
+    public function crmModule(): array
+    {
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026'));
+        $catalog = collect($this->modules())->firstWhere('slug', 'crm') ?? [];
+        $screenshots = \App\Support\CrmScreenshots::all();
+
+        return [
+            'name' => 'CRM',
+            'slug' => 'crm',
+            'agt_cert' => $agt,
+            'headline' => 'Pipeline, WhatsApp e clientes no mesmo sistema',
+            'lead' => 'O CRM SIGESC organiza leads, follow-ups e fechos de venda — integrado à faturação eletrónica AGT, PDV e gestão da PME.',
+            'description' => $catalog['description'] ?? '',
+            'highlights' => $catalog['highlights'] ?? [],
+            'screenshots' => $screenshots,
+            'hero_image' => \App\Support\CrmScreenshots::heroSrc(),
+            'capabilities' => [
+                [
+                    'key' => 'pipeline',
+                    'title' => 'Pipeline de vendas',
+                    'body' => 'Veja cada oportunidade no funil, priorize a equipa e acelere o fecho.',
+                ],
+                [
+                    'key' => 'contactos',
+                    'title' => 'Contactos e leads',
+                    'body' => 'Fichas completas com histórico, negócios e próximos passos.',
+                ],
+                [
+                    'key' => 'whatsapp',
+                    'title' => 'WhatsApp e email',
+                    'body' => 'Converse com o cliente nos canais que ele usa, sem sair do SIGESC.',
+                ],
+                [
+                    'key' => 'atividades',
+                    'title' => 'Atividades comerciais',
+                    'body' => 'Tarefas, lembretes e follow-ups para nenhuma oportunidade cair.',
+                ],
+                [
+                    'key' => 'relatorios',
+                    'title' => 'Relatórios do funil',
+                    'body' => 'Conversão, desempenho da equipa e indicadores do CRM.',
+                ],
+            ],
+            'integrations' => [
+                'Faturação eletrónica certificada AGT ('.$agt.')',
+                'Ponto de venda (PDV) e documentos comerciais',
+                'Stock, finanças e operações da PME',
+                'Loja virtual, marketing e dropshipping',
+            ],
         ];
     }
 }

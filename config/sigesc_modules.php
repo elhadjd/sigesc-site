@@ -79,4 +79,18 @@ return [
             'Ideal para PME angolanas que querem vender online com baixo investimento',
         ],
     ],
+    [
+        'name' => 'CRM',
+        'slug' => 'crm',
+        'description' => 'CRM comercial do SIGESC: pipeline de vendas, contactos, atividades, WhatsApp, email e relatórios — integrado à faturação eletrónica AGT, PDV e gestão da PME em Angola.',
+        'keywords' => 'CRM Angola, software CRM Angola, CRM SIGESC, gestão de clientes Angola, pipeline de vendas, CRM WhatsApp, CRM PME Luanda, funil de vendas, software comercial Angola',
+        'highlights' => [
+            'Pipeline visual de oportunidades e negócios em curso',
+            'Gestão completa de contactos, leads e clientes',
+            'Atividades, tarefas e follow-ups da equipa comercial',
+            'Conversas com clientes via WhatsApp e email no mesmo sistema',
+            'Relatórios de conversão, desempenho e funil de vendas',
+            'Integração com faturação AGT, PDV, stock e finanças SIGESC',
+        ],
+    ],
 ];
