@@ -36,18 +36,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Programa de Parceria (revenda / instalação offline)
+    | Programa de Parceria
     |--------------------------------------------------------------------------
+    | - Partner: mensalidade com licenças ilimitadas
+    | - Freelancer: indicação de clientes com comissão
     */
     'partnership' => [
-        'monthly_price' => (int) env('SIGESC_PARTNER_MONTHLY_PRICE', 30000),
+        'monthly_price' => (int) env('SIGESC_PARTNER_MONTHLY_PRICE', 40000),
         'currency' => 'AOA',
         'currency_label' => 'Kz',
         'billing_period' => 'P1M',
-        'offline_licenses_limited' => true,
-        'offline_licenses_note' => 'Licenças limitadas para a versão offline do SIGESC',
+        'offline_licenses_limited' => false,
+        'offline_licenses_note' => 'Licenças ilimitadas para a versão offline e cloud',
         'contact_path' => '/contact',
         'register_path' => '/auth/register',
+        'freelancer' => [
+            'enabled' => true,
+            'commission_percent' => (int) env('SIGESC_FREELANCER_COMMISSION', 30),
+            'label' => 'Freelancer',
+            'summary' => 'Indique o SIGESC a clientes e ganhe comissão sobre as vendas fechadas.',
+        ],
     ],
 
 ];

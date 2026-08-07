@@ -259,11 +259,11 @@ class SeoBuilder
     public function forAbout(): array
     {
         $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
-        $price = config('geo.partnership.price_formatted', '30.000 Kz');
+        $price = config('geo.partnership.price_formatted', '40.000 Kz');
 
         return $this->forPage([
             'title' => "Sobre o SIGESC | Software de Faturação Certificado AGT {$agt}",
-            'description' => "Conheça o SIGESC: software de faturação certificado pela AGT em Angola (n.º {$agt}). ERP/PDV, stock, finanças e e-commerce. Parceria {$price}/mês com licenças offline limitadas.",
+            'description' => "Conheça o SIGESC: software de faturação certificado pela AGT em Angola (n.º {$agt}). ERP/PDV, stock, finanças e e-commerce. Parceria {$price}/mês com licenças ilimitadas; Freelancer com comissão.",
             'path' => '/sobre',
             'keywords' => app(GeoManifest::class)->keywordsCsv(),
             'faq' => config('geo.faqs', []),
@@ -305,17 +305,18 @@ class SeoBuilder
 
     public function forPrices(): array
     {
-        $price = config('geo.partnership.price_formatted', '30.000 Kz');
+        $price = config('geo.partnership.price_formatted', '40.000 Kz');
+        $commission = (int) config('geo.partnership.freelancer.commission_percent', 30);
 
         return $this->forPage([
             'title' => 'Preços SIGESC | Planos para PME em Angola',
-            'description' => "Planos e preços do software de gestão SIGESC para empresas em Angola. Veja também a parceria {$price}/mês com licenças offline limitadas.",
+            'description' => "Planos e preços do software de gestão SIGESC para empresas em Angola. Veja também a parceria {$price}/mês com licenças ilimitadas e Freelancer com {$commission}% de comissão.",
             'path' => '/prices',
-            'keywords' => 'preços SIGESC, planos ERP Angola, software gestão preço, parceria 30000 Kz',
+            'keywords' => 'preços SIGESC, planos ERP Angola, software gestão preço, parceria 40000 Kz, freelancer comissão SIGESC',
             'faq' => [
                 [
-                    'question' => 'Onde ver o preço da parceria offline?',
-                    'answer' => "A parceria com o sistema SIGESC custa {$price}/mês com licenças offline limitadas. Detalhes em sisgesc.net/parceria.",
+                    'question' => 'Onde ver o preço da parceria?',
+                    'answer' => "A parceria Parceiro custa {$price}/mês com licenças ilimitadas. Freelancers ganham {$commission}% de comissão. Detalhes em sisgesc.net/parceria.",
                 ],
                 [
                     'question' => 'Os planos cloud estão nesta página?',
@@ -329,49 +330,55 @@ class SeoBuilder
     {
         $url = route('partnership.index', absolute: true);
         $cfg = config('sigesc.partnership', []);
-        $price = (int) ($cfg['monthly_price'] ?? 30000);
+        $price = (int) ($cfg['monthly_price'] ?? 40000);
         $priceLabel = number_format($price, 0, ',', '.').' '.($cfg['currency_label'] ?? 'Kz');
         $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $commission = (int) data_get($cfg, 'freelancer.commission_percent', 30);
 
         $faqs = [
             [
                 'question' => 'Quanto custa a parceria SIGESC?',
-                'answer' => "O plano de parceria com o sistema SIGESC custa {$priceLabel} por mês. Inclui acesso ao programa de parceiros e suporte comercial para revenda e implantação junto de PME em Angola.",
+                'answer' => "O plano Parceiro custa {$priceLabel} por mês, com licenças ilimitadas. Freelancers que indicam clientes ganham {$commission}% de comissão.",
             ],
             [
-                'question' => 'A versão offline tem licenças limitadas?',
-                'answer' => 'Sim. As licenças da versão offline do SIGESC são limitadas. Os parceiros aprovados recebem cupos conforme disponibilidade e território — contacte a equipa para reservar a sua licença offline.',
+                'question' => 'As licenças são ilimitadas?',
+                'answer' => 'Sim. No plano Parceiro as licenças cloud e offline são ilimitadas.',
+            ],
+            [
+                'question' => 'O que é a parceria Freelancer?',
+                'answer' => "Freelancers indicam o SIGESC a clientes e ganham {$commission}% de comissão sobre as vendas fechadas. Não há mensalidade — só comissão.",
             ],
             [
                 'question' => 'O que um parceiro SIGESC pode oferecer aos clientes?',
                 'answer' => 'Pode apresentar, implementar e acompanhar o software de gestão comercial SIGESC: faturação eletrónica certificada AGT ('.$agt.'), PDV, stock, finanças, RH e módulos relacionados para empresas angolanas.',
             ],
             [
-                'question' => 'Como me candidatar a parceiro SIGESC?',
-                'answer' => 'Aceda a sisgesc.net/parceria, reveja o plano mensal e envie o pedido por contacto ou registo de conta Parceiro. A equipa comercial valida disponibilidade de licenças offline e território.',
+                'question' => 'Como me candidatar a parceiro ou freelancer SIGESC?',
+                'answer' => 'Aceda a sisgesc.net/parceria, escolha Parceiro ou Freelancer e envie o pedido por contacto ou registo de conta.',
             ],
             [
                 'question' => 'A parceria cobre Luanda e outras províncias?',
-                'answer' => 'Sim. O programa de parceria SIGESC está aberto a consultores, contabilistas e revendedores em Luanda e no resto de Angola, sujeito a licenças offline disponíveis.',
+                'answer' => 'Sim. O programa de parceria SIGESC está aberto a consultores, contabilistas, freelancers e revendedores em Luanda e no resto de Angola.',
             ],
         ];
 
         return $this->forPage([
-            'title' => 'Parceria SIGESC | '.$priceLabel.'/mês · Licenças Offline Limitadas',
-            'description' => "Torne-se parceiro SIGESC por {$priceLabel}/mês. Revenda e implemente software de gestão comercial certificado AGT ({$agt}) em Angola. Licenças limitadas para a versão offline — candidate-se já.",
+            'title' => 'Parceria SIGESC | '.$priceLabel.'/mês · Freelancer '.$commission.'%',
+            'description' => "Parceiro SIGESC: {$priceLabel}/mês com licenças ilimitadas. Freelancer: indique clientes e ganhe {$commission}% de comissão. Software certificado AGT ({$agt}) em Angola.",
             'path' => '/parceria',
             'keywords' => implode(', ', [
                 'parceria SIGESC',
                 'parceiro SIGESC Angola',
+                'freelancer SIGESC',
+                'comissão indicação software Angola',
                 'revenda software gestão Angola',
-                'licença offline SIGESC',
+                'licença ilimitada SIGESC',
                 'software gestão offline Angola',
                 'programa de parceiros ERP Angola',
                 'revendedor faturação eletrónica AGT',
                 'parceiro PDV Angola',
-                'licença SIGESC mensal 30000',
+                'licença SIGESC mensal 40000',
                 'implementador SIGESC Luanda',
-                'franchise software gestão Angola',
                 'distribuidor ERP Angola',
                 'SIGESC versão offline',
                 'parceria software PME Angola',
@@ -381,8 +388,8 @@ class SeoBuilder
                 [
                     '@context' => 'https://schema.org',
                     '@type' => 'Product',
-                    'name' => 'Programa de Parceria SIGESC',
-                    'description' => "Parceria mensal com o sistema SIGESC para revenda e implantação em Angola, incluindo acesso a licenças limitadas da versão offline. Certificação AGT {$agt}.",
+                    'name' => 'Programa de Parceria SIGESC — Parceiro',
+                    'description' => "Parceria mensal com o sistema SIGESC para revenda e implantação em Angola, com licenças ilimitadas. Certificação AGT {$agt}.",
                     'brand' => [
                         '@type' => 'Brand',
                         'name' => 'SIGESC',
@@ -397,10 +404,10 @@ class SeoBuilder
                         'url' => $url,
                         'price' => (string) $price,
                         'priceCurrency' => $cfg['currency'] ?? 'AOA',
-                        'availability' => 'https://schema.org/LimitedAvailability',
+                        'availability' => 'https://schema.org/InStock',
                         'priceValidUntil' => now()->addYear()->format('Y-m-d'),
                         'eligibleRegion' => 'AO',
-                        'description' => 'Mensalidade de parceria com licenças limitadas para versão offline',
+                        'description' => 'Mensalidade de parceria com licenças ilimitadas',
                         'priceSpecification' => [
                             '@type' => 'UnitPriceSpecification',
                             'price' => (string) $price,
@@ -412,23 +419,13 @@ class SeoBuilder
                 ],
                 [
                     '@context' => 'https://schema.org',
-                    '@type' => 'SoftwareApplication',
-                    'name' => 'SIGESC Offline — Licença de Parceiro',
-                    'applicationCategory' => 'BusinessApplication',
-                    'operatingSystem' => 'Windows, Linux',
-                    'offers' => [
-                        '@type' => 'Offer',
-                        'price' => (string) $price,
-                        'priceCurrency' => $cfg['currency'] ?? 'AOA',
-                        'availability' => 'https://schema.org/LimitedAvailability',
-                        'url' => $url,
-                    ],
-                    'provider' => [
-                        '@type' => 'Organization',
-                        'name' => 'SIGESC',
-                        'url' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/'),
-                    ],
-                    'inLanguage' => 'pt-AO',
+                    '@type' => 'Offer',
+                    'name' => 'Parceria Freelancer SIGESC',
+                    'description' => "Indique o SIGESC a clientes e ganhe {$commission}% de comissão sobre vendas fechadas.",
+                    'url' => $url,
+                    'availability' => 'https://schema.org/InStock',
+                    'eligibleRegion' => 'AO',
+                    'category' => 'Affiliate / referral partnership',
                 ],
             ],
         ]);
@@ -438,7 +435,7 @@ class SeoBuilder
     {
         return $this->forPage([
             'title' => 'Contacto | SIGESC Angola',
-            'description' => 'Fale com a equipa SIGESC. Suporte comercial, técnico e candidaturas ao programa de parceria (30.000 Kz/mês, offline limitado) para empresas em Angola.',
+            'description' => 'Fale com a equipa SIGESC. Suporte comercial, técnico e candidaturas ao programa de parceria (40.000 Kz/mês com licenças ilimitadas, ou Freelancer com 30% de comissão) para empresas em Angola.',
             'path' => '/contact',
             'keywords' => 'contacto SIGESC, suporte, parceria SIGESC, Angola',
         ]);

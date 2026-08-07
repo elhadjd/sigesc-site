@@ -23,9 +23,10 @@ class PartnershipPageTest extends TestCase
                 ->component('partnership/index')
                 ->has('seo')
                 ->has('plan')
-                ->where('plan.monthly_price', 30000)
+                ->where('plan.monthly_price', 40000)
                 ->where('plan.currency', 'AOA')
-                ->where('plan.offline_licenses_limited', true)
+                ->where('plan.offline_licenses_limited', false)
+                ->where('plan.freelancer.commission_percent', 30)
                 ->where('seo.title', fn ($title) => str_contains((string) $title, 'Parceria SIGESC'))
                 ->where('seo.keywords', fn ($kw) => str_contains((string) $kw, 'parceria SIGESC'))
             );
@@ -38,10 +39,12 @@ class PartnershipPageTest extends TestCase
                 'User-Agent' => 'Mozilla/5.0 (compatible; '.$bot.')',
             ])->get('/parceria')
                 ->assertOk()
-                ->assertSee('30.000 Kz', false)
-                ->assertSee('licenças', false)
+                ->assertSee('40.000 Kz', false)
+                ->assertSee('Freelancer', false)
+                ->assertSee('30%', false)
+                ->assertSee('ilimitadas', false)
                 ->assertSee('FAQPage', false)
-                ->assertSee('LimitedAvailability', false)
+                ->assertSee('InStock', false)
                 ->assertSee('Parceria SIGESC', false)
                 ->getContent();
 
@@ -54,13 +57,14 @@ class PartnershipPageTest extends TestCase
     {
         $this->get('/llms.txt')
             ->assertOk()
-            ->assertSee('30.000 Kz', false)
-            ->assertSee('/parceria', false);
+            ->assertSee('40.000 Kz', false)
+            ->assertSee('/parceria', false)
+            ->assertSee('Freelancer', false);
 
         $this->get('/ai.txt')
             ->assertOk()
-            ->assertSee('30.000 Kz', false)
-            ->assertSee('Offline licenses: limited', false);
+            ->assertSee('40.000 Kz', false)
+            ->assertSee('unlimited', false);
     }
 
     public function test_sitemap_includes_partnership_and_geo_files(): void

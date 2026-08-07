@@ -14,7 +14,7 @@
 
     <section style="margin-top:1.5rem;padding:1rem 1.25rem;border-radius:12px;background:#0b3d91;color:#fff;">
         <p style="margin:0;"><strong>Certificação AGT:</strong> {{ $cert['number'] ?? '' }} · {{ $cert['scope'] ?? 'Faturação eletrónica' }}</p>
-        <p style="margin:.5rem 0 0;"><strong>Parceria:</strong> {{ $partner['price_formatted'] ?? '30.000 Kz' }}/mês · licenças offline limitadas</p>
+        <p style="margin:.5rem 0 0;"><strong>Parceria:</strong> {{ $partner['price_formatted'] ?? '40.000 Kz' }}/mês · licenças ilimitadas · Freelancer {{ data_get($partner, 'freelancer.commission_percent', 30) }}% comissão</p>
     </section>
 
     @foreach (($page['sections'] ?? []) as $section)

@@ -24,7 +24,7 @@ class GeoDiscoveryTest extends TestCase
                 ->has('seo')
                 ->has('knowledge')
                 ->where('seo.title', fn ($t) => str_contains((string) $t, 'Sobre o SIGESC'))
-                ->where('knowledge.partnership.monthly_price', 30000)
+                ->where('knowledge.partnership.monthly_price', 40000)
             );
     }
 
