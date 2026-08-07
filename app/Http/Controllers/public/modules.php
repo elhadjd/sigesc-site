@@ -5,6 +5,7 @@ namespace App\Http\Controllers\public;
 use App\Http\Controllers\Controller;
 use App\Services\Seo\PublicPageContent;
 use App\Services\Seo\SeoBuilder;
+use App\Support\CrmScreenshots;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -27,6 +28,11 @@ class modules extends Controller
     public function index(Request $request, $module)
     {
         $slug = Str::slug(str_replace(['_', ' '], '-', (string) $module));
+
+        if ($slug === 'crm') {
+            return $this->crm($request);
+        }
+
         $moduleName = collect($this->content->modules())
             ->firstWhere('slug', $slug)['name']
             ?? ucwords(str_replace(['-', '_'], ' ', (string) $module));
@@ -37,5 +43,27 @@ class modules extends Controller
             'prerender' => $this->content->modulePage($moduleName, $slug),
             'modules' => $this->content->modules(),
         ]);
+    }
+
+    protected function crm(Request $request)
+    {
+        $module = $this->content->crmModule();
+
+        return $this->renderPublicPage(
+            $request,
+            'modules/crm',
+            [
+                'moduleName' => 'CRM',
+                'seo' => $this->seo->forCrm(),
+                'prerender' => $this->content->crm(),
+                'module' => $module,
+                'modules' => $this->content->modules(),
+            ],
+            'seo.crm',
+            [
+                'module' => $module,
+                'screenshots' => CrmScreenshots::all(),
+            ]
+        );
     }
 }
