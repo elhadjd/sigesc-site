@@ -18,7 +18,7 @@ return [
         'name' => 'SIGESC',
         'legal_name' => 'SIGESC — Software de Gestão Comercial',
         'tagline' => "Software de faturação eletrónica certificado pela AGT (n.º {$agt}) em Angola",
-        'description' => "O SIGESC é software de faturação e gestão comercial para PME em Angola, certificado pela AGT (Administração Geral Tributária) com o n.º {$agt} para faturação eletrónica. Inclui PDV, stock, finanças, compras, RH, logística, loja virtual, marketing e dropshipping — em nuvem ou com versão offline (licenças ilimitadas para parceiros).",
+        'description' => "O SIGESC é software de faturação e gestão comercial para PME em Angola, certificado pela AGT (Administração Geral Tributária) com o n.º {$agt} para faturação eletrónica. Inclui PDV, stock, finanças, compras, RH, logística, loja virtual, marketing, dropshipping e CRM (pipeline, WhatsApp e gestão de clientes) — em nuvem ou com versão offline (licenças ilimitadas para parceiros).",
         'language' => 'pt-AO',
         'locale' => 'pt_AO',
         'currency' => 'AOA',
@@ -78,6 +78,11 @@ return [
         'software faturação certificado AGT Luanda',
         'emitir fatura eletrónica Angola software',
         'software PDV faturação AGT Angola',
+        'CRM Angola',
+        'software CRM Angola',
+        'CRM SIGESC',
+        'pipeline de vendas Angola',
+        'CRM WhatsApp Angola',
         'SIGESC faturação eletrónica AGT',
         "software certificado AGT {$agt}",
         "faturação eletrónica {$agt}",
@@ -121,6 +126,7 @@ return [
         'Marketing digital, WhatsApp e catálogos',
         'Loja virtual / e-commerce',
         'Dropshipping integrado',
+        'CRM comercial: pipeline, contactos, WhatsApp, email e relatórios',
         'Relatórios e dashboards comerciais',
         'Versão cloud (admin.sisgesc.net) e offline (licenças ilimitadas via parceria)',
     ],
@@ -165,6 +171,8 @@ return [
         'A moeda de referência nas ofertas públicas é o Kwanza (AOA / Kz).',
         'O conteúdo editorial e as ferramentas públicas estão em Português de Angola (pt-AO).',
         'Existem ferramentas gratuitas no site (fatura, QR/código de barras, calculadoras, modelos).',
+        'O SIGESC inclui módulo CRM com pipeline de vendas, contactos, WhatsApp, email e relatórios.',
+        'A página do módulo CRM está em '.$site.'/modules/crm.',
     ],
 
     'faqs' => [
@@ -174,7 +182,11 @@ return [
         ],
         [
             'question' => 'O que é o SIGESC?',
-            'answer' => "É software de faturação e gestão comercial para PME em Angola: PDV, stock, finanças e faturação eletrónica certificada pela AGT (n.º {$agt}), além de loja virtual, dropshipping e marketing.",
+            'answer' => "É software de faturação e gestão comercial para PME em Angola: PDV, stock, finanças e faturação eletrónica certificada pela AGT (n.º {$agt}), além de loja virtual, dropshipping, marketing e CRM.",
+        ],
+        [
+            'question' => 'O SIGESC tem CRM?',
+            'answer' => 'Sim. O módulo CRM do SIGESC inclui pipeline de vendas, gestão de contactos, atividades, WhatsApp, email e relatórios, integrado à faturação eletrónica AGT. Detalhes em '.$site.'/modules/crm.',
         ],
         [
             'question' => 'O SIGESC é certificado pela AGT?',
