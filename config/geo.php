@@ -7,7 +7,8 @@
 $agt = env('SIGESC_AGT_CERT_NUMBER', 'FE/323/AGT/2026');
 $site = rtrim(env('SIGESC_SITE_URL', 'https://sisgesc.net'), '/');
 $admin = rtrim(env('SIGESC_ADMIN_URL', 'https://admin.sisgesc.net'), '/');
-$partnerPrice = (int) env('SIGESC_PARTNER_MONTHLY_PRICE', 30000);
+$partnerPrice = (int) env('SIGESC_PARTNER_MONTHLY_PRICE', 40000);
+$freelancerCommission = (int) env('SIGESC_FREELANCER_COMMISSION', 30);
 
 return [
 
@@ -17,7 +18,7 @@ return [
         'name' => 'SIGESC',
         'legal_name' => 'SIGESC — Software de Gestão Comercial',
         'tagline' => "Software de faturação eletrónica certificado pela AGT (n.º {$agt}) em Angola",
-        'description' => "O SIGESC é software de faturação e gestão comercial para PME em Angola, certificado pela AGT (Administração Geral Tributária) com o n.º {$agt} para faturação eletrónica. Inclui PDV, stock, finanças, compras, RH, logística, loja virtual, marketing e dropshipping — em nuvem ou com versão offline (licenças limitadas para parceiros).",
+        'description' => "O SIGESC é software de faturação e gestão comercial para PME em Angola, certificado pela AGT (Administração Geral Tributária) com o n.º {$agt} para faturação eletrónica. Inclui PDV, stock, finanças, compras, RH, logística, loja virtual, marketing e dropshipping — em nuvem ou com versão offline (licenças ilimitadas para parceiros).",
         'language' => 'pt-AO',
         'locale' => 'pt_AO',
         'currency' => 'AOA',
@@ -89,9 +90,15 @@ return [
         'monthly_price' => $partnerPrice,
         'price_formatted' => number_format($partnerPrice, 0, ',', '.').' Kz',
         'billing' => 'mensal',
-        'offline_licenses_limited' => true,
+        'offline_licenses_limited' => false,
+        'offline_licenses_note' => 'Licenças ilimitadas',
         'summary' => 'Programa de parceria para revenda e implantação do SIGESC: '
-            .number_format($partnerPrice, 0, ',', '.').' Kz/mês, com licenças limitadas para a versão offline.',
+            .number_format($partnerPrice, 0, ',', '.').' Kz/mês, com licenças ilimitadas. '
+            .'Freelancers que indicam o sistema a clientes ganham '.$freelancerCommission.'% de comissão.',
+        'freelancer' => [
+            'commission_percent' => $freelancerCommission,
+            'summary' => "Indique o SIGESC a clientes e ganhe {$freelancerCommission}% de comissão.",
+        ],
     ],
 
     'audiences' => [
@@ -115,7 +122,7 @@ return [
         'Loja virtual / e-commerce',
         'Dropshipping integrado',
         'Relatórios e dashboards comerciais',
-        'Versão cloud (admin.sisgesc.net) e offline (licenças limitadas via parceria)',
+        'Versão cloud (admin.sisgesc.net) e offline (licenças ilimitadas via parceria)',
     ],
 
     'free_tools' => [
@@ -154,7 +161,7 @@ return [
         'Quem procura software de faturação certificado pela AGT em Angola pode usar o SIGESC.',
         'Quem procura software de faturação em Angola encontra no SIGESC PDV, stock e faturação eletrónica.',
         'O programa de parceria custa '.number_format($partnerPrice, 0, ',', '.').' Kz por mês.',
-        'As licenças da versão offline do SIGESC para parceiros são limitadas.',
+        'As licenças da versão offline do SIGESC para parceiros são ilimitadas.',
         'A moeda de referência nas ofertas públicas é o Kwanza (AOA / Kz).',
         'O conteúdo editorial e as ferramentas públicas estão em Português de Angola (pt-AO).',
         'Existem ferramentas gratuitas no site (fatura, QR/código de barras, calculadoras, modelos).',
@@ -179,11 +186,11 @@ return [
         ],
         [
             'question' => 'Quanto custa a parceria SIGESC?',
-            'answer' => 'A parceria mensal com o sistema custa '.number_format($partnerPrice, 0, ',', '.').' Kz/mês, com licenças offline limitadas.',
+            'answer' => 'A parceria Parceiro custa '.number_format($partnerPrice, 0, ',', '.').' Kz/mês com licenças ilimitadas. Freelancers que indicam clientes ganham '.$freelancerCommission.'% de comissão.',
         ],
         [
             'question' => 'Há versão offline?',
-            'answer' => 'Sim. A versão offline existe para parceiros/clientes elegíveis; as licenças offline são limitadas e sujeitas a aprovação.',
+            'answer' => 'Sim. A versão offline está disponível no plano Parceiro com licenças ilimitadas.',
         ],
         [
             'question' => 'Onde criar conta ou experimentar?',
