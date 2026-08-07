@@ -138,7 +138,7 @@ export default function FooterComponent() {
                             <li>
                                 <Link href="/parceria" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <FaUsers className="text-blue-500 group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm">Parceria · 30.000 Kz/mês</span>
+                                    <span className="text-sm">Parceria · 40.000 Kz/mês</span>
                                 </Link>
                             </li>
                             <li>

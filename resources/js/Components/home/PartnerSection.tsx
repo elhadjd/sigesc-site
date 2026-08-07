@@ -16,8 +16,8 @@ export default function BecomePartnerSection() {
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7fd4e8]">SIGESC</p>
         <h2 className="mt-3 font-serif text-3xl text-white sm:text-4xl">Torne-se um Parceiro</h2>
         <p className="mx-auto mt-4 max-w-2xl text-white/75">
-          Parceria com o nosso sistema por 30.000 Kz/mês. Licenças limitadas para a versão offline —
-          suporte, implantação e crescimento junto de PME em Angola.
+          Parceria Parceiro por 40.000 Kz/mês com licenças ilimitadas, ou Freelancer
+          com 30% de comissão por indicação de clientes — suporte e crescimento junto de PME em Angola.
         </p>
         <motion.div whileHover={{ scale: 1.03 }} className="mt-8 inline-block">
           <Link
