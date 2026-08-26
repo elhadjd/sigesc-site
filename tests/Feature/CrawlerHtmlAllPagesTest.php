@@ -26,6 +26,7 @@ class CrawlerHtmlAllPagesTest extends TestCase
             ['/solutions', 'Soluções'],
             ['/modules/ponto-de-venda', 'Ponto'],
             ['/modules/dropshipping', 'Dropshipping'],
+            ['/modules/crm', 'CRM'],
             ['/prices', 'Preços'],
             ['/contact', 'Contacto'],
             ['/blog/posts', 'Blog'],
@@ -81,6 +82,8 @@ class CrawlerHtmlAllPagesTest extends TestCase
         $this->assertStringContainsString('/modules/ponto-de-venda', $html);
         $this->assertStringContainsString('Dropshipping', $html);
         $this->assertStringContainsString('/modules/dropshipping', $html);
+        $this->assertStringContainsString('CRM', $html);
+        $this->assertStringContainsString('/modules/crm', $html);
     }
 
     public function test_home_and_solutions_expose_module_submenu_before_js(): void
@@ -91,8 +94,10 @@ class CrawlerHtmlAllPagesTest extends TestCase
             $this->assertStringContainsString('Gestão de Estoque', $html);
             $this->assertStringContainsString('Faturamento', $html);
             $this->assertStringContainsString('Dropshipping', $html);
+            $this->assertStringContainsString('CRM', $html);
             $this->assertStringContainsString('/modules/gestao-de-stock', $html);
             $this->assertStringContainsString('/modules/dropshipping', $html);
+            $this->assertStringContainsString('/modules/crm', $html);
         }
     }
 
@@ -110,6 +115,39 @@ class CrawlerHtmlAllPagesTest extends TestCase
         $this->assertStringContainsString('fornecedores', $html);
         $this->assertStringContainsString('/solutions', $html);
         $this->assertStringContainsString('Conteúdo indexável gerado no servidor', $html);
+    }
+
+    public function test_crm_module_page_has_rich_seo_for_crawlers(): void
+    {
+        $response = $this->withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        ])->get('/modules/crm');
+
+        $response->assertOk();
+        $html = $response->getContent();
+
+        $this->assertStringContainsString('CRM', $html);
+        $this->assertStringContainsString('pipeline', $html);
+        $this->assertStringContainsString('WhatsApp', $html);
+        $this->assertStringContainsString('/img/crm/painel.png', $html);
+        $this->assertStringContainsString('SoftwareApplication', $html);
+        $this->assertStringContainsString('Conteúdo indexável gerado no servidor', $html);
+        $this->assertStringNotContainsString('data-page=', $html);
+    }
+
+    public function test_human_crm_page_uses_dedicated_inertia_component(): void
+    {
+        $response = $this->get('/modules/crm');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('modules/crm')
+            ->has('seo')
+            ->has('prerender')
+            ->has('module')
+            ->where('module.slug', 'crm')
+            ->has('module.screenshots')
+        );
     }
 
     public function test_calculators_prerender_has_legal_detail(): void
