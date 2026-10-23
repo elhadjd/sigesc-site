@@ -189,6 +189,12 @@ class CareersPageTest extends TestCase
             ->assertSee('Analista QA', false)
             ->assertSee('Carreiras', false)
             ->assertSee('vagas emprego Luanda', false)
+            ->assertSee('consultor comercial B2B Angola', false)
+            ->assertSee('Meta description:', false)
+            ->assertSee('Keywords:', false)
+            ->assertSee('name="description"', false)
+            ->assertSee('name="keywords"', false)
+            ->assertSee('/carreiras/analista-qa', false)
             ->assertSee('ItemList', false)
             ->assertSee('FAQPage', false)
             ->assertSee('BreadcrumbList', false)
@@ -197,6 +203,55 @@ class CareersPageTest extends TestCase
 
         $this->assertStringContainsString('Conteúdo indexável gerado no servidor', $html);
         $this->assertStringNotContainsString('data-page=', $html);
+        $this->assertStringNotContainsString('app.tsx', $html);
+    }
+
+    public function test_crawler_gets_ssr_job_detail_with_keywords(): void
+    {
+        JobListing::create($this->jobAttrs([
+            'title' => 'Consultor Comercial B2B',
+            'slug' => 'consultor-comercial-b2b',
+            'department' => 'Comercial',
+        ]));
+
+        $html = $this->withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (compatible; GPTBot/1.0)',
+        ])->get('/carreiras/consultor-comercial-b2b')
+            ->assertOk()
+            ->assertSee('Consultor Comercial B2B', false)
+            ->assertSee('JobPosting', false)
+            ->assertSee('Como se candidatar', false)
+            ->assertSee('name="keywords"', false)
+            ->assertSee('emprego software Angola', false)
+            ->getContent();
+
+        $this->assertStringContainsString('Conteúdo indexável gerado no servidor', $html);
+        $this->assertStringNotContainsString('data-page=', $html);
+    }
+
+    public function test_human_careers_html_includes_prerender_and_meta_without_waiting_for_js(): void
+    {
+        JobListing::create($this->jobAttrs([
+            'title' => 'Engenheiro Full Stack',
+            'slug' => 'engenheiro-full-stack',
+        ]));
+
+        $response = $this->get('/carreiras')->assertOk();
+
+        $response->assertInertia(fn ($page) => $page
+            ->component('careers/index')
+            ->has('seo')
+            ->has('prerender')
+            ->has('jobs', 1)
+            ->where('seo.keywords', fn ($kw) => str_contains((string) $kw, 'vagas emprego Luanda'))
+        );
+
+        $html = $response->getContent();
+        $this->assertStringContainsString('seo-prerender', $html);
+        $this->assertStringContainsString('Engenheiro Full Stack', $html);
+        $this->assertStringContainsString('name="description"', $html);
+        $this->assertStringContainsString('name="keywords"', $html);
+        $this->assertStringContainsString('vagas emprego Luanda', $html);
     }
 
     public function test_careers_seo_keywords_and_discovery_files(): void

@@ -7,6 +7,7 @@ use App\Mail\JobApplicationConfirmationMail;
 use App\Mail\JobApplicationProducerMail;
 use App\Models\Careers\JobApplication;
 use App\Models\Careers\JobListing;
+use App\Services\Seo\PublicPageContent;
 use App\Services\Seo\SeoBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,8 @@ use Illuminate\Validation\ValidationException;
 class CareersController extends Controller
 {
     public function __construct(
-        protected SeoBuilder $seo
+        protected SeoBuilder $seo,
+        protected PublicPageContent $content
     ) {}
 
     public function index(Request $request)
@@ -29,53 +31,27 @@ class CareersController extends Controller
             ->map(fn (JobListing $job) => $job->toPublicArray())
             ->values();
 
-        $seo = $this->seo->forCareers($listings->all());
+        $jobs = $listings->all();
+        $seo = $this->seo->forCareers($jobs);
+        $prerender = $this->content->careers($jobs);
 
-        $prerender = [
-            'kicker' => 'Carreiras SIGESC · Emprego em Angola',
-            'headline' => 'Vagas de emprego em tecnologia e comercial — Luanda',
-            'lead' => (string) config(
-                'careers.seo_description',
-                'Vagas abertas em produto, engenharia, comercial B2B e operações — ajude PME angolanas com software de faturação certificado AGT.'
-            ),
-            'sections' => [
-                [
-                    'heading' => 'Vagas abertas',
-                    'items' => $listings->isEmpty()
-                        ? ['Neste momento não há vagas abertas. Volte em breve ou envie uma candidatura espontânea pelo contacto.']
-                        : $listings->map(fn (array $j) => $j['title'].' · '.($j['location'] ?? '').' · '.($j['employment_type_label'] ?? ''))->all(),
-                ],
-                [
-                    'heading' => 'Áreas de recrutamento',
-                    'items' => config('careers.departments_hint', []),
-                ],
-                [
-                    'heading' => 'Palavras-chave (emprego Angola)',
-                    'items' => array_slice(config('careers.seo_keywords', []), 0, 12),
-                ],
-                [
-                    'heading' => 'FAQ carreiras',
-                    'items' => collect(config('careers.faqs', []))
-                        ->map(fn (array $f) => $f['question'].' — '.$f['answer'])
-                        ->all(),
-                ],
+        return $this->renderPublicPage(
+            $request,
+            'careers/index',
+            [
+                'seo' => $seo,
+                'prerender' => $prerender,
+                'jobs' => $listings,
+                'canManageCareers' => (bool) $request->user()
+                    && $this->userCanManageCareers($request),
             ],
-            'links' => [
-                ['href' => url('/contact'), 'label' => 'Contacto / candidatura espontânea'],
-                ['href' => url('/parceria'), 'label' => 'Parceria'],
-                ['href' => url('/sobre'), 'label' => 'Sobre o SIGESC'],
-                ['href' => url('/llms.txt'), 'label' => 'llms.txt'],
-                ['href' => url('/ai.txt'), 'label' => 'ai.txt'],
-            ],
-        ];
-
-        return $this->renderPublicPage($request, 'careers/index', [
-            'seo' => $seo,
-            'prerender' => $prerender,
-            'jobs' => $listings,
-            'canManageCareers' => (bool) $request->user()
-                && $this->userCanManageCareers($request),
-        ]);
+            'seo.careers',
+            [
+                'jobs' => $jobs,
+                'keywords' => config('careers.seo_keywords', []),
+                'faqs' => config('careers.faqs', []),
+            ]
+        );
     }
 
     public function show(Request $request, string $slug)
@@ -88,43 +64,40 @@ class CareersController extends Controller
             abort(404);
         }
 
+        $job = $listing->toPublicArray();
         $seo = $this->seo->forCareerJob($listing);
+        $prerender = $this->content->careersJob($job);
 
-        $prerender = [
-            'kicker' => 'Carreiras · '.$listing->department,
-            'headline' => $listing->title,
-            'lead' => $listing->summary ?: str($listing->description)->limit(180)->toString(),
-            'sections' => [
-                [
-                    'heading' => 'Detalhes',
-                    'items' => array_filter([
-                        $listing->location,
-                        $listing->employmentTypeLabel(),
-                        $listing->workModeLabel(),
-                        $listing->salary_range,
-                    ]),
-                ],
-                [
-                    'heading' => 'Descrição',
-                    'items' => [str($listing->description)->limit(400)->toString()],
-                ],
+        $jobKeywords = array_values(array_unique(array_filter(array_merge(
+            [
+                $job['title'] ?? null,
+                'vaga '.($job['title'] ?? ''),
+                $job['department'] ?? null,
+                $job['location'] ?? null,
             ],
-            'links' => [
-                ['href' => route('careers.index'), 'label' => 'Todas as vagas'],
-                ['href' => url('/contact'), 'label' => 'Contacto'],
-            ],
-        ];
+            array_slice(config('careers.seo_keywords', []), 0, 14)
+        ))));
 
-        return $this->renderPublicPage($request, 'careers/show', [
-            'seo' => $seo,
-            'prerender' => $prerender,
-            'job' => $listing->toPublicArray(),
-            'canManageCareers' => $this->userCanManageCareers($request),
-            'flash' => [
-                'success' => $request->session()->get('success'),
-                'error' => $request->session()->get('error'),
+        return $this->renderPublicPage(
+            $request,
+            'careers/show',
+            [
+                'seo' => $seo,
+                'prerender' => $prerender,
+                'job' => $job,
+                'canManageCareers' => $this->userCanManageCareers($request),
+                'flash' => [
+                    'success' => $request->session()->get('success'),
+                    'error' => $request->session()->get('error'),
+                ],
             ],
-        ]);
+            'seo.career-job',
+            [
+                'job' => $job,
+                'keywords' => $jobKeywords,
+                'faqs' => config('careers.faqs', []),
+            ]
+        );
     }
 
     public function apply(Request $request, string $slug)
