@@ -34,6 +34,7 @@ class CrawlerHtmlAllPagesTest extends TestCase
             ['/produtos/hub', 'HUB'],
             ['/prices', 'Preços'],
             ['/contact', 'Contacto'],
+            ['/carreiras', 'Carreiras'],
             ['/blog/posts', 'Blog'],
             ['/calculadoras', 'Calculadoras'],
             ['/modelos-de-fatura', 'Modelos'],

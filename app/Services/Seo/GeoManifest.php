@@ -602,6 +602,7 @@ TXT;
             'SIGESC HUB' => $site.'/produtos/hub',
             'Preços' => $site.'/prices',
             'Parceria' => $site.'/parceria',
+            'Carreiras' => $site.'/carreiras',
             'Blog' => $site.'/blog/posts',
             'Calculadoras' => $site.'/calculadoras',
             'Gerador de fatura' => $site.'/gerador-de-fatura',

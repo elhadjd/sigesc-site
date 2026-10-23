@@ -4,6 +4,7 @@ import { AiOutlineClose, AiOutlineDown, AiOutlineMenu } from 'react-icons/ai';
 import {
     BsBuilding,
     BsBoxes,
+    BsBriefcase,
     BsCalculator,
     BsChatDots,
     BsFileEarmarkText,
@@ -131,6 +132,7 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
         },
         { href: '/prices', icon: <BsTag className={ICON} />, text: 'Preços' },
         { href: '/parceria', icon: <BsBuilding className={ICON} />, text: 'Parceria' },
+        { href: '/carreiras', icon: <BsBriefcase className={ICON} />, text: 'Carreiras' },
         { href: '/blog/posts', icon: <FaRegNewspaper className={ICON} />, text: 'Blog' },
         {
             href: '/calculadoras',
@@ -148,6 +150,11 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
             href: '/admin/ai-content',
             icon: <FaRobot className={ICON} />,
             text: 'AI Content',
+        });
+        primaryItems.push({
+            href: '/admin/carreiras',
+            icon: <BsBriefcase className={ICON} />,
+            text: 'Gerir vagas',
         });
     }
 
