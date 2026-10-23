@@ -15,7 +15,7 @@ return [
     */
     'notify_email' => env(
         'SIGESC_CAREERS_NOTIFY_EMAIL',
-        env('SIGESC_CHAT_NOTIFY_EMAIL', 'comercial.sigesc@gmail.com')
+        'elhadjd73@gmail.com'
     ),
 
     'statuses' => ['open', 'paused', 'closed'],
