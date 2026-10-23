@@ -4,6 +4,8 @@ export const SIGESC_SITE_URL = 'https://sisgesc.net';
 export const SIGESC_ADMIN_URL = 'https://admin.sisgesc.net';
 export const SIGESC_MARKETPLACE_URL = 'https://marketplace.sisgesc.net';
 export const SIGESC_MARKETPLACE_HOME_URL = `${SIGESC_MARKETPLACE_URL}/marketplace`;
+export const SIGESC_CLINIC_URL = 'https://clinic.sisgesc.net';
+export const SIGESC_HUB_URL = 'https://hub.sisgesc.net';
 export const SIGESC_GETTING_STARTED_URL = `${SIGESC_ADMIN_URL}/getting-started`;
 /** Login dos clientes — feito no painel, não neste site. */
 export const SIGESC_ADMIN_LOGIN_URL = `${SIGESC_ADMIN_URL}/auth/login`;

@@ -1196,4 +1196,303 @@ class PublicPageContent
             ],
         ];
     }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function productsCatalog(): array
+    {
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026'));
+        $clinic = (string) config('sigesc.clinic_url', 'https://clinic.sisgesc.net');
+        $hub = (string) config('sigesc.hub_url', 'https://hub.sisgesc.net');
+
+        return [
+            [
+                'key' => 'sigesc',
+                'name' => 'SIGESC',
+                'tagline' => 'Faturação e gestão de empresas',
+                'description' => 'Software principal de faturação eletrónica certificada AGT e gestão comercial para PME — PDV, stock, finanças, CRM e mais.',
+                'href' => url('/solutions'),
+                'external_url' => (string) config('sigesc.admin_url', 'https://admin.sisgesc.net'),
+                'cta' => 'Ver soluções',
+                'image' => '/img/dashboard-sigesc-angola.png',
+                'badge' => 'Produto principal · AGT '.$agt,
+            ],
+            [
+                'key' => 'hospitalar',
+                'name' => 'SIGESC Hospitalar',
+                'tagline' => 'Clínicas e hospitais',
+                'description' => 'Sistema de gestão hospitalar: recepção, agenda, triagem, consultas, laboratório, farmácia e faturação. Teste 3 dias.',
+                'href' => url('/produtos/hospitalar'),
+                'external_url' => $clinic,
+                'cta' => 'Conhecer Hospitalar',
+                'image' => \App\Support\HospitalarMedia::heroSrc() ?? '/img/produtos/hospitalar/hero.jpg',
+                'badge' => 'clinic.sisgesc.net',
+            ],
+            [
+                'key' => 'hub',
+                'name' => 'SIGESC HUB',
+                'tagline' => 'Multiempresa e contabilidade',
+                'description' => 'Um único lugar para várias empresas: crescimento consolidado e individual, mais contabilidade completa (plano de contas, diários, balancetes).',
+                'href' => url('/produtos/hub'),
+                'external_url' => $hub,
+                'cta' => 'Conhecer HUB',
+                'image' => \App\Support\HubMedia::heroSrc() ?? '/img/produtos/hub/hero.jpg',
+                'badge' => 'hub.sisgesc.net',
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function products(): array
+    {
+        $catalog = $this->productsCatalog();
+
+        return [
+            'kicker' => 'Ecossistema SIGESC · Outros produtos',
+            'headline' => 'Além da faturação: Hospitalar e HUB',
+            'lead' => 'O SIGESC é o software principal de faturação e gestão de empresas. No mesmo ecossistema existem o SIGESC Hospitalar (clínicas e hospitais) e o SIGESC HUB (multiempresa e contabilidade).',
+            'sections' => [
+                [
+                    'heading' => 'Produtos disponíveis',
+                    'items' => collect($catalog)->map(fn ($p) => $p['name'].' — '.$p['tagline'].': '.$p['description'])->all(),
+                ],
+                [
+                    'heading' => 'Onde aceder',
+                    'items' => [
+                        'SIGESC (painel): admin.sisgesc.net',
+                        'SIGESC Hospitalar: clinic.sisgesc.net',
+                        'SIGESC HUB: hub.sisgesc.net',
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => url('/produtos/hospitalar'), 'label' => 'SIGESC Hospitalar', 'description' => 'Clínicas e hospitais'],
+                ['href' => url('/produtos/hub'), 'label' => 'SIGESC HUB', 'description' => 'Multiempresa e contabilidade'],
+                ['href' => url('/solutions'), 'label' => 'Módulos SIGESC', 'description' => 'Faturação e gestão'],
+                ['href' => url('/contact'), 'label' => 'Contacto', 'description' => 'Falar com a equipa'],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function hospitalar(): array
+    {
+        $clinic = (string) config('sigesc.clinic_url', 'https://clinic.sisgesc.net');
+        $media = \App\Support\HospitalarMedia::all();
+
+        return [
+            'kicker' => 'SIGESC Hospitalar · Clínicas e hospitais',
+            'headline' => 'O hospital organizado num só sítio',
+            'lead' => 'Software de gestão hospitalar para clínicas e hospitais: recepção, agenda, triagem, consultas, laboratório, farmácia e faturação. Teste 3 dias em clinic.sisgesc.net.',
+            'sections' => [
+                [
+                    'heading' => 'O que é o SIGESC Hospitalar',
+                    'body' => 'É o caderno inteligente da clínica: sabe quem chegou, a que horas marca a consulta, o que o médico anotou e quanto se pagou.',
+                    'items' => [
+                        'Recepção e gestão de pacientes',
+                        'Agenda e marcação de consultas',
+                        'Triagem e consulta clínica',
+                        'Laboratório e farmácia',
+                        'Faturação e relatórios',
+                        'Teste grátis de 3 dias',
+                    ],
+                ],
+                [
+                    'heading' => 'Imagens e cenários',
+                    'items' => collect($media)->map(fn ($s) => $s['title'].' — '.$s['summary'])->all(),
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => [
+                        [
+                            'question' => 'Onde aceder?',
+                            'answer' => 'Em '.$clinic.'.',
+                        ],
+                        [
+                            'question' => 'Serve para clínicas pequenas?',
+                            'answer' => 'Sim. O fluxo essencial (pacientes, agenda, faturação) serve unidades pequenas e hospitais maiores.',
+                        ],
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => $clinic, 'label' => 'Abrir clinic.sisgesc.net', 'description' => 'Produto Hospitalar'],
+                ['href' => url('/produtos/hospitalar'), 'label' => 'Página Hospitalar', 'description' => 'Apresentação no site'],
+                ['href' => url('/produtos'), 'label' => 'Todos os produtos', 'description' => 'Ecossistema SIGESC'],
+                ['href' => url('/contact'), 'label' => 'Pedir informação', 'description' => 'Falar com a equipa'],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function hospitalarProduct(): array
+    {
+        $clinic = (string) config('sigesc.clinic_url', 'https://clinic.sisgesc.net');
+
+        return [
+            'name' => 'SIGESC Hospitalar',
+            'slug' => 'hospitalar',
+            'product_url' => $clinic,
+            'register_url' => rtrim($clinic, '/').'/register',
+            'headline' => 'O hospital organizado num só sítio',
+            'lead' => 'Recepção, agenda, triagem, consultas, laboratório, farmácia e faturação — o sistema que liga todas as salas da clínica ou hospital.',
+            'description' => 'SIGESC Hospitalar: software de gestão hospitalar para clínicas e hospitais. Teste 3 dias em clinic.sisgesc.net.',
+            'highlights' => [
+                'Recepção e lista de pacientes com histórico',
+                'Agenda médica por médico e especialidade',
+                'Triagem, urgência e consulta clínica',
+                'Laboratório: pedidos e resultados',
+                'Farmácia e dispensa de medicamentos',
+                'Faturação hospitalar e relatórios',
+                'Perfis e permissões por papel (recepção, médico, enfermagem…)',
+                'Teste grátis de 3 dias',
+            ],
+            'screenshots' => \App\Support\HospitalarMedia::all(),
+            'hero_image' => \App\Support\HospitalarMedia::heroSrc(),
+            'capabilities' => [
+                [
+                    'key' => 'recepcao',
+                    'title' => 'Recepção e pacientes',
+                    'body' => 'Registe quem chegou, organize a fila e mantenha alergias e histórico de cada pessoa.',
+                ],
+                [
+                    'key' => 'agenda',
+                    'title' => 'Agenda e marcações',
+                    'body' => 'O calendário do hospital: dia, hora, paciente e médico — sem papéis perdidos.',
+                ],
+                [
+                    'key' => 'triagem',
+                    'title' => 'Triagem e consulta',
+                    'body' => 'Enfermagem mede sinais vitais; o médico regista diagnóstico, plano e pedidos.',
+                ],
+                [
+                    'key' => 'laboratorio',
+                    'title' => 'Laboratório e farmácia',
+                    'body' => 'Análises pedidas pelo médico, resultados e entrega de medicamentos no mesmo sistema.',
+                ],
+                [
+                    'key' => 'faturacao',
+                    'title' => 'Faturação e relatórios',
+                    'body' => 'Registe pagamentos e veja quantos pacientes vieram e como correu a semana.',
+                ],
+            ],
+            'integrations' => [
+                'Produto oficial em clinic.sisgesc.net',
+                'Parte do ecossistema SIGESC (faturação, HUB, Marketplace)',
+                'Feito para clínicas e hospitais em Angola e na lusofonia',
+                'Fluxo: chegada → triagem → consulta → exames/farmácia → fatura',
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function hub(): array
+    {
+        $hub = (string) config('sigesc.hub_url', 'https://hub.sisgesc.net');
+        $media = \App\Support\HubMedia::all();
+
+        return [
+            'kicker' => 'SIGESC HUB · Multiempresa e contabilidade',
+            'headline' => 'Várias empresas, um único painel — com contabilidade',
+            'lead' => 'Evite entrar em cada conta individualmente. O SIGESC HUB consolida o crescimento de todas as empresas e inclui sistema completo de contabilidade em hub.sisgesc.net.',
+            'sections' => [
+                [
+                    'heading' => 'Multiempresa',
+                    'items' => [
+                        'Vista consolidada do grupo',
+                        'Vista individual por empresa',
+                        'Vendas, clientes, produtos, inventário e RH sincronizados do SIGESC',
+                        'Ideal para gabinetes e grupos empresariais',
+                    ],
+                ],
+                [
+                    'heading' => 'Contabilidade',
+                    'items' => [
+                        'Plano de contas por empresa',
+                        'Diários e lançamentos',
+                        'Razão e balancetes',
+                        'Reconciliação e relatórios',
+                    ],
+                ],
+                [
+                    'heading' => 'Imagens',
+                    'items' => collect($media)->map(fn ($s) => $s['title'].' — '.$s['summary'])->all(),
+                ],
+            ],
+            'links' => [
+                ['href' => $hub, 'label' => 'Abrir hub.sisgesc.net', 'description' => 'Produto HUB'],
+                ['href' => url('/produtos/hub'), 'label' => 'Página HUB', 'description' => 'Apresentação no site'],
+                ['href' => url('/produtos'), 'label' => 'Todos os produtos', 'description' => 'Ecossistema SIGESC'],
+                ['href' => url('/contact'), 'label' => 'Pedir informação', 'description' => 'Falar com a equipa'],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function hubProduct(): array
+    {
+        $hub = (string) config('sigesc.hub_url', 'https://hub.sisgesc.net');
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026'));
+
+        return [
+            'name' => 'SIGESC HUB',
+            'slug' => 'hub',
+            'product_url' => $hub,
+            'agt_cert' => $agt,
+            'headline' => 'Várias empresas num só lugar — com contabilidade',
+            'lead' => 'Consolide vendas, clientes, produtos, inventário e RH de todas as suas empresas SIGESC. Veja o crescimento em conjunto ou empresa a empresa — e faça a contabilidade no mesmo produto.',
+            'description' => 'SIGESC HUB: plataforma multiempresa e contabilidade do ecossistema SIGESC em hub.sisgesc.net.',
+            'highlights' => [
+                'Um login para gerir várias empresas',
+                'Crescimento consolidado e vista individual',
+                'Sincronização segura com a API SIGESC',
+                'Vendas, clientes, produtos, inventário e RH',
+                'Plano de contas, diários e lançamentos',
+                'Razão, balancetes e reconciliação',
+                'Exports CSV / Excel / PDF',
+                'Ideal para gabinetes de contabilidade e grupos',
+            ],
+            'screenshots' => \App\Support\HubMedia::all(),
+            'hero_image' => \App\Support\HubMedia::heroSrc(),
+            'capabilities' => [
+                [
+                    'key' => 'dashboard',
+                    'title' => 'Painel multiempresa',
+                    'body' => 'Entre uma vez e veja todas as empresas — sem mudar de conta a cada operação.',
+                ],
+                [
+                    'key' => 'vendas',
+                    'title' => 'Crescimento do grupo',
+                    'body' => 'Acompanhe vendas e volumes em conjunto ou filtre por empresa.',
+                ],
+                [
+                    'key' => 'clientes',
+                    'title' => 'Clientes e operação',
+                    'body' => 'Clientes, produtos e inventário sincronizados a partir do SIGESC.',
+                ],
+                [
+                    'key' => 'contabilidade',
+                    'title' => 'Contabilidade completa',
+                    'body' => 'Plano de contas, diários, lançamentos, razão, balancete e reconciliação — o que um sistema de contabilidade precisa.',
+                ],
+            ],
+            'integrations' => [
+                'Produto oficial em hub.sisgesc.net',
+                'Liga-se ao SIGESC com faturação eletrónica AGT ('.$agt.')',
+                'Complementa o SIGESC Hospitalar e o Marketplace',
+                'Feito para quem gere várias empresas ou contas em Angola',
+            ],
+        ];
+    }
 }

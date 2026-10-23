@@ -88,6 +88,11 @@ manifest.webmanifest
 payments/
 pos/
 produtos/
+!resources/js/Pages/produtos/
+!resources/js/Pages/produtos/**
+!public/img/produtos/
+!public/img/produtos/**
+!resources/views/seo/produtos.blade.php
 promotions/
 robots.txt
 service-worker.js

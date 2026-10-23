@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AiOutlineClose, AiOutlineDown, AiOutlineMenu } from 'react-icons/ai';
 import {
     BsBuilding,
+    BsBoxes,
     BsCalculator,
     BsChatDots,
     BsFileEarmarkText,
@@ -21,7 +22,9 @@ import {
     SIGESC_ADMIN_LOGIN_URL,
     SIGESC_AGT_CERT_LABEL,
     SIGESC_AGT_CERT_NUMBER,
+    SIGESC_CLINIC_URL,
     SIGESC_GETTING_STARTED_URL,
+    SIGESC_HUB_URL,
 } from '@/services/public/domains';
 
 type NavItem = {
@@ -85,12 +88,46 @@ export const HeaderComponent = ({ auth }: { auth?: { user?: any } }) => {
         { name: 'Pergunte ao Especialista', href: '/pergunte-ao-especialista', desc: 'Dúvidas fiscais' },
     ];
 
+    const productItems = [
+        {
+            name: 'Todos os produtos',
+            href: '/produtos',
+            desc: 'Faturação, Hospitalar e HUB',
+        },
+        {
+            name: 'SIGESC Hospitalar',
+            href: '/produtos/hospitalar',
+            desc: 'Clínicas e hospitais · clinic.sisgesc.net',
+        },
+        {
+            name: 'SIGESC HUB',
+            href: '/produtos/hub',
+            desc: 'Multiempresa e contabilidade · hub.sisgesc.net',
+        },
+        {
+            name: 'Abrir Hospitalar',
+            href: SIGESC_CLINIC_URL,
+            desc: 'clinic.sisgesc.net',
+        },
+        {
+            name: 'Abrir HUB',
+            href: SIGESC_HUB_URL,
+            desc: 'hub.sisgesc.net',
+        },
+    ];
+
     const primaryItems: NavItem[] = [
         {
             href: '/solutions',
             icon: <FaTools className={ICON} />,
             text: 'Soluções',
             dropdown: solutionItems,
+        },
+        {
+            href: '/produtos',
+            icon: <BsBoxes className={ICON} />,
+            text: 'Produtos',
+            dropdown: productItems,
         },
         { href: '/prices', icon: <BsTag className={ICON} />, text: 'Preços' },
         { href: '/parceria', icon: <BsBuilding className={ICON} />, text: 'Parceria' },
