@@ -86,6 +86,74 @@ class LlmGateway
     }
 
     /**
+     * Plain-text chat completion (no JSON response_format).
+     *
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    public function chatText(
+        array $messages,
+        ?string $model = null,
+        float $temperature = 0.4,
+        ?string $providerOverride = null
+    ): string {
+        $provider = $providerOverride
+            ? $this->resolveProvider($providerOverride)
+            : $this->resolveProvider();
+
+        if ($provider === null) {
+            throw new RuntimeException(
+                $providerOverride
+                    ? 'LLM provider "'.$providerOverride.'" is not configured.'
+                    : $this->missingConfigMessage()
+            );
+        }
+
+        if ($provider === 'tavily') {
+            throw new RuntimeException('Plain-text chat is not supported with the Tavily provider. Use DeepSeek or OpenAI.');
+        }
+
+        $baseUrl = (string) config("ai_content_engine.{$provider}.base_url");
+        $apiKey = (string) config("ai_content_engine.{$provider}.api_key");
+        $timeout = (int) config("ai_content_engine.{$provider}.timeout", 180);
+        $resolvedModel = $provider === 'deepseek'
+            ? $this->normalizeDeepSeekModel($model)
+            : ($model ?: (string) config('ai_content_engine.openai.model', 'gpt-4o-mini'));
+        $label = $provider === 'deepseek' ? 'DeepSeek' : 'OpenAI';
+
+        if (blank($apiKey)) {
+            throw new RuntimeException($label.' API key is required for this LLM provider.');
+        }
+
+        $baseUrl = rtrim($baseUrl, '/');
+        if (! str_ends_with($baseUrl, '/v1')) {
+            $baseUrl .= '/v1';
+        }
+
+        $response = Http::baseUrl($baseUrl)
+            ->withToken($apiKey)
+            ->acceptJson()
+            ->timeout($timeout)
+            ->retry(2, 1200)
+            ->post('/chat/completions', [
+                'model' => $resolvedModel,
+                'messages' => $messages,
+                'temperature' => $temperature,
+            ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException($label.' chat failed: '.$response->status().' '.$response->body());
+        }
+
+        $content = data_get($response->json(), 'choices.0.message.content');
+
+        if (! is_string($content) || trim($content) === '') {
+            throw new RuntimeException($label.' returned an empty reply.');
+        }
+
+        return trim($content);
+    }
+
+    /**
      * Provider-aware model for fact-check / review agents.
      * Never return OpenAI names when the active provider is DeepSeek.
      */

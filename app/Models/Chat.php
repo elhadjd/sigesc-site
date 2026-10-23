@@ -12,7 +12,12 @@ class Chat extends Model
 
     protected $fillable = [
         'user_id',
-        'session'
+        'session',
+        'state',
+    ];
+
+    protected $casts = [
+        'state' => 'boolean',
     ];
 
     protected $with = ['conversations'];
