@@ -302,6 +302,10 @@ class SeoBuilder
             return $this->forConferences();
         }
 
+        if (($catalog['slug'] ?? $slug) === 'marketplace') {
+            return $this->forMarketplace();
+        }
+
         $description = $catalog['description']
             ?? "Saiba como o módulo {$moduleName} do SIGESC ajuda a gerir o seu negócio em Angola com eficiência e conformidade.";
         $keywords = $catalog['keywords']
@@ -313,6 +317,104 @@ class SeoBuilder
             'path' => '/modules/'.($catalog['slug'] ?? $slug),
             'keywords' => $keywords,
         ]);
+    }
+
+    public function forMarketplace(): array
+    {
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $hero = \App\Support\MarketplaceMedia::heroSrc();
+        $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
+        $url = $base.'/modules/marketplace';
+        $marketplaceUrl = (string) config('sigesc.marketplace_home_url', 'https://marketplace.sisgesc.net/marketplace');
+
+        $faqs = [
+            [
+                'question' => 'O que é o Marketplace SIGESC?',
+                'answer' => 'É a área pública onde empresas e pessoas singulares listam o negócio por cidade, publicam produtos ou serviços, e os clientes pesquisam, compram ou agendam online em marketplace.sisgesc.net.',
+            ],
+            [
+                'question' => 'Quem pode listar no Marketplace?',
+                'answer' => 'Empresas e pessoas singulares podem criar o perfil do negócio e publicar produtos ou serviços na cidade onde se encontram.',
+            ],
+            [
+                'question' => 'Os clientes precisam do software SIGESC para comprar?',
+                'answer' => 'Não. Os clientes acedem ao Marketplace na internet, encontram o negócio e podem comprar produtos ou agendar serviços sem instalar o painel SIGESC.',
+            ],
+            [
+                'question' => 'Onde aceder ao Marketplace?',
+                'answer' => 'Em '.$marketplaceUrl.' — também a partir desta página de apresentação no site sisgesc.net.',
+            ],
+            [
+                'question' => 'O Marketplace está ligado ao SIGESC certificado AGT?',
+                'answer' => "Sim. Faz parte do ecossistema SIGESC, software de faturação eletrónica certificado pela AGT (n.º {$agt}), para PME e negócios em Angola.",
+            ],
+        ];
+
+        $payload = [
+            'title' => 'Marketplace SIGESC | Empresas, Produtos e Serviços Locais em Angola',
+            'description' => 'Marketplace SIGESC: liste a sua empresa, publique produtos e serviços na sua cidade. Clientes pesquisam, compram e agendam online em marketplace.sisgesc.net — descoberta local para PME em Angola.',
+            'path' => '/modules/marketplace',
+            'keywords' => implode(', ', [
+                'marketplace Angola',
+                'marketplace local Angola',
+                'marketplace SIGESC',
+                'comprar online Angola',
+                'agendar serviços online Angola',
+                'empresas perto de mim Angola',
+                'diretório de empresas Luanda',
+                'vender produtos online Angola',
+                'serviços locais Angola',
+                'marketplace PME Angola',
+                'negócios locais online',
+                'marketplace.sisgesc.net',
+                'encontrar empresas Angola',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'SoftwareApplication',
+                    'name' => 'SIGESC Marketplace',
+                    'applicationCategory' => 'BusinessApplication',
+                    'operatingSystem' => 'Web',
+                    'description' => 'Marketplace local do SIGESC: listagem de empresas, produtos e serviços por cidade; compras e agendamentos online em Angola.',
+                    'url' => $url,
+                    'sameAs' => [$marketplaceUrl, 'https://marketplace.sisgesc.net'],
+                    'image' => $hero ? $base.$hero : config('sigesc.logo_url'),
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'url' => $marketplaceUrl,
+                        'priceCurrency' => 'AOA',
+                        'availability' => 'https://schema.org/InStock',
+                        'areaServed' => [
+                            '@type' => 'Country',
+                            'name' => 'Angola',
+                        ],
+                    ],
+                    'featureList' => [
+                        'Listagem de empresas e negócios locais',
+                        'Publicação de produtos e serviços por cidade',
+                        'Pesquisa por categorias e localização',
+                        'Compras online',
+                        'Agendamento de serviços',
+                    ],
+                ],
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'WebSite',
+                    'name' => 'SIGESC Marketplace',
+                    'url' => 'https://marketplace.sisgesc.net',
+                    'description' => 'Descubra empresas, produtos e serviços locais no Marketplace SIGESC.',
+                    'inLanguage' => ['pt-AO', 'en'],
+                ],
+            ],
+        ];
+
+        if ($hero) {
+            $payload['og_image'] = $base.$hero;
+        }
+
+        return $this->forPage($payload);
     }
 
     public function forConferences(): array

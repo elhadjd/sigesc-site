@@ -774,6 +774,10 @@ class PublicPageContent
             return $this->conferences();
         }
 
+        if ($slug === 'marketplace') {
+            return $this->marketplace();
+        }
+
         $catalog = collect($this->modules())->firstWhere('slug', $slug)
             ?? collect($this->modules())->first(fn ($m) => strcasecmp($m['name'], $moduleName) === 0);
 
@@ -1062,6 +1066,133 @@ class PublicPageContent
                 'Complementa o CRM e o acompanhamento comercial',
                 'Útil para reuniões com clientes, parceiros e equipa interna',
                 'Disponível no fluxo cloud do SIGESC',
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function marketplace(): array
+    {
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026'));
+        $media = \App\Support\MarketplaceMedia::all();
+        $catalog = collect($this->modules())->firstWhere('slug', 'marketplace');
+        $highlights = $catalog['highlights'] ?? [];
+        $marketplaceUrl = (string) config('sigesc.marketplace_home_url', 'https://marketplace.sisgesc.net/marketplace');
+
+        return [
+            'kicker' => 'Marketplace SIGESC · Empresas e serviços locais',
+            'headline' => 'Marketplace SIGESC — liste o negócio, venda e agende na sua cidade',
+            'lead' => ($catalog['description'] ?? 'Marketplace local integrado ao ecossistema SIGESC.')
+                .' Software de faturação eletrónica certificado pela AGT (n.º '.$agt.').',
+            'sections' => [
+                [
+                    'heading' => 'O que é o Marketplace',
+                    'body' => 'Área pública onde negócios aparecem na internet por cidade: produtos, serviços, pesquisa e contactos — em marketplace.sisgesc.net.',
+                    'items' => $highlights !== [] ? $highlights : [
+                        'Listagem de empresas e pessoas singulares',
+                        'Produtos e serviços por cidade',
+                        'Compras e agendamentos online',
+                    ],
+                ],
+                [
+                    'heading' => 'Para quem vende',
+                    'items' => [
+                        'Lojas, restaurantes, salões e prestadores de serviços',
+                        'PME que querem ser encontradas na internet',
+                        'Empreendedores individuais com produtos ou serviços locais',
+                    ],
+                ],
+                [
+                    'heading' => 'Para quem compra ou agenda',
+                    'items' => [
+                        'Pesquisar empresas, categorias e cidades',
+                        'Comparar produtos e serviços publicados',
+                        'Comprar ou agendar diretamente no Marketplace',
+                    ],
+                ],
+                [
+                    'heading' => 'Imagens e cenários',
+                    'items' => collect($media)->map(fn ($s) => $s['title'].' — '.$s['summary'])->all(),
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => [
+                        [
+                            'question' => 'Onde está o Marketplace?',
+                            'answer' => 'Em '.$marketplaceUrl.'.',
+                        ],
+                        [
+                            'question' => 'Posso listar sem ser empresa constituída?',
+                            'answer' => 'Sim. Empresas e pessoas singulares podem listar o negócio e publicar produtos ou serviços.',
+                        ],
+                        [
+                            'question' => 'Os clientes encontram-me na internet?',
+                            'answer' => 'Sim. O objetivo do Marketplace é tornar o negócio pesquisável e acessível online por cidade e categoria.',
+                        ],
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => $marketplaceUrl, 'label' => 'Abrir Marketplace', 'description' => 'marketplace.sisgesc.net'],
+                ['href' => url('/modules/marketplace'), 'label' => 'Página Marketplace SIGESC', 'description' => 'Apresentação do módulo'],
+                ['href' => url('/modules/loja-virtual'), 'label' => 'Loja Virtual', 'description' => 'Catálogo integrado ao stock'],
+                ['href' => url('/solutions'), 'label' => 'Todas as soluções', 'description' => 'Catálogo de módulos'],
+                ['href' => url('/contact'), 'label' => 'Pedir demonstração', 'description' => 'Falar com a equipa'],
+            ],
+        ];
+    }
+
+    /**
+     * Payload Inertia para a página dedicada do Marketplace.
+     *
+     * @return array<string, mixed>
+     */
+    public function marketplaceModule(): array
+    {
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026'));
+        $catalog = collect($this->modules())->firstWhere('slug', 'marketplace') ?? [];
+        $marketplaceUrl = (string) config('sigesc.marketplace_home_url', 'https://marketplace.sisgesc.net/marketplace');
+
+        return [
+            'name' => 'Marketplace',
+            'slug' => 'marketplace',
+            'agt_cert' => $agt,
+            'marketplace_url' => $marketplaceUrl,
+            'headline' => 'O seu negócio na cidade — encontrado na internet',
+            'lead' => 'Liste a empresa, publique produtos ou serviços e deixe os clientes pesquisar, comprar ou agendar no Marketplace SIGESC.',
+            'description' => $catalog['description'] ?? '',
+            'highlights' => $catalog['highlights'] ?? [],
+            'screenshots' => \App\Support\MarketplaceMedia::all(),
+            'hero_image' => \App\Support\MarketplaceMedia::heroSrc(),
+            'capabilities' => [
+                [
+                    'key' => 'listar',
+                    'title' => 'Listar empresa ou negócio',
+                    'body' => 'Empresas e pessoas singulares criam o perfil e aparecem no Marketplace.',
+                ],
+                [
+                    'key' => 'descobrir',
+                    'title' => 'Descoberta por cidade',
+                    'body' => 'Clientes pesquisam por categoria, cidade ou nome da empresa.',
+                ],
+                [
+                    'key' => 'comprar',
+                    'title' => 'Vender produtos',
+                    'body' => 'Publique o catálogo e venda online a quem está na sua zona ou o encontra na web.',
+                ],
+                [
+                    'key' => 'agendar',
+                    'title' => 'Agendar serviços',
+                    'body' => 'Prestadores publicam serviços; clientes marcam no mesmo Marketplace.',
+                ],
+            ],
+            'integrations' => [
+                'Marketplace público em marketplace.sisgesc.net',
+                'Ecossistema SIGESC com faturação eletrónica AGT ('.$agt.')',
+                'Complementa Loja Virtual, CRM e gestão comercial',
+                'Ideal para PME e negócios locais em Angola',
             ],
         ];
     }
