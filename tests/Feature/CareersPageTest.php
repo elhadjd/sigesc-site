@@ -188,10 +188,37 @@ class CareersPageTest extends TestCase
             ->assertOk()
             ->assertSee('Analista QA', false)
             ->assertSee('Carreiras', false)
+            ->assertSee('vagas emprego Luanda', false)
+            ->assertSee('ItemList', false)
+            ->assertSee('FAQPage', false)
+            ->assertSee('BreadcrumbList', false)
+            ->assertSee('CollectionPage', false)
             ->getContent();
 
         $this->assertStringContainsString('Conteúdo indexável gerado no servidor', $html);
         $this->assertStringNotContainsString('data-page=', $html);
+    }
+
+    public function test_careers_seo_keywords_and_discovery_files(): void
+    {
+        $seo = app(\App\Services\Seo\SeoBuilder::class)->forCareers([]);
+        $this->assertStringContainsString('vagas emprego Luanda', (string) $seo['keywords']);
+        $this->assertStringContainsString('consultor comercial B2B Angola', (string) $seo['keywords']);
+        $this->assertStringContainsString('Carreiras SIGESC', (string) $seo['title']);
+
+        $types = collect($seo['json_ld'])->pluck('@type')->all();
+        $this->assertContains('CollectionPage', $types);
+        $this->assertContains('BreadcrumbList', $types);
+        $this->assertContains('FAQPage', $types);
+
+        foreach (['/llms.txt', '/llms-full.txt', '/ai.txt', '/agents.md', '/humans.txt'] as $path) {
+            $body = $this->get($path)->assertOk()->getContent();
+            $this->assertStringContainsString('/carreiras', $body, "Expected /carreiras in {$path}");
+            $this->assertStringContainsString('vagas emprego Luanda', $body, "Expected career keyword in {$path}");
+        }
+
+        $robots = file_get_contents(public_path('robots.txt'));
+        $this->assertStringContainsString('Allow: /carreiras', (string) $robots);
     }
 
     public function test_duplicate_application_within_a_day_is_rejected(): void

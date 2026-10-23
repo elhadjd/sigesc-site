@@ -97,7 +97,7 @@ class GeoDiscoveryTest extends TestCase
     {
         $xml = $this->get('/sitemap.xml')->assertOk()->getContent();
 
-        foreach (['/sobre', '/llms-full.txt', '/agents.md', '/.well-known/ai-plugin.json', '/parceria'] as $needle) {
+        foreach (['/sobre', '/llms-full.txt', '/agents.md', '/.well-known/ai-plugin.json', '/parceria', '/carreiras'] as $needle) {
             $this->assertStringContainsString($needle, $xml);
         }
     }

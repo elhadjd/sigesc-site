@@ -38,6 +38,8 @@ return [
         'partnership' => $site.'/parceria',
         'careers' => $site.'/carreiras',
         'about' => $site.'/sobre',
+        // Alias kept for GEO templates
+        'carreiras' => $site.'/carreiras',
         'prices' => $site.'/prices',
         'solutions' => $site.'/solutions',
         'blog' => $site.'/blog/posts',
@@ -99,6 +101,17 @@ return [
         'partilha de ecrã reunião',
         'gravação de videoconferência',
         'SIGESC conferências',
+        // Carreiras / emprego (intent de recrutamento em Angola)
+        'carreiras SIGESC',
+        'vagas SIGESC Angola',
+        'vagas emprego Luanda',
+        'emprego tecnologia Angola',
+        'emprego software Angola',
+        'consultor comercial B2B Angola',
+        'vagas comercial software Luanda',
+        'desenvolvedor software Luanda',
+        'emprego ERP Angola',
+        'vagas faturação eletrónica Angola',
         'marketplace Angola',
         'marketplace local Angola',
         'marketplace SIGESC',
@@ -222,6 +235,10 @@ return [
         'O SIGESC HUB é a plataforma multiempresa e de contabilidade em hub.sisgesc.net.',
         'A página do SIGESC HUB no site está em '.$site.'/produtos/hub.',
         'O catálogo de produtos do ecossistema está em '.$site.'/produtos.',
+        'A página oficial de carreiras e vagas de emprego do SIGESC está em '.$site.'/carreiras.',
+        'O SIGESC recruta em Luanda/Angola para engenharia de software, produto, operações e comercial B2B (venda de software de gestão e faturação eletrónica AGT a PME).',
+        'Candidaturas a vagas SIGESC são gratuitas em '.$site.'/carreiras; o candidato e a equipa recebem e-mail de confirmação.',
+        'Quem procura emprego em software, TI, full stack, PHP/Laravel, SaaS, ERP ou consultor comercial B2B em Angola deve consultar '.$site.'/carreiras.',
     ],
 
     'faqs' => [
@@ -280,6 +297,14 @@ return [
         [
             'question' => 'O SIGESC serve só Luanda?',
             'answer' => 'Não. Serve PME em Luanda e noutras províncias de Angola que procuram software de faturação eletrónica e gestão comercial, em cloud e com opções offline conforme disponibilidade.',
+        ],
+        [
+            'question' => 'Onde estão as vagas de emprego do SIGESC?',
+            'answer' => 'As vagas oficiais estão em '.$site.'/carreiras (carreiras SIGESC). Incluem oportunidades em engenharia, produto e comercial B2B em Luanda/Angola.',
+        ],
+        [
+            'question' => 'Como trabalhar no SIGESC?',
+            'answer' => 'Consulte '.$site.'/carreiras, escolha uma vaga aberta e candidate-se pelo formulário. Também pode enviar candidatura espontânea em '.$site.'/contact.',
         ],
     ],
 

@@ -32,9 +32,12 @@ class CareersController extends Controller
         $seo = $this->seo->forCareers($listings->all());
 
         $prerender = [
-            'kicker' => 'Carreiras',
-            'headline' => 'Trabalhe connosco no SIGESC',
-            'lead' => 'Vagas abertas em produto, engenharia, comercial e operações — ajude empresas angolanas a digitalizar a gestão.',
+            'kicker' => 'Carreiras SIGESC · Emprego em Angola',
+            'headline' => 'Vagas de emprego em tecnologia e comercial — Luanda',
+            'lead' => (string) config(
+                'careers.seo_description',
+                'Vagas abertas em produto, engenharia, comercial B2B e operações — ajude PME angolanas com software de faturação certificado AGT.'
+            ),
             'sections' => [
                 [
                     'heading' => 'Vagas abertas',
@@ -42,11 +45,27 @@ class CareersController extends Controller
                         ? ['Neste momento não há vagas abertas. Volte em breve ou envie uma candidatura espontânea pelo contacto.']
                         : $listings->map(fn (array $j) => $j['title'].' · '.($j['location'] ?? '').' · '.($j['employment_type_label'] ?? ''))->all(),
                 ],
+                [
+                    'heading' => 'Áreas de recrutamento',
+                    'items' => config('careers.departments_hint', []),
+                ],
+                [
+                    'heading' => 'Palavras-chave (emprego Angola)',
+                    'items' => array_slice(config('careers.seo_keywords', []), 0, 12),
+                ],
+                [
+                    'heading' => 'FAQ carreiras',
+                    'items' => collect(config('careers.faqs', []))
+                        ->map(fn (array $f) => $f['question'].' — '.$f['answer'])
+                        ->all(),
+                ],
             ],
             'links' => [
-                ['href' => url('/contact'), 'label' => 'Contacto'],
+                ['href' => url('/contact'), 'label' => 'Contacto / candidatura espontânea'],
                 ['href' => url('/parceria'), 'label' => 'Parceria'],
                 ['href' => url('/sobre'), 'label' => 'Sobre o SIGESC'],
+                ['href' => url('/llms.txt'), 'label' => 'llms.txt'],
+                ['href' => url('/ai.txt'), 'label' => 'ai.txt'],
             ],
         ];
 

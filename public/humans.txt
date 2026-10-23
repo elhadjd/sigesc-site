@@ -17,6 +17,12 @@ llms-full.txt: https://sisgesc.net/llms-full.txt
 ai.txt: https://sisgesc.net/ai.txt
 agents.md: https://sisgesc.net/agents.md
 about: https://sisgesc.net/sobre
+careers: https://sisgesc.net/carreiras
+
+/* JOBS */
+Careers: https://sisgesc.net/carreiras
+Hiring: Luanda / Angola — software engineering, product, B2B commercial
+Keywords: vagas emprego Luanda, emprego tecnologia Angola, consultor comercial B2B Angola
 
 /* CONTACT */
 https://sisgesc.net/contact
