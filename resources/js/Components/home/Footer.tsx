@@ -136,6 +136,21 @@ export default function FooterComponent() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/produtos" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                    <span className="text-sm">Produtos · Hospitalar e HUB</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/produtos/hospitalar" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                    <span className="text-sm">SIGESC Hospitalar</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/produtos/hub" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
+                                    <span className="text-sm">SIGESC HUB</span>
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/parceria" className="flex items-center gap-3 text-gray-600 hover:text-blue-500 transition-colors duration-300 group">
                                     <FaUsers className="text-blue-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm">Parceria · 40.000 Kz/mês</span>

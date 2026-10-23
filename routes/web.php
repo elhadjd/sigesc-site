@@ -21,6 +21,7 @@ use App\Http\Controllers\public\InvoiceGeneratorController;
 use App\Http\Controllers\public\InvoiceTemplatesController;
 use App\Http\Controllers\public\GeoDiscoveryController;
 use App\Http\Controllers\public\PartnershipController;
+use App\Http\Controllers\public\ProductsController;
 use App\Http\Controllers\public\RssFeedController;
 use App\Http\Controllers\public\SitemapController;
 use App\Http\Controllers\public\clientDepoimentsController;
@@ -68,6 +69,12 @@ Route::get('/gerador-de-codigo-barras', [BarcodeQrGeneratorController::class, 'i
 
 Route::get('/parceria', [PartnershipController::class, 'index'])
     ->name('partnership.index');
+
+Route::prefix('produtos')->name('produtos.')->group(function () {
+    Route::get('', [ProductsController::class, 'index'])->name('index');
+    Route::get('hospitalar', [ProductsController::class, 'hospitalar'])->name('hospitalar');
+    Route::get('hub', [ProductsController::class, 'hub'])->name('hub');
+});
 
 Route::get('/sobre', [GeoDiscoveryController::class, 'about'])
     ->name('about.index');
