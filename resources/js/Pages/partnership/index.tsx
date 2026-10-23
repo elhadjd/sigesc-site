@@ -32,7 +32,7 @@ type Plan = {
 
 const partnerBenefits = [
     'Revenda e implantação do SIGESC junto de PME',
-    'Licenças ilimitadas (cloud e offline)',
+    '10 Licenças (cloud e offline) inclusas',
     'Faturação eletrónica certificada AGT',
     'PDV, stock, finanças, compras e RH',
     'Suporte comercial para o seu território',
@@ -62,11 +62,11 @@ export default function PartnershipIndex({
     const faqs = [
         {
             q: 'Quanto custa a parceria Parceiro?',
-            a: `A mensalidade do programa Parceiro SIGESC é de ${plan.price_formatted}, com licenças ilimitadas.`,
+            a: `A mensalidade do programa Parceiro SIGESC é de ${plan.price_formatted}, com 10 licenças inclusas.`,
         },
         {
-            q: 'As licenças são ilimitadas?',
-            a: 'Sim. No plano Parceiro as licenças são ilimitadas para cloud e versão offline.',
+            q: 'As licenças são limitadas?',
+            a: 'Sim. No plano Parceiro são 10 licenças para cloud e versão offline.',
         },
         {
             q: 'O que é a parceria Freelancer?',
@@ -89,7 +89,7 @@ export default function PartnershipIndex({
                 <SeoHead
                     seo={seo}
                     fallbackTitle={`Parceria SIGESC | ${plan.price_formatted}/mês · Freelancer ${commission}`}
-                    fallbackDescription={`Parceiro SIGESC: ${plan.price_formatted}/mês com licenças ilimitadas. Freelancer: indique clientes e ganhe ${commission} de comissão.`}
+                    fallbackDescription={`Parceiro SIGESC: ${plan.price_formatted}/mês com 10 licenças. Freelancer: indique clientes e ganhe ${commission} de comissão.`}
                 />
                 <HeaderComponent auth={auth as any} />
 
@@ -127,7 +127,7 @@ export default function PartnershipIndex({
                                 transition={{ duration: 0.55, delay: 0.16 }}
                                 className="mt-5 max-w-xl text-lg text-white/80"
                             >
-                                Parceiro: {plan.price_formatted}/mês com licenças ilimitadas. Freelancer:
+                                Parceiro: {plan.price_formatted}/mês com 10 licenças. Freelancer:
                                 indique clientes e ganhe {commission} de comissão.
                             </motion.p>
                             <motion.div
@@ -176,7 +176,7 @@ export default function PartnershipIndex({
                                         {plan.price_formatted}
                                         <span className="ml-2 text-xl text-white/60">/mês</span>
                                     </p>
-                                    <p className="mt-4 text-white/80">{plan.offline_licenses_note}</p>
+                                    <p className="mt-4 text-white/80">10 licenças inclusas (cloud e offline)</p>
                                     <ul className="mt-8 space-y-3 text-white/85">
                                         {partnerBenefits.map((item) => (
                                             <li key={item} className="flex gap-3">
@@ -192,7 +192,7 @@ export default function PartnershipIndex({
                                         href="/contact"
                                         className="mt-8 inline-flex bg-white px-5 py-3 text-sm font-semibold text-[#071820] transition hover:bg-[#7fd4e8]"
                                     >
-                                        Quero ser parceiro
+                                        Quero ser parceiro (10 licenças)
                                     </Link>
                                 </motion.div>
 
@@ -245,11 +245,11 @@ export default function PartnershipIndex({
                         <div className="absolute inset-0 bg-[#071820]/85" />
                         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6">
                             <h2 className="font-serif text-3xl text-white sm:text-4xl">
-                                Licenças ilimitadas para parceiros
+                                10 licenças para parceiros
                             </h2>
                             <p className="mt-4 max-w-2xl text-lg text-white/75">
-                                No plano Parceiro, as licenças cloud e offline são ilimitadas — ideal
-                                para crescer a sua carteira de clientes em Angola sem teto de cupos.
+                                No plano Parceiro, você recebe 10 licenças (cloud e offline) — ideais
+                                para começar a sua carteira de clientes em Angola.
                             </p>
                             <div className="mt-10 grid gap-8 sm:grid-cols-3">
                                 {[
@@ -258,8 +258,8 @@ export default function PartnershipIndex({
                                         body: 'Implante no posto do cliente ou na nuvem, com sincronização quando houver rede.',
                                     },
                                     {
-                                        title: 'Sem limite de licenças',
-                                        body: 'Escale a sua operação comercial sem restrição de cupos no plano Parceiro.',
+                                        title: '10 licenças inclusas',
+                                        body: 'Comece com 10 licenças no plano Parceiro, sem custos adicionais por elas.',
                                     },
                                     {
                                         title: 'Freelancer à parte',

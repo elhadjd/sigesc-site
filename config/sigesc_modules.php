@@ -93,4 +93,18 @@ return [
             'Integração com faturação AGT, PDV, stock e finanças SIGESC',
         ],
     ],
+    [
+        'name' => 'Chamadas e Conferências',
+        'slug' => 'chamadas-e-conferencias',
+        'description' => 'Chamadas e conferências de vídeo no SIGESC: reuniões internas, links para clientes sem conta, chamadas diretas entre utilizadores, partilha de ecrã e gravação — tudo dentro do software de gestão em Angola.',
+        'keywords' => 'videoconferência Angola, software reunião online Angola, conferência de vídeo PME, chamada de vídeo empresa, partilha de ecrã, gravação de reunião, link de conferência, reunião com cliente online, software chamadas empresariais Angola, SIGESC conferências',
+        'highlights' => [
+            'Crie conferências para a equipa interna ou para convidados externos',
+            'Envie um link ao cliente — entra na reunião sem ter conta no SIGESC',
+            'Chamadas diretas de um utilizador para outro dentro da empresa',
+            'Partilha de ecrã com todos os membros da conferência',
+            'Gravação de ecrã durante a reunião para arquivo ou formação',
+            'Integrado ao mesmo sistema de faturação, CRM e gestão da PME',
+        ],
+    ],
 ];

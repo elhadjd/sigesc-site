@@ -1,5 +1,5 @@
 import { SIGESC_GETTING_STARTED_URL, SIGESC_ADMIN_URL } from './domains';
-import { FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar, FiBarChart2, FiShoppingBag, FiDollarSign, FiGlobe, FiMessageSquare } from "react-icons/fi";
+import { FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar, FiBarChart2, FiShoppingBag, FiDollarSign, FiGlobe, FiMessageSquare, FiVideo } from "react-icons/fi";
 
 export const features = [
     {
@@ -97,6 +97,14 @@ export const features = [
         name: "CRM",
         color: "teal",
         href: route('modules', { module: 'crm' })
+    },
+    {
+        icon: FiVideo,
+        className: "text-lg",
+        desc: "Conferências, link para clientes, chamadas diretas, partilha e gravação de ecrã.",
+        name: "Chamadas e Conferências",
+        color: "sky",
+        href: route('modules', { module: 'chamadas-e-conferencias' })
     }
 ];
 
@@ -1701,6 +1709,61 @@ export const moduleData = {
                 number: "03",
                 title: "Uma plataforma",
                 description: "CRM + faturação AGT + PDV no mesmo sistema."
+            }
+        ]
+    },
+    chamadaseconferencias: {
+        title: "Chamadas e Conferências SIGESC | Videoconferência para PME em Angola",
+        description: "Videoconferência no SIGESC: reuniões internas, link para clientes sem conta, chamadas diretas, partilha de ecrã e gravação. Reúna a equipa ou o cliente dentro do software de gestão.",
+        keywords: "videoconferência Angola, software reunião online Angola, conferência de vídeo PME, chamada de vídeo empresa, partilha de ecrã, gravação de reunião, link de conferência",
+        heroTitle: "Chamadas e conferências no SIGESC",
+        heroSubtitle: "Crie salas para a equipa ou envie um link ao cliente — com partilha e gravação de ecrã.",
+        images: [
+            "/img/conferencias/hero.jpg",
+            "/img/conferencias/link-convidado.jpg",
+            "/img/conferencias/chamada-direta.jpg",
+            "/img/conferencias/compartilhar-tela.jpg",
+            "/img/conferencias/gravacao-ecra.jpg"
+        ],
+        imageAlts: [
+            "Conferência de vídeo SIGESC",
+            "Link de conferência para cliente sem conta",
+            "Chamada direta entre utilizadores SIGESC",
+            "Partilha de ecrã na conferência SIGESC",
+            "Gravação de ecrã na reunião SIGESC"
+        ],
+        features: [
+            {
+                icon: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z",
+                title: "Conferências",
+                description: "Salas para equipa interna ou convidados externos."
+            },
+            {
+                icon: "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1",
+                title: "Link para convidados",
+                description: "O cliente entra sem ter conta no SIGESC."
+            },
+            {
+                icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+                title: "Partilha e gravação",
+                description: "Partilhe o ecrã e grave a reunião quando precisar."
+            }
+        ],
+        benefits: [
+            {
+                number: "01",
+                title: "Com ou sem conta",
+                description: "Equipa com login; clientes entram pelo link."
+            },
+            {
+                number: "02",
+                title: "Chamadas diretas",
+                description: "Ligue utilizador a utilizador sem sala completa."
+            },
+            {
+                number: "03",
+                title: "No mesmo sistema",
+                description: "Junto da faturação AGT, CRM e gestão da PME."
             }
         ]
     }

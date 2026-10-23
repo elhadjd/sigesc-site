@@ -5,6 +5,7 @@ namespace App\Http\Controllers\public;
 use App\Http\Controllers\Controller;
 use App\Services\Seo\PublicPageContent;
 use App\Services\Seo\SeoBuilder;
+use App\Support\ConferenceMedia;
 use App\Support\CrmScreenshots;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -31,6 +32,10 @@ class modules extends Controller
 
         if ($slug === 'crm') {
             return $this->crm($request);
+        }
+
+        if (in_array($slug, ['chamadas-e-conferencias', 'conferencias', 'chamadas'], true)) {
+            return $this->conferencias($request);
         }
 
         $moduleName = collect($this->content->modules())
@@ -63,6 +68,28 @@ class modules extends Controller
             [
                 'module' => $module,
                 'screenshots' => CrmScreenshots::all(),
+            ]
+        );
+    }
+
+    protected function conferencias(Request $request)
+    {
+        $module = $this->content->conferencesModule();
+
+        return $this->renderPublicPage(
+            $request,
+            'modules/conferencias',
+            [
+                'moduleName' => 'Chamadas e Conferências',
+                'seo' => $this->seo->forConferences(),
+                'prerender' => $this->content->conferences(),
+                'module' => $module,
+                'modules' => $this->content->modules(),
+            ],
+            'seo.conferencias',
+            [
+                'module' => $module,
+                'screenshots' => ConferenceMedia::all(),
             ]
         );
     }

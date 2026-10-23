@@ -770,6 +770,10 @@ class PublicPageContent
             return $this->crm();
         }
 
+        if (in_array($slug, ['chamadas-e-conferencias', 'conferencias', 'chamadas'], true)) {
+            return $this->conferences();
+        }
+
         $catalog = collect($this->modules())->firstWhere('slug', $slug)
             ?? collect($this->modules())->first(fn ($m) => strcasecmp($m['name'], $moduleName) === 0);
 
@@ -935,6 +939,129 @@ class PublicPageContent
                 'Ponto de venda (PDV) e documentos comerciais',
                 'Stock, finanças e operações da PME',
                 'Loja virtual, marketing e dropshipping',
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function conferences(): array
+    {
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026'));
+        $media = \App\Support\ConferenceMedia::all();
+        $catalog = collect($this->modules())->firstWhere('slug', 'chamadas-e-conferencias');
+        $highlights = $catalog['highlights'] ?? [];
+
+        return [
+            'kicker' => 'Módulo Chamadas e Conferências · SIGESC Angola',
+            'headline' => 'Chamadas e conferências de vídeo no SIGESC',
+            'lead' => ($catalog['description'] ?? 'Videoconferência integrada ao SIGESC.')
+                .' Software de faturação eletrónica certificado pela AGT (n.º '.$agt.').',
+            'sections' => [
+                [
+                    'heading' => 'O que pode fazer',
+                    'body' => 'Reúna a equipa ou o cliente dentro do mesmo sistema onde gere faturação, CRM e operações.',
+                    'items' => $highlights !== [] ? $highlights : [
+                        'Conferências internas e com convidados',
+                        'Link para clientes sem conta',
+                        'Chamadas diretas entre utilizadores',
+                        'Partilha e gravação de ecrã',
+                    ],
+                ],
+                [
+                    'heading' => 'Como funciona o link para convidados',
+                    'body' => 'Crie a conferência no SIGESC, copie o link e envie ao cliente (WhatsApp, email ou SMS). O convidado abre o link e entra na sala — sem registo no sistema.',
+                    'items' => [
+                        'Ideal para reuniões comerciais com clientes',
+                        'Também serve para parceiros, fornecedores e consultores',
+                        'Colaboradores com conta entram como membros da empresa',
+                    ],
+                ],
+                [
+                    'heading' => 'Recursos da reunião',
+                    'items' => collect($media)->map(fn ($s) => $s['title'].' — '.$s['summary'])->all(),
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => [
+                        [
+                            'question' => 'O convidado precisa de conta SIGESC?',
+                            'answer' => 'Não. Com o link de conferência, o cliente entra na reunião sem ter conta no software.',
+                        ],
+                        [
+                            'question' => 'Há chamadas diretas além das salas?',
+                            'answer' => 'Sim. Um utilizador pode ligar diretamente a outro utilizador da empresa.',
+                        ],
+                        [
+                            'question' => 'Posso partilhar e gravar o ecrã?',
+                            'answer' => 'Sim. Durante a conferência pode partilhar o ecrã com os participantes e gravar a sessão.',
+                        ],
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => url('/modules/chamadas-e-conferencias'), 'label' => 'Chamadas e Conferências', 'description' => 'Página do módulo'],
+                ['href' => url('/modules/crm'), 'label' => 'CRM SIGESC', 'description' => 'Pipeline e clientes'],
+                ['href' => url('/solutions'), 'label' => 'Todas as soluções', 'description' => 'Catálogo de módulos'],
+                ['href' => url('/contact'), 'label' => 'Pedir demonstração', 'description' => 'Falar com a equipa'],
+                ['href' => (string) (config('geo.urls.trial') ?: 'https://admin.sisgesc.net/getting-started'), 'label' => 'Testar online', 'description' => 'Trial em admin.sisgesc.net'],
+            ],
+        ];
+    }
+
+    /**
+     * Payload Inertia para a página dedicada de conferências.
+     *
+     * @return array<string, mixed>
+     */
+    public function conferencesModule(): array
+    {
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026'));
+        $catalog = collect($this->modules())->firstWhere('slug', 'chamadas-e-conferencias') ?? [];
+
+        return [
+            'name' => 'Chamadas e Conferências',
+            'slug' => 'chamadas-e-conferencias',
+            'agt_cert' => $agt,
+            'headline' => 'Reúna a equipa ou o cliente — sem sair do SIGESC',
+            'lead' => 'Crie conferências internas ou com convidados, faça chamadas diretas, partilhe e grave o ecrã. O cliente entra pelo link, mesmo sem conta.',
+            'description' => $catalog['description'] ?? '',
+            'highlights' => $catalog['highlights'] ?? [],
+            'screenshots' => \App\Support\ConferenceMedia::all(),
+            'hero_image' => \App\Support\ConferenceMedia::heroSrc(),
+            'capabilities' => [
+                [
+                    'key' => 'link',
+                    'title' => 'Link para convidados',
+                    'body' => 'Envie o link ao cliente: ele entra na conferência sem criar conta no SIGESC.',
+                ],
+                [
+                    'key' => 'hero',
+                    'title' => 'Conferências internas',
+                    'body' => 'Reúna colaboradores e departamentos na mesma sala, com áudio e vídeo.',
+                ],
+                [
+                    'key' => 'chamada',
+                    'title' => 'Chamadas diretas',
+                    'body' => 'Ligue de um utilizador para outro dentro da empresa, de forma imediata.',
+                ],
+                [
+                    'key' => 'partilha',
+                    'title' => 'Partilha de ecrã',
+                    'body' => 'Mostre documentos, dashboards ou propostas a todos os participantes.',
+                ],
+                [
+                    'key' => 'gravacao',
+                    'title' => 'Gravação de ecrã',
+                    'body' => 'Grave a reunião para arquivo, formação da equipa ou follow-up com o cliente.',
+                ],
+            ],
+            'integrations' => [
+                'Mesmo sistema da faturação eletrónica AGT ('.$agt.')',
+                'Complementa o CRM e o acompanhamento comercial',
+                'Útil para reuniões com clientes, parceiros e equipa interna',
+                'Disponível no fluxo cloud do SIGESC',
             ],
         ];
     }
