@@ -11,7 +11,9 @@ use App\Http\Controllers\public\paymentsController;
 use App\Http\Controllers\public\pricesController;
 use App\Http\Controllers\profile\UserProfileController;
 use App\Http\Controllers\Admin\AiContentEngineController;
+use App\Http\Controllers\Admin\CareersController as AdminCareersController;
 use App\Http\Controllers\public\AskExpertController;
+use App\Http\Controllers\public\CareersController;
 use App\Http\Controllers\public\Blog\EngagementController;
 use App\Http\Controllers\public\BlogController;
 use App\Http\Controllers\public\CalculatorsController;
@@ -69,6 +71,17 @@ Route::get('/gerador-de-codigo-barras', [BarcodeQrGeneratorController::class, 'i
 
 Route::get('/parceria', [PartnershipController::class, 'index'])
     ->name('partnership.index');
+
+Route::prefix('carreiras')->name('careers.')->group(function () {
+    Route::get('', [CareersController::class, 'index'])->name('index');
+    Route::get('{slug}', [CareersController::class, 'show'])
+        ->where('slug', '[a-z0-9\-]+')
+        ->name('show');
+    Route::post('{slug}/candidatar', [CareersController::class, 'apply'])
+        ->where('slug', '[a-z0-9\-]+')
+        ->middleware('throttle:8,1')
+        ->name('apply');
+});
 
 Route::prefix('produtos')->name('produtos.')->group(function () {
     Route::get('', [ProductsController::class, 'index'])->name('index');
@@ -221,6 +234,21 @@ Route::middleware(['auth', 'ai-content-admin'])
         Route::get('research-settings', [AiContentEngineController::class, 'researchSettings'])->name('research-settings');
         Route::put('research-settings', [AiContentEngineController::class, 'updateResearchSettings'])->name('research-settings.update');
         Route::put('research-sources/{source}', [AiContentEngineController::class, 'toggleResearchSource'])->name('research-sources.toggle');
+    });
+
+Route::middleware(['auth', 'ai-content-admin'])
+    ->prefix('admin/carreiras')
+    ->name('admin.careers.')
+    ->group(function () {
+        Route::get('', [AdminCareersController::class, 'index'])->name('index');
+        Route::get('nova', [AdminCareersController::class, 'create'])->name('create');
+        Route::post('', [AdminCareersController::class, 'store'])->name('store');
+        Route::get('{job}/editar', [AdminCareersController::class, 'edit'])->name('edit');
+        Route::put('{job}', [AdminCareersController::class, 'update'])->name('update');
+        Route::post('{job}/pausar', [AdminCareersController::class, 'pause'])->name('pause');
+        Route::post('{job}/fechar', [AdminCareersController::class, 'close'])->name('close');
+        Route::post('{job}/reabrir', [AdminCareersController::class, 'reopen'])->name('reopen');
+        Route::delete('{job}', [AdminCareersController::class, 'destroy'])->name('destroy');
     });
 
 Route::fallback(function () {

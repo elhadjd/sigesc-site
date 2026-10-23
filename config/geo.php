@@ -36,6 +36,7 @@ return [
         'logo' => $admin.'/logo.png',
         'contact' => $site.'/contact',
         'partnership' => $site.'/parceria',
+        'careers' => $site.'/carreiras',
         'about' => $site.'/sobre',
         'prices' => $site.'/prices',
         'solutions' => $site.'/solutions',

@@ -984,6 +984,117 @@ class SeoBuilder
         ]);
     }
 
+    /**
+     * @param  array<int, array<string, mixed>>  $jobs
+     */
+    public function forCareers(array $jobs = []): array
+    {
+        $url = route('careers.index', absolute: true);
+        $count = count($jobs);
+        $titles = collect($jobs)->pluck('title')->filter()->take(5)->implode(', ');
+        $lead = $count > 0
+            ? "{$count} vaga(s) aberta(s)".($titles !== '' ? ": {$titles}." : '.')
+            : 'Consulte as oportunidades na equipa SIGESC em Angola.';
+
+        $faqs = [
+            [
+                'question' => 'Como me candidato a uma vaga no SIGESC?',
+                'answer' => 'Abra a vaga em sisgesc.net/carreiras, preencha o formulário com nome, e-mail e carta de apresentação. Recebe confirmação por e-mail e a equipa é notificada.',
+            ],
+            [
+                'question' => 'Onde fica a equipa SIGESC?',
+                'answer' => 'O SIGESC opera em Angola, com foco em Luanda, e recruta para produto, engenharia, comercial e operações.',
+            ],
+            [
+                'question' => 'Posso enviar candidatura espontânea?',
+                'answer' => 'Sim. Se não houver vaga adequada, contacte-nos em sisgesc.net/contact com o seu perfil e área de interesse.',
+            ],
+        ];
+
+        return $this->forPage([
+            'title' => 'Carreiras SIGESC | Vagas em Angola',
+            'description' => "Trabalhe no SIGESC — software de faturação certificado AGT. {$lead}",
+            'path' => '/carreiras',
+            'keywords' => implode(', ', [
+                'carreiras SIGESC',
+                'vagas SIGESC Angola',
+                'emprego software Angola',
+                'trabalhar SIGESC Luanda',
+                'vagas tecnologia Angola',
+                'recrutamento faturação eletrónica',
+                'emprego PME Angola',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'CollectionPage',
+                    'name' => 'Carreiras SIGESC',
+                    'description' => 'Vagas de emprego no SIGESC em Angola.',
+                    'url' => $url,
+                    'isPartOf' => [
+                        '@type' => 'WebSite',
+                        'name' => 'SIGESC',
+                        'url' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/'),
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function forCareerJob(\App\Models\Careers\JobListing $job): array
+    {
+        $url = route('careers.show', $job->slug, absolute: true);
+        $description = $job->summary
+            ?: str($job->description)->limit(155)->toString();
+
+        return $this->forPage([
+            'title' => $job->title.' | Carreiras SIGESC',
+            'description' => $description,
+            'path' => '/carreiras/'.$job->slug,
+            'og_type' => 'article',
+            'keywords' => implode(', ', array_filter([
+                $job->title,
+                'vaga '.$job->title,
+                $job->department,
+                $job->location,
+                'carreiras SIGESC',
+                'emprego Angola',
+            ])),
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'JobPosting',
+                    'title' => $job->title,
+                    'description' => strip_tags($job->description),
+                    'datePosted' => optional($job->published_at)?->toIso8601String(),
+                    'employmentType' => match ($job->employment_type) {
+                        'full_time' => 'FULL_TIME',
+                        'part_time' => 'PART_TIME',
+                        'contract' => 'CONTRACTOR',
+                        'internship' => 'INTERN',
+                        'freelance' => 'OTHER',
+                        default => 'FULL_TIME',
+                    },
+                    'hiringOrganization' => [
+                        '@type' => 'Organization',
+                        'name' => 'SIGESC',
+                        'sameAs' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/'),
+                    ],
+                    'jobLocation' => [
+                        '@type' => 'Place',
+                        'address' => [
+                            '@type' => 'PostalAddress',
+                            'addressLocality' => $job->location ?: 'Luanda',
+                            'addressCountry' => 'AO',
+                        ],
+                    ],
+                    'url' => $url,
+                ],
+            ],
+        ]);
+    }
+
     public function forAskExpert(): array
     {
         $url = route('ask-expert.index', absolute: true);

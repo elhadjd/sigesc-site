@@ -4,6 +4,7 @@ namespace App\Http\Controllers\public;
 
 use App\Http\Controllers\Controller;
 use App\Models\AiContent\Article;
+use App\Models\Careers\JobListing;
 use App\Models\Post;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
@@ -26,6 +27,7 @@ class SitemapController extends Controller
             ['loc' => $base.'/solutions', 'changefreq' => 'monthly', 'priority' => '0.8'],
             ['loc' => $base.'/prices', 'changefreq' => 'monthly', 'priority' => '0.8'],
             ['loc' => route('partnership.index', absolute: true), 'changefreq' => 'monthly', 'priority' => '0.9'],
+            ['loc' => route('careers.index', absolute: true), 'changefreq' => 'weekly', 'priority' => '0.85'],
             ['loc' => route('produtos.index', absolute: true), 'changefreq' => 'monthly', 'priority' => '0.9'],
             ['loc' => route('produtos.hospitalar', absolute: true), 'changefreq' => 'monthly', 'priority' => '0.9'],
             ['loc' => route('produtos.hub', absolute: true), 'changefreq' => 'monthly', 'priority' => '0.9'],
@@ -65,6 +67,22 @@ class SitemapController extends Controller
                 ->orderByDesc('published_at')
                 ->get(['slug', 'title', 'published_at', 'updated_at', 'featured_image']);
         });
+
+        $careerJobs = Cache::remember('sitemap_career_jobs', 600, function () {
+            return JobListing::query()
+                ->publiclyVisible()
+                ->orderByDesc('published_at')
+                ->get(['slug', 'title', 'published_at', 'updated_at']);
+        });
+
+        foreach ($careerJobs as $job) {
+            $staticUrls[] = [
+                'loc' => route('careers.show', $job->slug, absolute: true),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
+                'lastmod' => optional($job->updated_at ?? $job->published_at)?->toAtomString(),
+            ];
+        }
 
         $xml = view('seo.sitemap', [
             'staticUrls' => $staticUrls,
