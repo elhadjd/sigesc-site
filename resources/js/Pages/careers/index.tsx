@@ -203,6 +203,32 @@ export default function CareersIndex({
                             </Link>
                         </div>
                     </section>
+
+                    <section className="border-t border-teal-900/40 bg-[#08332c] px-4 py-14 sm:px-6" aria-label="SEO carreiras Angola">
+                        <div className="mx-auto max-w-6xl">
+                            <h2 className="display text-2xl text-white sm:text-3xl">
+                                Emprego em software e comercial B2B em Angola
+                            </h2>
+                            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-teal-100/80 sm:text-base">
+                                A página de carreiras SIGESC concentra vagas de emprego em Luanda e Angola nas áreas de
+                                engenharia de software, full stack, produto e consultor comercial B2B para software de
+                                gestão e faturação eletrónica certificada AGT. Candidate-se gratuitamente — sem taxas
+                                de recrutamento.
+                            </p>
+                            <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-xs text-teal-200/70 sm:text-sm">
+                                {[
+                                    'vagas emprego Luanda',
+                                    'emprego tecnologia Angola',
+                                    'desenvolvedor software Luanda',
+                                    'consultor comercial B2B Angola',
+                                    'emprego SaaS / ERP Angola',
+                                    'vagas faturação eletrónica',
+                                ].map((kw) => (
+                                    <li key={kw}>{kw}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </section>
                 </main>
 
                 <FooterComponent />

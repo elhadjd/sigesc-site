@@ -989,6 +989,7 @@ class SeoBuilder
      */
     public function forCareers(array $jobs = []): array
     {
+        $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
         $url = route('careers.index', absolute: true);
         $count = count($jobs);
         $titles = collect($jobs)->pluck('title')->filter()->take(5)->implode(', ');
@@ -996,78 +997,155 @@ class SeoBuilder
             ? "{$count} vaga(s) aberta(s)".($titles !== '' ? ": {$titles}." : '.')
             : 'Consulte as oportunidades na equipa SIGESC em Angola.';
 
-        $faqs = [
+        $faqs = config('careers.faqs', []);
+        $keywords = array_values(array_unique(array_filter(array_merge(
+            config('careers.seo_keywords', []),
             [
-                'question' => 'Como me candidato a uma vaga no SIGESC?',
-                'answer' => 'Abra a vaga em sisgesc.net/carreiras, preencha o formulário com nome, e-mail e carta de apresentação. Recebe confirmação por e-mail e a equipa é notificada.',
-            ],
-            [
-                'question' => 'Onde fica a equipa SIGESC?',
-                'answer' => 'O SIGESC opera em Angola, com foco em Luanda, e recruta para produto, engenharia, comercial e operações.',
-            ],
-            [
-                'question' => 'Posso enviar candidatura espontânea?',
-                'answer' => 'Sim. Se não houver vaga adequada, contacte-nos em sisgesc.net/contact com o seu perfil e área de interesse.',
-            ],
-        ];
+                'SIGESC',
+                config('geo.certification.number', 'FE/323/AGT/2026'),
+                'emprego Luanda',
+                'vagas TI Angola',
+            ]
+        ))));
 
-        return $this->forPage([
-            'title' => 'Carreiras SIGESC | Vagas em Angola',
-            'description' => "Trabalhe no SIGESC — software de faturação certificado AGT. {$lead}",
-            'path' => '/carreiras',
-            'keywords' => implode(', ', [
-                'carreiras SIGESC',
-                'vagas SIGESC Angola',
-                'emprego software Angola',
-                'trabalhar SIGESC Luanda',
-                'vagas tecnologia Angola',
-                'recrutamento faturação eletrónica',
-                'emprego PME Angola',
-            ]),
-            'faq' => $faqs,
-            'extra_json_ld' => [
-                [
-                    '@context' => 'https://schema.org',
-                    '@type' => 'CollectionPage',
-                    'name' => 'Carreiras SIGESC',
-                    'description' => 'Vagas de emprego no SIGESC em Angola.',
-                    'url' => $url,
-                    'isPartOf' => [
-                        '@type' => 'WebSite',
-                        'name' => 'SIGESC',
-                        'url' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/'),
+        $itemListElements = [];
+        foreach (array_values($jobs) as $i => $job) {
+            $itemListElements[] = [
+                '@type' => 'ListItem',
+                'position' => $i + 1,
+                'url' => route('careers.show', $job['slug'], absolute: true),
+                'name' => $job['title'],
+            ];
+        }
+
+        $extra = [
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => 'Carreiras SIGESC — Vagas de emprego em Angola',
+                'description' => (string) config('careers.seo_description'),
+                'url' => $url,
+                'inLanguage' => 'pt-AO',
+                'isPartOf' => [
+                    '@type' => 'WebSite',
+                    'name' => 'SIGESC',
+                    'url' => $base,
+                ],
+                'about' => [
+                    '@type' => 'Organization',
+                    'name' => 'SIGESC',
+                    'url' => $base,
+                ],
+            ],
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 1,
+                        'name' => 'Início',
+                        'item' => $base.'/',
+                    ],
+                    [
+                        '@type' => 'ListItem',
+                        'position' => 2,
+                        'name' => 'Carreiras',
+                        'item' => $url,
                     ],
                 ],
             ],
+        ];
+
+        if ($itemListElements !== []) {
+            $extra[] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'ItemList',
+                'name' => 'Vagas abertas SIGESC',
+                'itemListOrder' => 'https://schema.org/ItemListOrderDescending',
+                'numberOfItems' => count($itemListElements),
+                'itemListElement' => $itemListElements,
+            ];
+        }
+
+        return $this->forPage([
+            'title' => (string) config('careers.seo_title', 'Carreiras SIGESC | Vagas em Angola'),
+            'description' => (string) config('careers.seo_description', "Trabalhe no SIGESC. {$lead}"),
+            'path' => '/carreiras',
+            'keywords' => implode(', ', $keywords),
+            'faq' => $faqs,
+            'extra_json_ld' => $extra,
         ]);
     }
 
     public function forCareerJob(\App\Models\Careers\JobListing $job): array
     {
+        $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
         $url = route('careers.show', $job->slug, absolute: true);
+        $indexUrl = route('careers.index', absolute: true);
         $description = $job->summary
             ?: str($job->description)->limit(155)->toString();
 
-        return $this->forPage([
-            'title' => $job->title.' | Carreiras SIGESC',
-            'description' => $description,
-            'path' => '/carreiras/'.$job->slug,
-            'og_type' => 'article',
-            'keywords' => implode(', ', array_filter([
+        $keywords = array_values(array_unique(array_filter(array_merge(
+            [
                 $job->title,
                 'vaga '.$job->title,
                 $job->department,
                 $job->location,
+                $job->employmentTypeLabel(),
+                $job->workModeLabel(),
                 'carreiras SIGESC',
                 'emprego Angola',
-            ])),
+                'vagas emprego Luanda',
+                'emprego software Angola',
+            ],
+            array_slice(config('careers.seo_keywords', []), 0, 12)
+        ))));
+
+        return $this->forPage([
+            'title' => $job->title.' | Carreiras SIGESC — Emprego em Angola',
+            'description' => $description,
+            'path' => '/carreiras/'.$job->slug,
+            'og_type' => 'article',
+            'keywords' => implode(', ', $keywords),
             'extra_json_ld' => [
                 [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'BreadcrumbList',
+                    'itemListElement' => [
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 1,
+                            'name' => 'Início',
+                            'item' => $base.'/',
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 2,
+                            'name' => 'Carreiras',
+                            'item' => $indexUrl,
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 3,
+                            'name' => $job->title,
+                            'item' => $url,
+                        ],
+                    ],
+                ],
+                array_filter([
                     '@context' => 'https://schema.org',
                     '@type' => 'JobPosting',
                     'title' => $job->title,
                     'description' => strip_tags($job->description),
-                    'datePosted' => optional($job->published_at)?->toIso8601String(),
+                    'identifier' => [
+                        '@type' => 'PropertyValue',
+                        'name' => 'SIGESC',
+                        'value' => $job->slug,
+                    ],
+                    'datePosted' => optional($job->published_at)?->toIso8601String()
+                        ?: optional($job->created_at)?->toIso8601String(),
+                    'validThrough' => optional($job->closed_at)?->toIso8601String(),
                     'employmentType' => match ($job->employment_type) {
                         'full_time' => 'FULL_TIME',
                         'part_time' => 'PART_TIME',
@@ -1079,18 +1157,28 @@ class SeoBuilder
                     'hiringOrganization' => [
                         '@type' => 'Organization',
                         'name' => 'SIGESC',
-                        'sameAs' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/'),
+                        'sameAs' => $base,
+                        'logo' => config('sigesc.logo_url'),
                     ],
                     'jobLocation' => [
                         '@type' => 'Place',
                         'address' => [
                             '@type' => 'PostalAddress',
                             'addressLocality' => $job->location ?: 'Luanda',
+                            'addressRegion' => 'Luanda',
                             'addressCountry' => 'AO',
                         ],
                     ],
+                    'applicantLocationRequirements' => [
+                        '@type' => 'Country',
+                        'name' => 'Angola',
+                    ],
+                    'jobLocationType' => $job->work_mode === 'remote' ? 'TELECOMMUTE' : null,
+                    'directApply' => true,
                     'url' => $url,
-                ],
+                    'industry' => 'Software / Faturação eletrónica / Gestão comercial',
+                    'occupationalCategory' => $job->department ?: 'Technology',
+                ], fn ($v) => $v !== null),
             ],
         ]);
     }

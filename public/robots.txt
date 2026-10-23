@@ -8,6 +8,7 @@ Allow: /modelos-de-fatura
 Allow: /gerador-de-fatura
 Allow: /gerador-de-codigo-barras
 Allow: /parceria
+Allow: /carreiras
 Allow: /sobre
 Allow: /llms.txt
 Allow: /llms-full.txt
