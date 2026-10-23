@@ -626,7 +626,6 @@ const ChatComponent = () => {
                                         onKeyDown={onKeyDown}
                                         disabled={isSending}
                                         placeholder="Escreva a sua pergunta…"
-                                        enterKeyHint="send"
                                         className="max-h-32 min-h-[3rem] flex-1 resize-none border border-slate-200 bg-[#f7fafb] px-3.5 py-3 text-base leading-normal text-[var(--chat-ink)] outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/25 disabled:opacity-60"
                                         style={{ fontSize: '16px' }}
                                     />
