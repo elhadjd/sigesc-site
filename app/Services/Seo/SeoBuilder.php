@@ -720,6 +720,260 @@ class SeoBuilder
         ]);
     }
 
+    public function forProducts(): array
+    {
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $clinic = (string) config('sigesc.clinic_url', 'https://clinic.sisgesc.net');
+        $hub = (string) config('sigesc.hub_url', 'https://hub.sisgesc.net');
+
+        $faqs = [
+            [
+                'question' => 'Além da faturação, que produtos a SIGESC tem?',
+                'answer' => 'O ecossistema inclui o SIGESC (faturação e gestão de empresas), o SIGESC Hospitalar para clínicas e hospitais (clinic.sisgesc.net) e o SIGESC HUB para multiempresa e contabilidade (hub.sisgesc.net).',
+            ],
+            [
+                'question' => 'O que é o SIGESC Hospitalar?',
+                'answer' => 'É o software de gestão hospitalar e clínica: recepção, agenda, triagem, consultas, laboratório, farmácia e faturação — em clinic.sisgesc.net, com teste de 3 dias.',
+            ],
+            [
+                'question' => 'O que é o SIGESC HUB?',
+                'answer' => 'É a plataforma multiempresa e de contabilidade: consolida várias empresas SIGESC num único painel e inclui plano de contas, diários, balancetes e reconciliação em hub.sisgesc.net.',
+            ],
+            [
+                'question' => 'Onde ver todos os produtos?',
+                'answer' => 'Em sisgesc.net/produtos — com páginas dedicadas a Hospitalar e HUB, além do SIGESC principal.',
+            ],
+        ];
+
+        return $this->forPage([
+            'title' => 'Produtos SIGESC | Faturação, Hospitalar e HUB Multiempresa',
+            'description' => "Conheça os produtos SIGESC: faturação e gestão de empresas (certificado AGT {$agt}), SIGESC Hospitalar para clínicas e hospitais, e SIGESC HUB multiempresa com contabilidade.",
+            'path' => '/produtos',
+            'keywords' => implode(', ', [
+                'produtos SIGESC',
+                'SIGESC Hospitalar',
+                'SIGESC HUB',
+                'software clínicas Angola',
+                'software hospitalar Angola',
+                'multiempresa SIGESC',
+                'contabilidade SIGESC',
+                'clinic.sisgesc.net',
+                'hub.sisgesc.net',
+                'ecossistema SIGESC',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'ItemList',
+                    'name' => 'Produtos SIGESC',
+                    'itemListElement' => [
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 1,
+                            'name' => 'SIGESC',
+                            'url' => rtrim(config('app.url') ?: config('sigesc.site_url'), '/').'/produtos',
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 2,
+                            'name' => 'SIGESC Hospitalar',
+                            'url' => $clinic,
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 3,
+                            'name' => 'SIGESC HUB',
+                            'url' => $hub,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function forHospitalar(): array
+    {
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $hero = \App\Support\HospitalarMedia::heroSrc();
+        $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
+        $url = $base.'/produtos/hospitalar';
+        $clinicUrl = (string) config('sigesc.clinic_url', 'https://clinic.sisgesc.net');
+
+        $faqs = [
+            [
+                'question' => 'O que é o SIGESC Hospitalar?',
+                'answer' => 'É um sistema de gestão hospitalar (HIS) no navegador para clínicas e hospitais: recepção, agenda, triagem, consultas, laboratório, farmácia e faturação — em clinic.sisgesc.net.',
+            ],
+            [
+                'question' => 'Serve para clínicas pequenas?',
+                'answer' => 'Sim. O fluxo é o mesmo em unidades pequenas ou grandes: organizar pacientes, horários e cuidados sem papéis perdidos.',
+            ],
+            [
+                'question' => 'Há período de teste?',
+                'answer' => 'Sim. Pode criar conta e experimentar o SIGESC Hospitalar durante 3 dias grátis.',
+            ],
+            [
+                'question' => 'Onde aceder ao produto?',
+                'answer' => 'Em '.$clinicUrl.' — também a partir desta página em sisgesc.net/produtos/hospitalar.',
+            ],
+            [
+                'question' => 'Faz parte do ecossistema SIGESC?',
+                'answer' => "Sim. É um produto da marca SIGESC, ao lado da faturação eletrónica certificada AGT (n.º {$agt}) e do SIGESC HUB.",
+            ],
+        ];
+
+        $payload = [
+            'title' => 'SIGESC Hospitalar | Software para Clínicas e Hospitais em Angola',
+            'description' => 'SIGESC Hospitalar: gestão para clínicas e hospitais — recepção, agenda, triagem, consultas, laboratório, farmácia e faturação. Teste 3 dias em clinic.sisgesc.net.',
+            'path' => '/produtos/hospitalar',
+            'keywords' => implode(', ', [
+                'SIGESC Hospitalar',
+                'software hospitalar Angola',
+                'software para clínicas Angola',
+                'sistema de gestão hospitalar',
+                'HIS hospitalar',
+                'agenda médica online Angola',
+                'prontuário eletrónico Angola',
+                'farmácia hospitalar software',
+                'faturação clínica Angola',
+                'clinic.sisgesc.net',
+                'gestão de pacientes Angola',
+                'triagem hospitalar software',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'SoftwareApplication',
+                    'name' => 'SIGESC Hospitalar',
+                    'applicationCategory' => 'HealthApplication',
+                    'applicationSubCategory' => 'Hospital Information System',
+                    'operatingSystem' => 'Web',
+                    'description' => 'Software de gestão hospitalar e clínica: recepção, agenda, triagem, consultas, laboratório, farmácia e faturação.',
+                    'url' => $url,
+                    'sameAs' => [$clinicUrl],
+                    'image' => $hero ? $base.$hero : config('sigesc.logo_url'),
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'url' => $clinicUrl.'/register',
+                        'priceCurrency' => 'AOA',
+                        'description' => 'Teste grátis 3 dias',
+                        'availability' => 'https://schema.org/InStock',
+                        'areaServed' => [
+                            '@type' => 'Country',
+                            'name' => 'Angola',
+                        ],
+                    ],
+                    'featureList' => [
+                        'Recepção e gestão de pacientes',
+                        'Agenda e marcação de consultas',
+                        'Triagem e consulta clínica',
+                        'Laboratório e farmácia',
+                        'Faturação e relatórios',
+                    ],
+                ],
+            ],
+        ];
+
+        if ($hero) {
+            $payload['og_image'] = $base.$hero;
+        }
+
+        return $this->forPage($payload);
+    }
+
+    public function forHub(): array
+    {
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $hero = \App\Support\HubMedia::heroSrc();
+        $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
+        $url = $base.'/produtos/hub';
+        $hubUrl = (string) config('sigesc.hub_url', 'https://hub.sisgesc.net');
+
+        $faqs = [
+            [
+                'question' => 'O que é o SIGESC HUB?',
+                'answer' => 'É a plataforma SaaS multiempresa e de contabilidade: consolida vendas, clientes, produtos, inventário e RH de várias empresas SIGESC e oferece plano de contas, diários, balancetes e reconciliação num único painel.',
+            ],
+            [
+                'question' => 'Para quem é o HUB?',
+                'answer' => 'Para quem tem várias empresas ou contas SIGESC e quer evitar entrar em cada uma individualmente — grupos, gabinetes e contabilidades.',
+            ],
+            [
+                'question' => 'O HUB inclui contabilidade?',
+                'answer' => 'Sim. Inclui sistema completo de contabilidade: plano de contas, diários, lançamentos, razão, balancete e reconciliação.',
+            ],
+            [
+                'question' => 'Onde aceder ao HUB?',
+                'answer' => 'Em '.$hubUrl.' — apresentação também em sisgesc.net/produtos/hub.',
+            ],
+            [
+                'question' => 'Como se liga ao SIGESC?',
+                'answer' => "O HUB sincroniza dados das empresas no SIGESC (faturação certificada AGT n.º {$agt}) via API, com vista consolidada e por empresa.",
+            ],
+        ];
+
+        $payload = [
+            'title' => 'SIGESC HUB | Multiempresa e Contabilidade num Único Painel',
+            'description' => 'SIGESC HUB: gira várias empresas SIGESC num só lugar — crescimento consolidado e por empresa, mais contabilidade completa (plano de contas, diários, balancetes e reconciliação). hub.sisgesc.net.',
+            'path' => '/produtos/hub',
+            'keywords' => implode(', ', [
+                'SIGESC HUB',
+                'software multiempresa Angola',
+                'contabilidade SIGESC',
+                'software de contabilidade Angola',
+                'plano de contas online',
+                'balancete online Angola',
+                'diários contabilísticos',
+                'reconciliação bancária software',
+                'gestão de várias empresas',
+                'hub.sisgesc.net',
+                'painel consolidado SIGESC',
+                'gabinete de contabilidade software',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'SoftwareApplication',
+                    'name' => 'SIGESC HUB',
+                    'applicationCategory' => 'BusinessApplication',
+                    'applicationSubCategory' => 'AccountingApplication',
+                    'operatingSystem' => 'Web',
+                    'description' => 'Plataforma multiempresa e contabilidade do ecossistema SIGESC: consolidação de empresas e contabilidade completa.',
+                    'url' => $url,
+                    'sameAs' => [$hubUrl],
+                    'image' => $hero ? $base.$hero : config('sigesc.logo_url'),
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'url' => $hubUrl,
+                        'priceCurrency' => 'AOA',
+                        'description' => 'Teste grátis disponível',
+                        'availability' => 'https://schema.org/InStock',
+                        'areaServed' => [
+                            '@type' => 'Country',
+                            'name' => 'Angola',
+                        ],
+                    ],
+                    'featureList' => [
+                        'Painel multiempresa consolidado',
+                        'Vista individual por empresa',
+                        'Sincronização com SIGESC',
+                        'Plano de contas e diários',
+                        'Balancetes e reconciliação',
+                    ],
+                ],
+            ],
+        ];
+
+        if ($hero) {
+            $payload['og_image'] = $base.$hero;
+        }
+
+        return $this->forPage($payload);
+    }
+
     public function forContact(): array
     {
         return $this->forPage([
