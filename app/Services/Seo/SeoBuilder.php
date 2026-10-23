@@ -298,6 +298,10 @@ class SeoBuilder
             return $this->forCrm();
         }
 
+        if (in_array($catalog['slug'] ?? $slug, ['chamadas-e-conferencias', 'conferencias', 'chamadas'], true)) {
+            return $this->forConferences();
+        }
+
         $description = $catalog['description']
             ?? "Saiba como o módulo {$moduleName} do SIGESC ajuda a gerir o seu negócio em Angola com eficiência e conformidade.";
         $keywords = $catalog['keywords']
@@ -309,6 +313,94 @@ class SeoBuilder
             'path' => '/modules/'.($catalog['slug'] ?? $slug),
             'keywords' => $keywords,
         ]);
+    }
+
+    public function forConferences(): array
+    {
+        $agt = config('sigesc.agt_certification.number', 'FE/323/AGT/2026');
+        $hero = \App\Support\ConferenceMedia::heroSrc();
+        $base = rtrim(config('app.url') ?: config('sigesc.site_url'), '/');
+        $url = $base.'/modules/chamadas-e-conferencias';
+
+        $faqs = [
+            [
+                'question' => 'O que são as chamadas e conferências do SIGESC?',
+                'answer' => 'É o módulo de videoconferência do SIGESC: as empresas criam reuniões internas ou com convidados externos, fazem chamadas diretas entre utilizadores, partilham ecrã e podem gravar a conferência — tudo dentro do software de gestão.',
+            ],
+            [
+                'question' => 'O cliente precisa de conta SIGESC para entrar na conferência?',
+                'answer' => 'Não. Pode criar um link de conferência e enviá-lo ao cliente; o convidado acede pelo link e entra na reunião sem ter conta no sistema.',
+            ],
+            [
+                'question' => 'Posso fazer chamadas diretas entre colaboradores?',
+                'answer' => 'Sim. Além das salas de conferência, há chamadas diretas de um utilizador para outro dentro da empresa.',
+            ],
+            [
+                'question' => 'Dá para partilhar e gravar o ecrã?',
+                'answer' => 'Sim. Durante a conferência pode partilhar o ecrã com os participantes e gravar a sessão para arquivo, formação ou acompanhamento comercial.',
+            ],
+            [
+                'question' => 'As conferências fazem parte do mesmo SIGESC da faturação AGT?',
+                'answer' => "Sim. O módulo está no SIGESC, software de faturação eletrónica certificado pela AGT (n.º {$agt}), junto de CRM, PDV e gestão da PME.",
+            ],
+        ];
+
+        $payload = [
+            'title' => 'Chamadas e Conferências SIGESC | Videoconferência para PME em Angola',
+            'description' => 'Videoconferência no SIGESC: reuniões internas, link para clientes sem conta, chamadas diretas, partilha de ecrã e gravação. Reúna a equipa ou o cliente dentro do software de gestão em Angola.',
+            'path' => '/modules/chamadas-e-conferencias',
+            'keywords' => implode(', ', [
+                'videoconferência Angola',
+                'software reunião online Angola',
+                'conferência de vídeo PME',
+                'chamada de vídeo empresa Angola',
+                'reunião online com cliente',
+                'link de conferência',
+                'partilha de ecrã reunião',
+                'gravação de videoconferência',
+                'software chamadas empresariais Angola',
+                'reunião interna online',
+                'SIGESC conferências',
+                'videoconferência Luanda',
+                'meeting online PME Angola',
+            ]),
+            'faq' => $faqs,
+            'extra_json_ld' => [
+                [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'SoftwareApplication',
+                    'name' => 'SIGESC Chamadas e Conferências',
+                    'applicationCategory' => 'BusinessApplication',
+                    'operatingSystem' => 'Web, Windows',
+                    'description' => 'Módulo de chamadas e videoconferência do SIGESC: reuniões internas e com convidados, chamadas diretas, partilha e gravação de ecrã para PME em Angola.',
+                    'url' => $url,
+                    'image' => $hero ? $base.$hero : config('sigesc.logo_url'),
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'url' => $base.'/prices',
+                        'priceCurrency' => 'AOA',
+                        'availability' => 'https://schema.org/InStock',
+                        'areaServed' => [
+                            '@type' => 'Country',
+                            'name' => 'Angola',
+                        ],
+                    ],
+                    'featureList' => [
+                        'Conferências internas e com convidados',
+                        'Link de acesso sem conta SIGESC',
+                        'Chamadas diretas entre utilizadores',
+                        'Partilha de ecrã',
+                        'Gravação de ecrã na conferência',
+                    ],
+                ],
+            ],
+        ];
+
+        if ($hero) {
+            $payload['og_image'] = $base.$hero;
+        }
+
+        return $this->forPage($payload);
     }
 
     public function forCrm(): array

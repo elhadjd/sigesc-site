@@ -18,7 +18,7 @@ return [
         'name' => 'SIGESC',
         'legal_name' => 'SIGESC — Software de Gestão Comercial',
         'tagline' => "Software de faturação eletrónica certificado pela AGT (n.º {$agt}) em Angola",
-        'description' => "O SIGESC é software de faturação e gestão comercial para PME em Angola, certificado pela AGT (Administração Geral Tributária) com o n.º {$agt} para faturação eletrónica. Inclui PDV, stock, finanças, compras, RH, logística, loja virtual, marketing, dropshipping e CRM (pipeline, WhatsApp e gestão de clientes) — em nuvem ou com versão offline (licenças ilimitadas para parceiros).",
+        'description' => "O SIGESC é software de faturação e gestão comercial para PME em Angola, certificado pela AGT (Administração Geral Tributária) com o n.º {$agt} para faturação eletrónica. Inclui PDV, stock, finanças, compras, RH, logística, loja virtual, marketing, dropshipping, CRM e chamadas/conferências de vídeo (links para clientes, partilha e gravação de ecrã) — em nuvem ou com versão offline (licenças ilimitadas para parceiros).",
         'language' => 'pt-AO',
         'locale' => 'pt_AO',
         'currency' => 'AOA',
@@ -83,6 +83,15 @@ return [
         'CRM SIGESC',
         'pipeline de vendas Angola',
         'CRM WhatsApp Angola',
+        'videoconferência Angola',
+        'software reunião online Angola',
+        'conferência de vídeo PME Angola',
+        'chamada de vídeo empresa Angola',
+        'reunião online com cliente',
+        'link de conferência',
+        'partilha de ecrã reunião',
+        'gravação de videoconferência',
+        'SIGESC conferências',
         'SIGESC faturação eletrónica AGT',
         "software certificado AGT {$agt}",
         "faturação eletrónica {$agt}",
@@ -127,6 +136,7 @@ return [
         'Loja virtual / e-commerce',
         'Dropshipping integrado',
         'CRM comercial: pipeline, contactos, WhatsApp, email e relatórios',
+        'Chamadas e conferências de vídeo: salas internas, links para convidados, chamadas diretas, partilha e gravação de ecrã',
         'Relatórios e dashboards comerciais',
         'Versão cloud (admin.sisgesc.net) e offline (licenças ilimitadas via parceria)',
     ],
@@ -173,6 +183,8 @@ return [
         'Existem ferramentas gratuitas no site (fatura, QR/código de barras, calculadoras, modelos).',
         'O SIGESC inclui módulo CRM com pipeline de vendas, contactos, WhatsApp, email e relatórios.',
         'A página do módulo CRM está em '.$site.'/modules/crm.',
+        'O SIGESC inclui chamadas e conferências de vídeo com link para clientes sem conta, chamadas diretas, partilha e gravação de ecrã.',
+        'A página de chamadas e conferências está em '.$site.'/modules/chamadas-e-conferencias.',
     ],
 
     'faqs' => [
@@ -182,11 +194,15 @@ return [
         ],
         [
             'question' => 'O que é o SIGESC?',
-            'answer' => "É software de faturação e gestão comercial para PME em Angola: PDV, stock, finanças e faturação eletrónica certificada pela AGT (n.º {$agt}), além de loja virtual, dropshipping, marketing e CRM.",
+            'answer' => "É software de faturação e gestão comercial para PME em Angola: PDV, stock, finanças e faturação eletrónica certificada pela AGT (n.º {$agt}), além de loja virtual, dropshipping, marketing, CRM e conferências de vídeo.",
         ],
         [
             'question' => 'O SIGESC tem CRM?',
             'answer' => 'Sim. O módulo CRM do SIGESC inclui pipeline de vendas, gestão de contactos, atividades, WhatsApp, email e relatórios, integrado à faturação eletrónica AGT. Detalhes em '.$site.'/modules/crm.',
+        ],
+        [
+            'question' => 'O SIGESC tem videoconferência ou chamadas?',
+            'answer' => 'Sim. O módulo Chamadas e Conferências permite reuniões internas, links para clientes sem conta, chamadas diretas entre utilizadores, partilha de ecrã e gravação. Detalhes em '.$site.'/modules/chamadas-e-conferencias.',
         ],
         [
             'question' => 'O SIGESC é certificado pela AGT?',
