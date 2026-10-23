@@ -545,6 +545,137 @@ class PublicPageContent
         ];
     }
 
+    /**
+     * @param  array<int, array<string, mixed>>  $jobs
+     * @return array<string, mixed>
+     */
+    public function careers(array $jobs = []): array
+    {
+        $agt = config('geo.certification.number', config('sigesc.agt_certification.number', 'FE/323/AGT/2026'));
+        $keywords = config('careers.seo_keywords', []);
+
+        return [
+            'kicker' => 'Carreiras SIGESC · Emprego em Angola · Certificado AGT '.$agt,
+            'headline' => 'Vagas de emprego em tecnologia e comercial B2B — Luanda, Angola',
+            'lead' => (string) config(
+                'careers.seo_description',
+                'Vagas no SIGESC: engenharia de software, full stack, produto e consultor comercial B2B para faturação eletrónica certificada AGT.'
+            ),
+            'sections' => [
+                [
+                    'heading' => 'Vagas abertas',
+                    'body' => empty($jobs)
+                        ? 'Neste momento não há vagas abertas. Volte em breve ou envie candidatura espontânea pelo contacto.'
+                        : count($jobs).' oportunidade(s) publicadas em sisgesc.net/carreiras.',
+                    'items' => empty($jobs)
+                        ? ['Sem vagas abertas — candidatura espontânea em '.url('/contact')]
+                        : collect($jobs)->map(function (array $j) {
+                            return ($j['title'] ?? 'Vaga')
+                                .' · '.($j['location'] ?? 'Luanda')
+                                .' · '.($j['employment_type_label'] ?? '')
+                                .' · '.url('/carreiras/'.($j['slug'] ?? ''));
+                        })->all(),
+                ],
+                [
+                    'heading' => 'Áreas de recrutamento',
+                    'items' => config('careers.departments_hint', []),
+                ],
+                [
+                    'heading' => 'Palavras-chave de emprego (Angola)',
+                    'body' => 'Frases de pesquisa usadas por candidatos e motores de busca para encontrar vagas SIGESC em Luanda e Angola.',
+                    'items' => $keywords,
+                ],
+                [
+                    'heading' => 'Perguntas frequentes — carreiras',
+                    'faqs' => config('careers.faqs', []),
+                ],
+                [
+                    'heading' => 'Porquê trabalhar no SIGESC',
+                    'items' => [
+                        'Produto de faturação eletrónica certificado AGT (n.º '.$agt.')',
+                        'Impacto directo em PME angolanas (PDV, stock, finanças, CRM)',
+                        'Equipas de engenharia, produto e comercial B2B',
+                        'Candidatura gratuita em sisgesc.net/carreiras — sem taxas de recrutamento',
+                    ],
+                ],
+            ],
+            'links' => [
+                ['href' => url('/carreiras'), 'label' => 'Carreiras SIGESC', 'description' => 'Lista oficial de vagas'],
+                ['href' => url('/contact'), 'label' => 'Candidatura espontânea', 'description' => 'Contacto recrutamento'],
+                ['href' => url('/sobre'), 'label' => 'Sobre o SIGESC', 'description' => 'Marca e certificação AGT'],
+                ['href' => url('/parceria'), 'label' => 'Parceria', 'description' => 'Parceiro ou Freelancer'],
+                ['href' => url('/llms.txt'), 'label' => 'llms.txt', 'description' => 'Descoberta para IAs'],
+                ['href' => url('/ai.txt'), 'label' => 'ai.txt', 'description' => 'Política para assistentes'],
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $job
+     * @return array<string, mixed>
+     */
+    public function careersJob(array $job): array
+    {
+        $keywords = array_values(array_unique(array_filter(array_merge(
+            [
+                $job['title'] ?? null,
+                'vaga '.($job['title'] ?? ''),
+                $job['department'] ?? null,
+                $job['location'] ?? null,
+                $job['employment_type_label'] ?? null,
+                $job['work_mode_label'] ?? null,
+            ],
+            array_slice(config('careers.seo_keywords', []), 0, 14)
+        ))));
+
+        return [
+            'kicker' => 'Carreiras SIGESC · '.($job['department'] ?? 'Emprego em Angola'),
+            'headline' => $job['title'] ?? 'Vaga SIGESC',
+            'lead' => $job['summary']
+                ?? \Illuminate\Support\Str::limit(strip_tags($job['description'] ?? ''), 180),
+            'sections' => [
+                [
+                    'heading' => 'Detalhes',
+                    'items' => array_values(array_filter([
+                        $job['location'] ?? null,
+                        $job['employment_type_label'] ?? null,
+                        $job['work_mode_label'] ?? null,
+                        $job['salary_range'] ?? null,
+                    ])),
+                ],
+                [
+                    'heading' => 'Descrição',
+                    'body' => $job['description'] ?? '',
+                ],
+                [
+                    'heading' => 'Requisitos',
+                    'body' => $job['requirements'] ?? 'Consultar anúncio completo.',
+                ],
+                [
+                    'heading' => 'Benefícios',
+                    'body' => $job['benefits'] ?? null,
+                ],
+                [
+                    'heading' => 'Palavras-chave desta vaga',
+                    'items' => $keywords,
+                ],
+                [
+                    'heading' => 'Perguntas frequentes',
+                    'faqs' => config('careers.faqs', []),
+                ],
+            ],
+            'links' => [
+                [
+                    'href' => url('/carreiras/'.($job['slug'] ?? '')),
+                    'label' => 'Candidatar-se a '.$job['title'],
+                    'description' => 'Formulário gratuito na página da vaga',
+                ],
+                ['href' => url('/carreiras'), 'label' => 'Todas as vagas', 'description' => 'Lista de carreiras SIGESC'],
+                ['href' => url('/contact'), 'label' => 'Contacto', 'description' => 'Candidatura espontânea'],
+            ],
+        ];
+    }
+
     public function about(): array
     {
         $agt = config('geo.certification.number', config('sigesc.agt_certification.number'));

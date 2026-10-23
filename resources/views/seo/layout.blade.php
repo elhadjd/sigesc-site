@@ -85,6 +85,7 @@
                 <a href="{{ $base }}/solutions">Soluções</a>
                 <a href="{{ $base }}/prices">Preços</a>
                 <a href="{{ $base }}/parceria">Parceria</a>
+                <a href="{{ $base }}/carreiras">Carreiras</a>
                 <a href="{{ $base }}/sobre">Sobre</a>
                 <a href="{{ $base }}/blog/posts">Blog</a>
                 <a href="{{ $base }}/calculadoras">Calculadoras</a>

@@ -66,6 +66,98 @@
             @endforeach
         </ul>
     </section>
+@elseif ($component === 'careers/index')
+    @php
+        $pr = $props['prerender'] ?? [];
+        $jobs = $props['jobs'] ?? [];
+        $seo = $props['seo'] ?? [];
+    @endphp
+    <section class="seo-prerender" style="max-width:760px;margin:0 auto;padding:2rem 1rem;font-family:Georgia,serif;color:#14213d;">
+        @if (!empty($seo['description']))
+            <p style="font-family:'Segoe UI',sans-serif;font-size:.9rem;color:#475569;"><strong>Meta:</strong> {{ $seo['description'] }}</p>
+        @endif
+        @if (!empty($seo['keywords']))
+            <p style="font-family:'Segoe UI',sans-serif;font-size:.85rem;color:#64748b;"><strong>Keywords:</strong> {{ $seo['keywords'] }}</p>
+        @endif
+        @if (!empty($pr['kicker']))
+            <p style="text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;color:#64748b;">{{ $pr['kicker'] }}</p>
+        @endif
+        <h1>{{ $pr['headline'] ?? ($seo['title'] ?? 'Carreiras SIGESC') }}</h1>
+        @if (!empty($pr['lead']))
+            <p style="font-size:1.15rem;">{{ $pr['lead'] }}</p>
+        @endif
+        <h2 style="font-size:1.35rem;margin-top:1.5rem;">Vagas abertas</h2>
+        @if (empty($jobs))
+            <p>Sem vagas abertas neste momento. <a href="{{ url('/contact') }}">Candidatura espontânea</a>.</p>
+        @else
+            <ul style="list-style:none;padding:0;">
+                @foreach ($jobs as $jobItem)
+                    @php
+                        $j = is_array($jobItem) ? $jobItem : [];
+                    @endphp
+                    <li style="padding:1rem 0;border-bottom:1px solid #e5e0d6;">
+                        <a href="{{ url('/carreiras/'.($j['slug'] ?? '')) }}" style="color:inherit;text-decoration:none;">
+                            <h2 style="margin:.25rem 0;font-size:1.35rem;">{{ $j['title'] ?? 'Vaga' }}</h2>
+                            <p>{{ $j['summary'] ?? '' }} · {{ $j['location'] ?? '' }}</p>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+        @foreach ($pr['sections'] ?? [] as $section)
+            <section style="margin-top:1.5rem;">
+                @if (!empty($section['heading']))
+                    <h2 style="font-size:1.35rem;">{{ $section['heading'] }}</h2>
+                @endif
+                @if (!empty($section['body']))
+                    <p>{{ $section['body'] }}</p>
+                @endif
+                @if (!empty($section['items']))
+                    <ul>
+                        @foreach ($section['items'] as $item)
+                            <li>{{ $item }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+                @if (!empty($section['faqs']))
+                    @foreach ($section['faqs'] as $faq)
+                        <h3>{{ $faq['question'] ?? '' }}</h3>
+                        <p>{{ $faq['answer'] ?? '' }}</p>
+                    @endforeach
+                @endif
+            </section>
+        @endforeach
+    </section>
+@elseif ($component === 'careers/show')
+    @php
+        $pr = $props['prerender'] ?? [];
+        $job = $props['job'] ?? [];
+        $seo = $props['seo'] ?? [];
+    @endphp
+    <article class="seo-prerender" style="max-width:760px;margin:0 auto;padding:2rem 1rem;font-family:Georgia,serif;color:#14213d;">
+        @if (!empty($seo['description']))
+            <p style="font-family:'Segoe UI',sans-serif;font-size:.9rem;color:#475569;"><strong>Meta:</strong> {{ $seo['description'] }}</p>
+        @endif
+        @if (!empty($seo['keywords']))
+            <p style="font-family:'Segoe UI',sans-serif;font-size:.85rem;color:#64748b;"><strong>Keywords:</strong> {{ $seo['keywords'] }}</p>
+        @endif
+        <p style="text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;color:#64748b;">
+            <a href="{{ url('/carreiras') }}">Carreiras</a>
+            @if (!empty($job['department'])) · {{ $job['department'] }} @endif
+        </p>
+        <h1>{{ $job['title'] ?? ($pr['headline'] ?? 'Vaga SIGESC') }}</h1>
+        <p style="font-size:1.15rem;">{{ $pr['lead'] ?? ($job['summary'] ?? '') }}</p>
+        <p>{{ $job['location'] ?? '' }} · {{ $job['employment_type_label'] ?? '' }} · {{ $job['work_mode_label'] ?? '' }}</p>
+        <h2 style="font-size:1.35rem;margin-top:1.5rem;">Descrição</h2>
+        <div style="white-space:pre-wrap;">{{ $job['description'] ?? '' }}</div>
+        @if (!empty($job['requirements']))
+            <h2 style="font-size:1.35rem;margin-top:1.5rem;">Requisitos</h2>
+            <div style="white-space:pre-wrap;">{{ $job['requirements'] }}</div>
+        @endif
+        <p style="margin-top:1.5rem;">
+            <a href="{{ url('/carreiras/'.($job['slug'] ?? '')) }}" style="color:#0b3d91;font-weight:700;">Candidatar-se a esta vaga</a>
+        </p>
+    </article>
 @elseif (!empty($props['prerender']) && is_array($props['prerender']))
     @php $pr = $props['prerender']; @endphp
     <section class="seo-prerender" style="max-width:760px;margin:0 auto;padding:2rem 1rem;font-family:Georgia,serif;color:#14213d;">
@@ -93,6 +185,12 @@
                             <li>{{ $item }}</li>
                         @endforeach
                     </ul>
+                @endif
+                @if (!empty($section['faqs']))
+                    @foreach ($section['faqs'] as $faq)
+                        <h3>{{ $faq['question'] ?? '' }}</h3>
+                        <p>{{ $faq['answer'] ?? '' }}</p>
+                    @endforeach
                 @endif
             </section>
         @endforeach
