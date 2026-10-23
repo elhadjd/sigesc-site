@@ -6,64 +6,127 @@ use App\Events\ChatEvent;
 use App\Http\Controllers\Controller;
 use App\Mail\NewChatMail;
 use App\Models\Chat;
+use App\Services\Chat\ChatAssistantService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Throwable;
 
 class ChatController extends Controller
 {
+    public function __construct(
+        protected ChatAssistantService $assistant
+    ) {}
+
     /**
-     * Display a listing of the resource.
+     * Start or resume a chat session.
      */
     public function index($sessionUser = null)
     {
-        $chat = Chat::where('session', $sessionUser)->first();
-        if ($chat && Chat::where('session', $sessionUser)->first()->state) {
+        $existing = $sessionUser
+            ? Chat::where('session', $sessionUser)->where('state', true)->first()
+            : null;
+
+        if ($existing) {
             cookie()->queue('chatSession', $sessionUser);
-            return ['data' => $chat, 'session' => $sessionUser, 'user' => 'support'];
+
+            return [
+                'data' => $existing->fresh(),
+                'session' => $sessionUser,
+                'user' => 'user',
+                'assistant' => [
+                    'whatsapp' => $this->assistant->whatsappPayload(),
+                ],
+            ];
         }
+
         $session = Str::random(100);
-        $userId = null;
-        if (Auth::check()) $userId = Auth::user()->id;
+        $userId = Auth::check() ? Auth::id() : null;
+
         $chat = Chat::create([
             'user_id' => $userId,
             'session' => $session,
         ]);
 
         $chat->conversations()->create([
-            'message' => __('Wellcome to chat live'),
-            'user' => 'support'
+            'message' => $this->assistant->welcomeMessage(),
+            'user' => 'support',
         ]);
+
         cookie()->queue('chatSession', $session);
 
-        Mail::to('comercial.sigesc@gmail.com')->send(new NewChatMail(['session' => $chat->session]));
+        try {
+            $notify = (string) config('chat_assistant.notify_email', 'comercial.sigesc@gmail.com');
+            if ($notify !== '') {
+                Mail::to($notify)->send(new NewChatMail(['session' => $chat->session]));
+            }
+        } catch (Throwable $e) {
+            Log::warning('Chat notify mail failed: '.$e->getMessage());
+        }
 
-        return ['session' => $session, 'user' => 'user', 'data' => $chat->fresh()];
+        return [
+            'session' => $session,
+            'user' => 'user',
+            'data' => $chat->fresh(),
+            'assistant' => [
+                'whatsapp' => $this->assistant->whatsappPayload(),
+            ],
+        ];
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Store a visitor message and return the assistant reply.
      */
     public function create(Request $request, $session)
     {
         $request->validate([
-            'message' => 'required|string',
-            'session' => "required|string",
-            'user' => 'required|string'
+            'message' => 'required|string|max:4000',
+            'session' => 'required|string',
+            'user' => 'required|string',
         ]);
 
         try {
             $chat = Chat::where('session', $session)->first();
-            if ($chat->state === false) {
-                throw new Exception("Chat is closed.", 1);
+            if (! $chat || $chat->state === false) {
+                throw new Exception('Chat is closed.');
             }
 
-            $message = $chat->conversations()->create(['message' => $request->message, 'user' => $request->user]);
+            $userRole = $request->user === 'support' ? 'support' : 'user';
+            $text = trim((string) $request->message);
 
-            event(new ChatEvent($message, $chat->session));
+            $userMessage = $chat->conversations()->create([
+                'message' => $text,
+                'user' => $userRole,
+            ]);
+
+            $this->broadcastConversation($userMessage, $chat->session);
+
+            $assistantMessage = null;
+
+            // Only auto-reply when the visitor writes (not support/human override).
+            if ($userRole === 'user' && $text !== 'End of chat.') {
+                $reply = $this->assistant->reply($chat->fresh(), $text);
+                $assistantMessage = $chat->conversations()->create([
+                    'message' => $reply,
+                    'user' => 'support',
+                ]);
+                $this->broadcastConversation($assistantMessage, $chat->session);
+            }
+
+            return response()->json([
+                'type' => 'success',
+                'user_message' => $userMessage->fresh(),
+                'assistant_message' => $assistantMessage?->fresh(),
+                'assistant' => [
+                    'whatsapp' => $this->assistant->whatsappPayload(),
+                ],
+            ]);
         } catch (\Exception $e) {
+            Log::warning('Chat create failed: '.$e->getMessage());
+
             return $this->RespondError(__('Error sending message'));
         }
     }
@@ -73,43 +136,43 @@ class ChatController extends Controller
         $request->validate(['session' => 'required|string']);
         $chat = Chat::where('session', $request->session)->first();
         if ($chat) {
-            $message = $chat->conversations()->create(['message' => 'End of chat.', 'user' => $request->user]);
-            $chat->update([
-                'state' => false
+            $message = $chat->conversations()->create([
+                'message' => 'End of chat.',
+                'user' => $request->user ?: 'user',
             ]);
-            event(new ChatEvent($message, $chat->session));
+            $chat->update([
+                'state' => false,
+            ]);
+            $this->broadcastConversation($message, $chat->session);
         }
 
         return $this->RespondSuccess(__('Chat end'));
     }
 
-    /**
-     * Display the specified resource.
-     */
+    protected function broadcastConversation($message, string $session): void
+    {
+        try {
+            event(new ChatEvent($message, $session));
+        } catch (Throwable $e) {
+            Log::warning('Chat broadcast skipped: '.$e->getMessage());
+        }
+    }
+
     public function show(Chat $chat)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Chat $chat)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Chat $chat)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Chat $chat)
     {
         //

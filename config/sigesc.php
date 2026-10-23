@@ -22,6 +22,11 @@ return [
 
     'hub_url' => rtrim(env('SIGESC_HUB_URL', 'https://hub.sisgesc.net'), '/'),
 
+    'whatsapp' => [
+        'digits' => preg_replace('/\D+/', '', (string) env('SIGESC_WHATSAPP', '244929147445')) ?: '244929147445',
+        'display' => env('SIGESC_WHATSAPP_DISPLAY', '+244 929 147 445'),
+    ],
+
     'getting_started_url' => rtrim(env('SIGESC_ADMIN_URL', 'https://admin.sisgesc.net'), '/').'/getting-started',
 
     'admin_login_url' => rtrim(env('SIGESC_ADMIN_URL', 'https://admin.sisgesc.net'), '/').'/auth/login',
