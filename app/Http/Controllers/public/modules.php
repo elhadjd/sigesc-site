@@ -7,6 +7,7 @@ use App\Services\Seo\PublicPageContent;
 use App\Services\Seo\SeoBuilder;
 use App\Support\ConferenceMedia;
 use App\Support\CrmScreenshots;
+use App\Support\MarketplaceMedia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -36,6 +37,10 @@ class modules extends Controller
 
         if (in_array($slug, ['chamadas-e-conferencias', 'conferencias', 'chamadas'], true)) {
             return $this->conferencias($request);
+        }
+
+        if ($slug === 'marketplace') {
+            return $this->marketplace($request);
         }
 
         $moduleName = collect($this->content->modules())
@@ -90,6 +95,28 @@ class modules extends Controller
             [
                 'module' => $module,
                 'screenshots' => ConferenceMedia::all(),
+            ]
+        );
+    }
+
+    protected function marketplace(Request $request)
+    {
+        $module = $this->content->marketplaceModule();
+
+        return $this->renderPublicPage(
+            $request,
+            'modules/marketplace',
+            [
+                'moduleName' => 'Marketplace',
+                'seo' => $this->seo->forMarketplace(),
+                'prerender' => $this->content->marketplace(),
+                'module' => $module,
+                'modules' => $this->content->modules(),
+            ],
+            'seo.marketplace',
+            [
+                'module' => $module,
+                'screenshots' => MarketplaceMedia::all(),
             ]
         );
     }

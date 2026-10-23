@@ -28,6 +28,7 @@ class CrawlerHtmlAllPagesTest extends TestCase
             ['/modules/dropshipping', 'Dropshipping'],
             ['/modules/crm', 'CRM'],
             ['/modules/chamadas-e-conferencias', 'Conferências'],
+            ['/modules/marketplace', 'Marketplace'],
             ['/prices', 'Preços'],
             ['/contact', 'Contacto'],
             ['/blog/posts', 'Blog'],
@@ -87,6 +88,8 @@ class CrawlerHtmlAllPagesTest extends TestCase
         $this->assertStringContainsString('/modules/crm', $html);
         $this->assertStringContainsString('Chamadas e Conferências', $html);
         $this->assertStringContainsString('/modules/chamadas-e-conferencias', $html);
+        $this->assertStringContainsString('Marketplace', $html);
+        $this->assertStringContainsString('/modules/marketplace', $html);
     }
 
     public function test_home_and_solutions_expose_module_submenu_before_js(): void
@@ -99,10 +102,12 @@ class CrawlerHtmlAllPagesTest extends TestCase
             $this->assertStringContainsString('Dropshipping', $html);
             $this->assertStringContainsString('CRM', $html);
             $this->assertStringContainsString('Chamadas e Conferências', $html);
+            $this->assertStringContainsString('Marketplace', $html);
             $this->assertStringContainsString('/modules/gestao-de-stock', $html);
             $this->assertStringContainsString('/modules/dropshipping', $html);
             $this->assertStringContainsString('/modules/crm', $html);
             $this->assertStringContainsString('/modules/chamadas-e-conferencias', $html);
+            $this->assertStringContainsString('/modules/marketplace', $html);
         }
     }
 
@@ -184,6 +189,39 @@ class CrawlerHtmlAllPagesTest extends TestCase
             ->has('prerender')
             ->has('module')
             ->where('module.slug', 'chamadas-e-conferencias')
+            ->has('module.screenshots')
+        );
+    }
+
+    public function test_marketplace_module_page_has_rich_seo_for_crawlers(): void
+    {
+        $response = $this->withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        ])->get('/modules/marketplace');
+
+        $response->assertOk();
+        $html = $response->getContent();
+
+        $this->assertStringContainsString('Marketplace', $html);
+        $this->assertStringContainsString('marketplace.sisgesc.net', $html);
+        $this->assertStringContainsString('cidade', mb_strtolower($html));
+        $this->assertStringContainsString('/img/marketplace/hero.jpg', $html);
+        $this->assertStringContainsString('SoftwareApplication', $html);
+        $this->assertStringContainsString('Conteúdo indexável gerado no servidor', $html);
+        $this->assertStringNotContainsString('data-page=', $html);
+    }
+
+    public function test_human_marketplace_page_uses_dedicated_inertia_component(): void
+    {
+        $response = $this->get('/modules/marketplace');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('modules/marketplace')
+            ->has('seo')
+            ->has('prerender')
+            ->has('module')
+            ->where('module.slug', 'marketplace')
             ->has('module.screenshots')
         );
     }
