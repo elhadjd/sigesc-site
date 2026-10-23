@@ -14,6 +14,10 @@ return [
 
     'admin_url' => rtrim(env('SIGESC_ADMIN_URL', 'https://admin.sisgesc.net'), '/'),
 
+    'marketplace_url' => rtrim(env('SIGESC_MARKETPLACE_URL', 'https://marketplace.sisgesc.net'), '/'),
+
+    'marketplace_home_url' => rtrim(env('SIGESC_MARKETPLACE_URL', 'https://marketplace.sisgesc.net'), '/').'/marketplace',
+
     'getting_started_url' => rtrim(env('SIGESC_ADMIN_URL', 'https://admin.sisgesc.net'), '/').'/getting-started',
 
     'admin_login_url' => rtrim(env('SIGESC_ADMIN_URL', 'https://admin.sisgesc.net'), '/').'/auth/login',

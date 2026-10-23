@@ -1,5 +1,5 @@
 import { SIGESC_GETTING_STARTED_URL, SIGESC_ADMIN_URL } from './domains';
-import { FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar, FiBarChart2, FiShoppingBag, FiDollarSign, FiGlobe, FiMessageSquare, FiVideo } from "react-icons/fi";
+import { FiShoppingCart, FiPackage, FiUsers, FiTruck, FiCalendar, FiBarChart2, FiShoppingBag, FiDollarSign, FiGlobe, FiMessageSquare, FiVideo, FiMapPin } from "react-icons/fi";
 
 export const features = [
     {
@@ -105,6 +105,14 @@ export const features = [
         name: "Chamadas e Conferências",
         color: "sky",
         href: route('modules', { module: 'chamadas-e-conferencias' })
+    },
+    {
+        icon: FiMapPin,
+        className: "text-lg",
+        desc: "Liste a empresa, publique produtos e serviços na cidade — clientes compram e agendam.",
+        name: "Marketplace",
+        color: "orange",
+        href: route('modules', { module: 'marketplace' })
     }
 ];
 
@@ -1764,6 +1772,61 @@ export const moduleData = {
                 number: "03",
                 title: "No mesmo sistema",
                 description: "Junto da faturação AGT, CRM e gestão da PME."
+            }
+        ]
+    },
+    marketplace: {
+        title: "Marketplace SIGESC | Empresas, Produtos e Serviços Locais em Angola",
+        description: "Marketplace SIGESC: liste a empresa, publique produtos e serviços na cidade. Clientes pesquisam, compram e agendam online em marketplace.sisgesc.net.",
+        keywords: "marketplace Angola, marketplace SIGESC, comprar online Angola, agendar serviços, empresas perto de mim, diretório empresas Luanda",
+        heroTitle: "Marketplace local SIGESC",
+        heroSubtitle: "Empresas e pessoas singulares listam o negócio; clientes encontram, compram e agendam na cidade.",
+        images: [
+            "/img/marketplace/hero.jpg",
+            "/img/marketplace/listar-empresa.jpg",
+            "/img/marketplace/descobrir-local.jpg",
+            "/img/marketplace/comprar-produtos.jpg",
+            "/img/marketplace/agendar-servico.jpg"
+        ],
+        imageAlts: [
+            "Marketplace SIGESC local",
+            "Listar empresa no Marketplace",
+            "Descobrir negócios por cidade",
+            "Comprar produtos no Marketplace",
+            "Agendar serviços no Marketplace"
+        ],
+        features: [
+            {
+                icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+                title: "Listar negócio",
+                description: "Empresas e pessoas singulares publicam o perfil na cidade."
+            },
+            {
+                icon: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z",
+                title: "Produtos e serviços",
+                description: "Catálogo local para comprar ou agendar online."
+            },
+            {
+                icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
+                title: "Pesquisa local",
+                description: "Clientes encontram o negócio na internet e no Marketplace."
+            }
+        ],
+        benefits: [
+            {
+                number: "01",
+                title: "Visibilidade",
+                description: "Apareça na cidade e nas pesquisas online."
+            },
+            {
+                number: "02",
+                title: "Vendas e agendas",
+                description: "Produtos e serviços no mesmo Marketplace."
+            },
+            {
+                number: "03",
+                title: "Ecossistema SIGESC",
+                description: "Ligado à marca e ao software certificado AGT."
             }
         ]
     }

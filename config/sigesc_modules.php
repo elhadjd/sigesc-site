@@ -107,4 +107,18 @@ return [
             'Integrado ao mesmo sistema de faturação, CRM e gestão da PME',
         ],
     ],
+    [
+        'name' => 'Marketplace',
+        'slug' => 'marketplace',
+        'description' => 'Marketplace SIGESC: empresas e pessoas singulares listam o negócio na cidade, publicam produtos e serviços; clientes pesquisam, compram e agendam online em marketplace.sisgesc.net.',
+        'keywords' => 'marketplace Angola, marketplace local Angola, comprar online Angola, agendar serviços online, empresas perto de mim Angola, diretório de empresas Luanda, marketplace SIGESC, vender produtos online Angola, serviços locais Angola, marketplace PME',
+        'highlights' => [
+            'Empresas e pessoas singulares listam o negócio no Marketplace SIGESC',
+            'Publique produtos ou serviços associados à cidade onde está',
+            'Clientes encontram a empresa na internet e no Marketplace',
+            'Compras de produtos e agendamento de serviços no mesmo lugar',
+            'Pesquisa por categorias, cidades e negócios locais',
+            'Aceda em marketplace.sisgesc.net',
+        ],
+    ],
 ];
